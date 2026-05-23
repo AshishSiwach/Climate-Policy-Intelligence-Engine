@@ -1,0 +1,61 @@
+# CPIE Configuration
+# TBD values are locked after Week 2 notebook validation.
+# Do not set defaults here — lock only after comparison.
+
+# --- Chunking ---
+chunking:
+  default_chunk_size: 400        # tokens — validate in pdf_quality_audit.ipynb
+  default_overlap: 80            # tokens
+  max_chunk_size: 512            # hard ceiling — reranker degrades above this
+  # Document-type-aware strategy:
+  # ofgem: numbered paragraph boundaries
+  # fca: section headings; footnotes attached to paragraph above
+  # desnz: page-based with overlap; headers as metadata
+  # ipcc/iea: section-based; executive summary as separate high-priority chunk
+
+# --- Embedding model (TBD — lock after Week 2 comparison) ---
+embedding:
+  model: null  # candidates: all-MiniLM-L6-v2 | BAAI/bge-base-en-v1.5 | nomic-embed-text
+  # Lock after: retrieval relevance (top-5 manual inspection), cosine sim distribution, indexing time
+
+# --- Retrieval ---
+retrieval:
+  bm25:
+    k1: 1.5
+    b: 0.75
+  rrf:
+    k: null  # TBD — test 10, 30, 60 in notebook, lock before building hybrid_retriever
+  reranker:
+    model: cross-encoder/ms-marco-MiniLM-L-6-v2
+    top_k_candidates: 20   # candidates passed to reranker
+    top_k_final: 5         # chunks returned to synthesiser
+    lazy_load: true
+
+# --- Vector store ---
+vector_store:
+  provider: chroma
+  persist_directory: data/processed/chroma_db
+  collection_name: cpie_v1
+
+# --- LLM synthesis (TBD — lock after Week 2 model_selection.ipynb) ---
+synthesis:
+  model: null  # candidates: claude-haiku-3-5 | gpt-4o-mini
+  max_tokens: 1024
+  temperature: 0.0
+  # Lock after: quality, latency, cost comparison on 10 queries
+
+# --- Output schema ---
+output:
+  confidence_threshold: 0.5   # below this, flag low confidence in response
+  include_contradictions: true
+
+# --- Monitoring / logging ---
+monitoring:
+  log_dir: logs/
+  log_format: jsonl
+  dashboard_port: 8502
+
+# --- Streamlit UI ---
+ui:
+  port: 8501
+  title: "CPIE — Climate Policy Intelligence Engine"

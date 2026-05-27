@@ -13,10 +13,18 @@ chunking:
   # desnz: page-based with overlap; headers as metadata
   # ipcc/iea: section-based; executive summary as separate high-priority chunk
 
-# --- Embedding model (TBD — lock after Week 2 comparison) ---
+# --- Embedding model (LOCKED Week 2) ---
 embedding:
-  model: null  # candidates: all-MiniLM-L6-v2 | BAAI/bge-base-en-v1.5 | nomic-embed-text
-  # Lock after: retrieval relevance (top-5 manual inspection), cosine sim distribution, indexing time
+  model: BAAI/bge-base-en-v1.5   # LOCKED — beat all-MiniLM-L6-v2 on top-5 relevance and cosine sim distribution
+  # all-MiniLM-L6-v2: mean cosine=0.278, index=2.8s, dim=384
+  # bge-base-en-v1.5:  mean cosine=0.543, index=21.6s, dim=768 — better separation, acceptable on RTX 4050
+  device: cuda                   # RTX 4050 Laptop GPU confirmed available
+
+# --- Chunking (LOCKED Week 2) ---
+# chunk_size=400 confirmed: avg=397-400 tokens, max=400, zero chunks over 512 ceiling
+# overlap=80 (20%) — principled range for regulatory prose; boundary quality acceptable in retrieval
+# table pages: heading injection strategy — prepend nearest section heading to preserve numeric context
+# ESO Beyond 2030 / Ofgem: strip nav/header artefacts before chunking (Include with fixes)
 
 # --- Retrieval ---
 retrieval:
@@ -24,7 +32,7 @@ retrieval:
     k1: 1.5
     b: 0.75
   rrf:
-    k: null  # TBD — test 10, 30, 60 in notebook, lock before building hybrid_retriever
+    k: 60   # LOCKED — literature default (Cormack et al. 2009); k=10/30/60 identical on test query (retrievers agreed)
   reranker:
     model: cross-encoder/ms-marco-MiniLM-L-6-v2
     top_k_candidates: 20   # candidates passed to reranker

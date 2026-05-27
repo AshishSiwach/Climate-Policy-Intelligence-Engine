@@ -358,9 +358,9 @@ page_number, chunk_index, token_count
 
 ## Open Decisions (resolve in Week 2 notebook before writing pipeline code)
 
-- [ ] Embedding model — run comparison, lock winner
-- [ ] Chunk size — validate 400/80 starting point, lock before embedder
-- [ ] RRF k value — test 10, 30, 60, lock before hybrid retriever
+- [x] Embedding model — BAAI/bge-base-en-v1.5. Beat all-MiniLM-L6-v2 on top-5 relevance and cosine sim distribution (mean 0.543 vs 0.278). Locked in config.yaml.
+- [x] Chunk size — 400 tokens / 80-token overlap. Validated: avg=397-400, max=400, zero chunks over 512 ceiling. Locked in config.yaml.
+- [x] RRF k value — k=60. Literature default (Cormack et al. 2009); k=10/30/60 identical on test query. Locked in config.yaml.
 - [ ] LLM synthesis model — Haiku 3.5 vs GPT-4o mini comparison, document in model_selection.md
 
 ---

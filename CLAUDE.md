@@ -24,8 +24,8 @@ confidence level, flagged contradictions.
 | Dependency management | `uv` |
 | PDF extraction | PyMuPDF (fitz) |
 | BM25 | `rank-bm25` |
-| Dense embeddings | TBD — all-MiniLM-L6-v2 vs BAAI/bge-base-en-v1.5 or nomic-embed-text. Lock after Week 2 notebook validation. |
-| Fusion | RRF — k value TBD. Test k=10, 30, 60 in notebook. Lock before building hybrid retriever. |
+| Dense embeddings | **LOCKED: BAAI/bge-base-en-v1.5** — beat all-MiniLM-L6-v2 on top-5 relevance and cosine sim distribution (mean 0.543 vs 0.278). 768-dim. device=cuda (RTX 4050). |
+| Fusion | **LOCKED: RRF k=60** — Cormack et al. 2009 default. k=10/30/60 indistinguishable on test query (retrievers agreed). Conservative fusion correct for small single-domain corpus. |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2`. Lazy loading. Separate latency logging. Top-20 candidates. |
 | Vector store | Chroma (v1). FAISS / Pinecone / Qdrant / pgvector are upgrade paths only. |
 | LLM synthesis | TBD — Haiku 3.5 vs GPT-4o mini. Week 2 comparison on quality, latency, cost. Winner in model_selection.md. |
@@ -51,18 +51,59 @@ confidence level, flagged contradictions.
 | Ofgem consultations | Chunk by numbered paragraph (3.14, 3.15 etc.) — canonical citation unit |
 | FCA papers | Chunk by section heading. Footnotes attached to paragraph above, not chunked independently. |
 | DESNZ strategy docs | Chunk by page with 80-token overlap. Headers preserved as metadata. |
-| IPCC / IEA reports | Chunk by section. Executive summary as separate high-priority chunk. |
+| CCC statutory reports | Chunk by section heading. Tables get heading injection (see below). |
+| IEA / ESO reports | Chunk by section. Executive summary as separate high-priority chunk. |
 
-**Chunk size:** Start exploration at 400 tokens / 80-token overlap.
-Hard ceiling: 512 tokens — reranker degrades above this.
-Lock after notebook validation. Do not build embedder before this is confirmed.
+**Chunk size: LOCKED — 400 tokens / 80-token overlap.**
+Validated in audit: avg=397-400 tokens, max=400, zero chunks over 512 ceiling across all pilot docs.
+Hard ceiling: 512 tokens — reranker degrades above this. Minimum floor: 50 tokens — discard trailing fragments.
+
+### Table handling — three tiers (ALL documents, locked in audit)
+
+**Tier 1 — Active stripping before chunking**
+Apply document-specific regex to remove layout noise before text reaches the chunker.
+
+| Document | What to strip |
+|---|---|
+| ESO Beyond 2030 | Interactive PDF nav elements ("Navigation", "Download a pdf", "Text Links", "Return to contents"), duplicated map page headers, fragmented social handles |
+| Ofgem Smart Secure | Running header ("Consultation Smart Secure Electricity Systems...NN"), `OFFICIAL OFFICIAL` security stamps |
+
+**Tier 2 — Heading injection on table pages**
+For pages detected as table pages (`page.find_tables()` returns results), prepend nearest section heading
+(walk back up to 3 pages). Preserves numeric context and makes table chunks retrievable by BM25 + dense.
+
+| Document | Why |
+|---|---|
+| WEO 2025 (338 table pages) | Dense numeric cost/demand tables — LCOE by technology, demand by scenario. Analysts will query these figures. |
+| Seventh Carbon Budget (47 table pages) | Sector emissions trajectories, policy cost estimates. Good heading structure in source. |
+| CCC Progress 2024 (24 table pages) | RAG status tables — traffic-light indicators don't extract. Prose surrounds carry signal; heading injection makes page findable. |
+| CCC Progress 2025 (27 table pages) | Same as above. |
+| BoE Disclosure 2024 (9 table pages) | Real financial data — portfolio exposures, carbon intensities, compositions. Analysts will query these. |
+
+**Tier 3 — Keep as-is**
+Table content is descriptive prose or benign layout artefacts. No special handling needed.
+
+| Document | Why |
+|---|---|
+| CBES Results 2021 (11 table pages) | Prose cells — participant lists, loss estimate tables. Reads fine flat. |
+| CBES Key Elements (8 table pages) | Prose cells — participant lists, scenario design. |
+| Measuring Climate Risks (3 table pages) | Scenario description tables — descriptive text in cells. |
+| ZEV Mandate (6 table pages) | Layout boxes with text repeated across columns. Artefacts merge or fall under min-token floor. |
+| BoE Macro Implications (0 table pages) | No tables — no action needed. |
+
+**Note on CCC Progress RAG tables:** Traffic-light status indicators (On Track / Insufficient Action symbols) do not
+extract as text. This is a known limitation. The prose paragraphs surrounding each table restate the assessment
+in text form — these carry the retrieval signal. Log as known limitation in README.
 
 ### Metadata schema (per chunk)
 
 ```
 doc_id, institution, doc_type, jurisdiction, publication_date,
-page_number, chunk_index, token_count
+page_number, chunk_index, token_count, chunk_type
 ```
+
+`chunk_type`: `"prose"` (default) or `"table"` (set when page.find_tables() detected a table).
+Used at synthesis time — LLM instructed to extract specific values from table chunks rather than paraphrase.
 
 ---
 
@@ -190,46 +231,128 @@ page_number, chunk_index, token_count
 ## Week 3 Task Sequence (strict order)
 
 **Step 1 — PDF ingestion pipeline**
-- *Current state: PDFs audited, chunking strategy confirmed, no ingestion code.*
-- *Target state: all audited documents chunked with metadata, saved to data/processed/ as JSON.*
-- Build `src/ingestion/pdf_loader.py` and `src/ingestion/chunker.py`
-- Use locked chunk size and document-type-aware strategy from audit
-- Validate: chunk count, avg token length, no chunks above 512 tokens
+- *Current state: PDFs audited, all decisions locked, no ingestion code.*
+- *Target state: all 12 audited documents chunked with metadata, saved to data/processed/ as JSON.*
+
+Build `src/ingestion/pdf_loader.py`:
+- `load_pdf(path) -> list[dict]` — extract text per page using PyMuPDF `page.get_text("text")`
+- `clean_text(text, doc_id) -> str` — apply Tier 1 strip rules for ESO and Ofgem only:
+  - ESO: strip nav elements ("Navigation", "Download a pdf", "Text Links", "Return to contents"), duplicated map headers, fragmented social handles
+  - Ofgem: strip running header pattern + `OFFICIAL OFFICIAL` stamps
+- `detect_table_page(page) -> bool` — use `page.find_tables().tables` (PyMuPDF)
+- `inject_heading(doc, page_idx) -> str` — walk back up to 3 pages, find nearest section heading via regex `r'(\d+[\.\d]*\s+[A-Z][^\n]{5,60}|Table \d+[\.\d]*[^\n]{5,60})'`, prepend as `[Section: ...]`
+- Apply heading injection to Tier 2 documents: WEO2025, Seventh Carbon Budget, CCC Progress 2024/2025, BoE Disclosure 2024
+- Attach metadata per page: `doc_id`, `institution`, `doc_type`, `jurisdiction`, `publication_date`, `page_number`, `chunk_type` ("prose"/"table")
+
+Build `src/ingestion/chunker.py`:
+- `chunk_page(text, chunk_size=400, overlap=80) -> list[str]` — tiktoken cl100k_base tokeniser
+- Minimum token floor: 50 tokens — discard fragments below this
+- Hard ceiling: 512 tokens — assert no chunk exceeds this
+- Add `chunk_index` and `token_count` to metadata per chunk
+- Save output: `data/processed/<doc_id>.json` — list of chunk dicts
+
+Validate before moving on:
+- Total chunk count across all 12 docs (expect 800–2500)
+- Avg token length per doc
+- Zero chunks above 512 tokens
+- Spot-check: 3 chunks from ESO (confirm nav stripped), 3 from Ofgem (confirm OFFICIAL stripped), 3 table chunks from WEO2025 (confirm heading prepended)
+
 - Commit: `feat: pdf ingestion pipeline`
 
 **Step 2 — Embed and index**
 - *Current state: chunks in data/processed/, no vector store.*
 - *Target state: Chroma index populated, BM25 index built, both queryable.*
-- Build `src/retrieval/dense_retriever.py` using locked embedding model
-- Initialise Chroma vector store on all audited documents
-- Commit: `feat: chroma index built`
+
+Build `src/retrieval/dense_retriever.py`:
+- Model: `BAAI/bge-base-en-v1.5`, device=cuda (RTX 4050 confirmed)
+- `build_index(chunks) -> None` — encode all chunks, persist to Chroma
+- `query(text, top_k=20) -> list[dict]` — encode query, return top-k with scores and metadata
+- Chroma collection: `cpie_v1`, persist to `data/processed/chroma_db/`
+- Store all metadata fields in Chroma document metadata (enables filtered retrieval later)
+
+BM25 index lives in `src/retrieval/bm25_retriever.py` (built in Week 2 Step 5 — wire here if not done):
+- `build_index(chunks) -> BM25Okapi`
+- `query(text, top_k=20) -> list[dict]`
+- Serialise index to `data/processed/bm25_index.pkl`
+
+- Commit: `feat: chroma index and bm25 index built`
 
 **Step 3 — Wire full retrieval pipeline**
-- *Current state: individual retrieval modules exist, not wired together.*
+- *Current state: BM25 and dense indices built, not fused.*
 - *Target state: BM25 + dense + RRF + reranker returning ranked chunks end-to-end on a real query.*
-- Confirm BM25, dense, RRF (locked k), reranker working end-to-end
-- Manual inspection: run 3 real queries, check top-5 chunks are relevant
+
+`src/retrieval/hybrid_retriever.py`:
+- RRF fusion with k=60 (locked)
+- `retrieve(query, top_k=20) -> list[dict]` — calls BM25 + dense, fuses with RRF, returns top-20 candidates for reranker
+
+`src/retrieval/reranker.py`:
+- Model: `cross-encoder/ms-marco-MiniLM-L-6-v2`
+- Lazy loading — do not load model at import time, load on first call
+- `rerank(query, candidates) -> list[dict]` — score all candidates, return top-5
+- Log reranker latency separately (needed for monitoring dashboard)
+
+Manual validation — run these 3 queries, inspect top-5 chunks:
+1. *"What load control licensing requirements does Ofgem propose?"* — expect Ofgem Smart Secure chunks
+2. *"What aggregate losses did UK banks face under the CBES early action scenario?"* — expect CBES Results chunks
+3. *"What does the IEA project for peak fossil fuel demand?"* — expect WEO 2025 chunks
+
 - Commit: `feat: hybrid retrieval pipeline end-to-end`
 
 **Step 4 — Synthesis layer**
-- *Current state: retrieval pipeline working, no LLM synthesis.*
+- *Current state: retrieval pipeline working, LLM model locked from Step 6 (Week 2).*
 - *Target state: structured JSON brief returned for a real query.*
-- Build `src/synthesis/output_schema.py` (Pydantic) and `src/synthesis/synthesiser.py`
-- Wire locked LLM model, three-check verification loop
+
+`src/synthesis/output_schema.py`:
+```python
+class Citation(BaseModel):
+    doc_id: str
+    passage: str
+    page: int
+
+class AnalystBrief(BaseModel):
+    answer: str
+    citations: list[Citation]
+    confidence: float          # 0.0–1.0
+    contradictions: list[dict] # experimental — list of {doc_a, doc_b, summary}
+```
+
+`src/synthesis/synthesiser.py`:
+- Three-check verification loop: relevance → confidence → contradiction
+- `chunk_type: table` handling — instruct LLM to extract specific values, not paraphrase
+- Handle out-of-corpus queries explicitly: if no chunk scores above confidence threshold, return `confidence=0.0` with `answer="The corpus does not contain sufficient information to answer this query."`
+- Note: contradiction detection is experimental in v1 — implement but do not treat as core feature
+
 - Commit: `feat: synthesis layer`
 
 **Step 5 — CLI end-to-end demo + logging**
-- *Current state: all modules built but not wired into a single runnable pipeline.*
+- *Current state: all modules built but not wired into a single runnable entry point.*
 - *Target state: `python main.py "query"` returns a structured JSON brief. Logging active from this point.*
-- Build `main.py` — accepts query string, runs full pipeline, prints JSON brief
-- Add `src/monitoring/logger.py` — JSON lines, logs every query from day one
-- Run 5 real queries manually, inspect output quality
+
+`main.py`:
+- Accept query string as CLI argument
+- Run full pipeline: clean query → dense encode → BM25 + dense retrieve → RRF fuse → rerank → synthesise
+- Print JSON brief to stdout
+
+`src/monitoring/logger.py`:
+- JSON lines format, one record per query
+- Log: `timestamp`, `query`, `retrieved_doc_ids`, `reranker_latency_ms`, `synthesis_latency_ms`, `confidence`, `model_used`
+- Write to `logs/queries.jsonl`
+- Logging goes in NOW — not in Week 5. Every query logged from day one.
+
+Run 5 real queries manually, inspect output quality before committing:
+1. Factual — Ofgem licensing timeline
+2. Factual — CBES loss estimates
+3. Factual — IEA fossil fuel demand peak
+4. Cross-document — CCC vs IEA on net zero pathways
+5. Out-of-corpus negative — confirm system returns low confidence, not a hallucination
+
 - Commit: `feat: end-to-end CLI pipeline with logging`
 
 **Step 6 — E2E version submission** *(course deadline Fri 30 May)*
 - *Current state: pipeline works locally.*
 - *Target state: pipeline confirmed running cleanly on a fresh install, submitted to course.*
-- Test clean run from scratch: `git clone → uv install → python main.py "query"`
+- Test clean run: `git clone → uv sync → cp .env.example .env → add API key → python main.py "query"`
+- Confirm logs/queries.jsonl is being written
 - Submit to course
 
 ---

@@ -348,6 +348,7 @@ class AnalystBrief(BaseModel):
 - Handle out-of-corpus queries explicitly: if no chunk scores above confidence threshold, return `confidence=0.0` with `answer="The corpus does not contain sufficient information to answer this query."`
 - Note: contradiction detection is experimental in v1 — implement but do not treat as core feature
 - **Confidence must come from the pipeline, not the LLM.** Combine: top RRF score + retrieval score spread (are top chunks clustered or scattered?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
+- **Confidence weights are v1 placeholders (0.5 score / 0.3 spread / 0.2 citation) — not empirically calibrated.** Individual signals (`score_signal`, `spread_signal`, `citation_signal`) are returned by `Synthesiser.synthesise()` and must be logged per query. Week 5 calibrates real weights by fitting logistic regression against LLM-as-judge scores on the ground truth dataset.
 - **Citation verification:** after synthesis, check every cited passage against the actual retrieved chunks. If a cited passage does not appear in any retrieved chunk, flag or remove it. Prevents fabricated citations.
 
 - Commit: `feat: synthesis layer`

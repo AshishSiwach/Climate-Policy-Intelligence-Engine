@@ -26,7 +26,7 @@ confidence level, flagged contradictions.
 | BM25 | `rank-bm25` |
 | Dense embeddings | **LOCKED: BAAI/bge-base-en-v1.5** — beat all-MiniLM-L6-v2 on top-5 relevance and cosine sim distribution (mean 0.543 vs 0.278). 768-dim. device=cuda (RTX 4050). |
 | Fusion | **LOCKED: RRF k=60** — Cormack et al. 2009 default. k=10/30/60 indistinguishable on test query (retrievers agreed). Conservative fusion correct for small single-domain corpus. |
-| Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2`. Lazy loading. Separate latency logging. Top-20 candidates. |
+| Reranker | **v1: NOT USED** — 3-query ablation showed reranker adds 172ms per query with zero hit-rate improvement over hybrid (3/3 top-1 on both). Code preserved in `src/retrieval/reranker.py` for Week 5 re-evaluation with full ground truth dataset. If Week 5 LLM-as-judge shows meaningful synthesis quality gain, add back. Model when re-enabled: `cross-encoder/ms-marco-MiniLM-L-6-v2`. |
 | Vector store | Chroma (v1). FAISS / Pinecone / Qdrant / pgvector are upgrade paths only. |
 | LLM synthesis | **LOCKED: GPT-4o mini** — beat Haiku 4.5 on quality (4.0 vs 2.7 avg) and cost (6x cheaper per query). Streaming planned to reduce perceived latency to ~800ms first token. Decision documented in model_selection.md. |
 | Output schema | Pydantic: `answer`, `citations[]`, `confidence` (0–1), `contradictions[]` |
@@ -300,21 +300,24 @@ BM25 index lives in `src/retrieval/bm25_retriever.py` (built in Week 2 Step 5 �
 
 - Commit: `feat: chroma index and bm25 index built`
 
-**Step 3 — Wire full retrieval pipeline**
+**Step 3 — Wire hybrid retrieval pipeline (no reranker in v1)**
 - *Current state: BM25 and dense indices built, not fused.*
-- *Target state: BM25 + dense + RRF + reranker returning ranked chunks end-to-end on a real query.*
+- *Target state: BM25 + dense + RRF returning ranked top-5 chunks end-to-end on real queries.*
 
 `src/retrieval/hybrid_retriever.py`:
 - RRF fusion with k=60 (locked)
-- `retrieve(query, top_k=20) -> list[dict]` — calls BM25 + dense, fuses with RRF, returns top-20 candidates for reranker
+- `retrieve(query, top_k=5) -> list[dict]` — calls BM25 + dense (each top-10), fuses with RRF, returns top-5 for synthesiser
 
 `src/retrieval/reranker.py`:
-- Model: `cross-encoder/ms-marco-MiniLM-L-6-v2`
-- Lazy loading — do not load model at import time, load on first call
-- `rerank(query, candidates) -> list[dict]` — score all candidates, return top-5
-- Log reranker latency separately (needed for monitoring dashboard)
+- Preserved but NOT wired into the v1 pipeline. See ablation reasoning below.
 
-Manual validation — run these 3 queries, inspect top-5 chunks:
+**Retrieval ablation (run in Week 3, on 3 pilot queries):**
+Compared 4 configs — BM25 only, Dense only, Hybrid, Full pipeline (hybrid + rerank).
+All 4 got 3/3 top-1 hits. Reranker added 172ms per query with zero hit-rate improvement.
+Decision: **drop reranker for v1**, revisit in Week 5 with 35–50 ground truth queries + LLM-as-judge.
+Hybrid stays because it costs only 14ms over BM25 alone and preserves semantic coverage for queries that don't name the institution. Full ablation script: `scripts/ablation_retrieval.py`.
+
+Manual validation queries (used in `scripts/validate_pipeline_e2e.py`):
 1. *"What load control licensing requirements does Ofgem propose?"* — expect Ofgem Smart Secure chunks
 2. *"What aggregate losses did UK banks face under the CBES early action scenario?"* — expect CBES Results chunks
 3. *"What does the IEA project for peak fossil fuel demand?"* — expect WEO 2025 chunks
@@ -344,7 +347,7 @@ class AnalystBrief(BaseModel):
 - `chunk_type: table` handling — instruct LLM to extract specific values, not paraphrase
 - Handle out-of-corpus queries explicitly: if no chunk scores above confidence threshold, return `confidence=0.0` with `answer="The corpus does not contain sufficient information to answer this query."`
 - Note: contradiction detection is experimental in v1 — implement but do not treat as core feature
-- **Confidence must come from the pipeline, not the LLM.** Combine: top reranker score + retrieval score spread (are top chunks clustered or scattered?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
+- **Confidence must come from the pipeline, not the LLM.** Combine: top RRF score + retrieval score spread (are top chunks clustered or scattered?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
 - **Citation verification:** after synthesis, check every cited passage against the actual retrieved chunks. If a cited passage does not appear in any retrieved chunk, flag or remove it. Prevents fabricated citations.
 
 - Commit: `feat: synthesis layer`
@@ -355,13 +358,14 @@ class AnalystBrief(BaseModel):
 
 `main.py`:
 - Accept query string as CLI argument
-- Run full pipeline: clean query → dense encode → BM25 + dense retrieve → RRF fuse → rerank → synthesise
+- Run pipeline: clean query → BM25 + dense retrieve → RRF fuse → top-5 → synthesise (no rerank in v1)
 - Print JSON brief to stdout
 
 `src/monitoring/logger.py`:
 - JSON lines format, one record per query
-- Log: `timestamp`, `query`, `retrieved_doc_ids`, `retrieval_scores`, `reranker_scores`, `reranker_latency_ms`, `synthesis_latency_ms`, `confidence`, `model_used`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `failure_reason`
+- Log: `timestamp`, `query`, `retrieved_doc_ids`, `retrieval_scores`, `rrf_scores`, `retrieval_latency_ms`, `synthesis_latency_ms`, `confidence`, `model_used`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `failure_reason`
 - Write to `logs/queries.jsonl`
+- Note: `rerank_scores` / `rerank_latency_ms` will be added back when reranker is re-enabled.
 - Logging goes in NOW — not in Week 5. Every query logged from day one.
 
 Run 5 real queries manually, inspect output quality before committing:
@@ -529,6 +533,7 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 | Query classification | Classify query type (factual / comparison / summarisation / cross-document / numeric) before retrieval. Choose strategy per type. Lightweight classifier, big retrieval gain. | High |
 | Retrieval metrics (Recall@5, MRR, nDCG@10) | Requires labeled relevance judgments per query. Add after ground truth dataset exists. Shows whether retrieval is improving independently of the LLM. | Medium |
 | Universal heading injection | v1 injects section headings for CCC/IEA/ESO (section strategy) and Tier 2 table pages only. BoE prose docs and DESNZ have no section context on their chunks. v2: extend heading injection to every chunk in every document, or move to hierarchical trail (`[Chapter 3 > Transport > Cars & vans]`). Run A/B with retrieval metrics to confirm gain before committing. | Medium |
+| Reranker re-evaluation | Cross-encoder rerank dropped from v1 pipeline after 3-query ablation showed no hit-rate gain over hybrid (all 3 configs got 3/3 top-1) at cost of 172ms/query. Test unrepresentative — too few queries, all named the institution. Week 5: re-run ablation with 35–50 ground truth queries + LLM-as-judge scoring. If rerank meaningfully improves top-5 relevance or synthesis quality, re-enable in `main.py` (one-line change; module preserved in `src/retrieval/reranker.py`). | Medium |
 | Prompt versioning | Version prompts (v1/v2/v3) and log which version generated each response. Required for A/B testing. Add when you have multiple prompt variants to test. | Medium |
 | Incremental indexing | Add/update documents without rebuilding Chroma from scratch. Needed when corpus grows. | Medium |
 | Async retrieval | Run BM25 and dense retrieval in parallel. Reduces retrieval latency by ~30–40%. | Medium |

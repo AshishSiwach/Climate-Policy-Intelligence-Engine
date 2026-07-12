@@ -1,7 +1,7 @@
 .PHONY: install run test lint eval docker-build docker-run
 
 install:
-	uv sync --all-extras
+	uv sync --all-extras --no-editable
 
 run:
 	uv run streamlit run app.py --server.port 8501

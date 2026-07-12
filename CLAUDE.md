@@ -1,6 +1,6 @@
 # CPIE — Climate Policy Intelligence Engine
 
-AI Engineering Buildcamp Capstone | Ashish Siwach
+AI Engineering Buildcamp Capstone + LLM Zoomcamp Capstone | Ashish Siwach
 
 ---
 
@@ -28,10 +28,10 @@ confidence level, flagged contradictions.
 | Fusion | **LOCKED: RRF k=60** — Cormack et al. 2009 default. k=10/30/60 indistinguishable on test query (retrievers agreed). Conservative fusion correct for small single-domain corpus. |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2`. Lazy loading. Separate latency logging. Top-20 candidates. |
 | Vector store | Chroma (v1). FAISS / Pinecone / Qdrant / pgvector are upgrade paths only. |
-| LLM synthesis | TBD — Haiku 3.5 vs GPT-4o mini. Week 2 comparison on quality, latency, cost. Winner in model_selection.md. |
+| LLM synthesis | **LOCKED: GPT-4o mini** — beat Haiku 4.5 on quality (4.0 vs 2.7 avg) and cost (6x cheaper per query). Streaming planned to reduce perceived latency to ~800ms first token. Decision documented in model_selection.md. |
 | Output schema | Pydantic: `answer`, `citations[]`, `confidence` (0–1), `contradictions[]` |
 | Verification | Three-check loop: relevance → confidence → contradiction |
-| Monitoring | JSON lines logging + Streamlit dashboard |
+| Monitoring | JSON lines logging (Week 3, raw data layer) + Logfire (Week 5, observability — course specified) |
 | UI | Streamlit |
 | Containerisation | Docker + docker-compose |
 | Build tooling | Makefile targets: install, run, test, eval, build, docker-build, docker-run |
@@ -44,19 +44,24 @@ confidence level, flagged contradictions.
 - All documents audited before ingestion (see Week 2 tasks)
 - Estimated corpus size: 800–2500 chunks
 
-### Chunking strategy (document-type-aware)
+### Chunking strategy
 
-| Document type | Strategy |
-|---|---|
-| Ofgem consultations | Chunk by numbered paragraph (3.14, 3.15 etc.) — canonical citation unit |
-| FCA papers | Chunk by section heading. Footnotes attached to paragraph above, not chunked independently. |
-| DESNZ strategy docs | Chunk by page with 80-token overlap. Headers preserved as metadata. |
-| CCC statutory reports | Chunk by section heading. Tables get heading injection (see below). |
-| IEA / ESO reports | Chunk by section. Executive summary as separate high-priority chunk. |
+**v1: sliding window across all documents.** Simple, standard baseline.
 
-**Chunk size: LOCKED — 400 tokens / 80-token overlap.**
-Validated in audit: avg=397-400 tokens, max=400, zero chunks over 512 ceiling across all pilot docs.
-Hard ceiling: 512 tokens — reranker degrades above this. Minimum floor: 50 tokens — discard trailing fragments.
+- 400 tokens per chunk, 80-token overlap (locked)
+- 50-token floor, discard fragments below
+- 512-token ceiling assert fires after Tier 2 heading injection
+
+**Why sliding window as v1:** Every chunking-strategy claim needs empirical validation. Shipping document-aware chunking without measuring it against a baseline would be "changed stance without evidence." Sliding window is cheap, standard, and the correct scientific baseline.
+
+**Watch during eval failure analysis:** Ofgem chunks may split paragraph citations across boundaries. Retrieval will still find the right chunk; the paragraph number stays inside the chunk text; `page_number` metadata preserves the citation. Not a v1 dealbreaker — flag if it shows up as a failure pattern.
+
+**v2 experiments (measured against v1 in Week 5):**
+1. Document-aware chunking — Ofgem by paragraph, CCC/IEA/ESO by section, others sliding window
+2. Universal heading injection — inject `[Section: ...]` into every chunk in every doc
+3. Chunk size sweep — test 200, 300, 400, 480 against retrieval metrics
+
+Keep whichever wins. See v2 Roadmap for detail.
 
 ### Table handling — three tiers (ALL documents, locked in audit)
 
@@ -74,11 +79,11 @@ For pages detected as table pages (`page.find_tables()` returns results), prepen
 
 | Document | Why |
 |---|---|
-| WEO 2025 (338 table pages) | Dense numeric cost/demand tables — LCOE by technology, demand by scenario. Analysts will query these figures. |
-| Seventh Carbon Budget (47 table pages) | Sector emissions trajectories, policy cost estimates. Good heading structure in source. |
-| CCC Progress 2024 (24 table pages) | RAG status tables — traffic-light indicators don't extract. Prose surrounds carry signal; heading injection makes page findable. |
-| CCC Progress 2025 (27 table pages) | Same as above. |
-| BoE Disclosure 2024 (9 table pages) | Real financial data — portfolio exposures, carbon intensities, compositions. Analysts will query these. |
+| WEO 2025 (122 real table pages) | Dense numeric cost/demand tables — LCOE by technology, demand by scenario. Analysts will query these figures. |
+| Seventh Carbon Budget (28 real table pages) | Sector emissions trajectories, policy cost estimates. Good heading structure in source. |
+| CCC Progress 2024 (20 real table pages) | RAG status tables — traffic-light indicators don't extract. Prose surrounds carry signal; heading injection makes page findable. |
+| CCC Progress 2025 (13 real table pages) | Same as above. |
+| BoE Disclosure 2024 (7 real table pages) | Real financial data — portfolio exposures, carbon intensities, compositions. Analysts will query these. |
 
 **Tier 3 — Keep as-is**
 Table content is descriptive prose or benign layout artefacts. No special handling needed.
@@ -88,8 +93,18 @@ Table content is descriptive prose or benign layout artefacts. No special handli
 | CBES Results 2021 (11 table pages) | Prose cells — participant lists, loss estimate tables. Reads fine flat. |
 | CBES Key Elements (8 table pages) | Prose cells — participant lists, scenario design. |
 | Measuring Climate Risks (3 table pages) | Scenario description tables — descriptive text in cells. |
-| ZEV Mandate (6 table pages) | Layout boxes with text repeated across columns. Artefacts merge or fall under min-token floor. |
+| ZEV Mandate (5 real table pages) | Layout boxes with text repeated across columns. Artefacts merge or fall under min-token floor. |
 | BoE Macro Implications (0 table pages) | No tables — no action needed. |
+
+**Note on table page counts:** `page.find_tables()` raw hit counts significantly overcount real tables on
+several documents — it misdetects recurring page headers/footers and body prose split into columns as tables.
+Verified via multi-sample audit (`notebooks/pdf_quality_audit.ipynb`, Check 4) with a fill-ratio filter
+(discards detections where >70% of data cells are empty). Raw vs. real: WEO 2025 338→122, ESO Beyond2030
+118→53 (not table-tiered — nav elements already stripped in Tier 1), Ofgem Smart Secure 19→7 (not table-tiered
+— chunked by numbered paragraph, false positives don't affect pipeline), Seventh Carbon Budget 47→28, CCC
+Progress 2024 24→20, CCC Progress 2025 27→13, BoE Disclosure 2024 9→7, ZEV Mandate 6→5. CBES Results/Key
+Elements and Measuring Climate Risks had zero false positives (raw count = real count). Counts above are the
+filtered "real" figures — use these for Tier 2 planning, not the raw `find_tables()` count.
 
 **Note on CCC Progress RAG tables:** Traffic-light status indicators (On Track / Insufficient Action symbols) do not
 extract as text. This is a known limitation. The prose paragraphs surrounding each table restate the assessment
@@ -144,8 +159,9 @@ Used at synthesis time — LLM instructed to extract specific values from table 
 | Week 2 | Mon 18 – Fri 23 May | 1→ scaffold, 2→ PDF audit, 3→ lock open decisions, 4→ retrieval pipeline, 5→ model comparison | Project Card — Fri 23 May |
 | Week 3 | Mon 26 – Fri 30 May | E2E pipeline, synthesis layer, CLI demo, logging active | E2E version — Fri 30 May |
 | Week 4 | Mon 2 – Fri 6 Jun | Unit tests, LLM-as-judge tests, ground truth QA dataset | — |
-| Week 5 | Mon 9 – Fri 13 Jun | Eval runner, monitoring dashboard, user feedback signal | Tests + Monitoring + Eval — Fri 13 Jun |
+| Week 5 | Mon 9 – Fri 13 Jun | Eval runner, Logfire monitoring, user feedback signal | Tests + Monitoring + Eval — Fri 13 Jun |
 | Week 6 | Mon 16 – Fri 20 Jun | Docker, README, deploy, walkthrough | Deployed demo — Fri 20 Jun |
+| Week 7+ | Mon 23 Jun – Fri 25 Jul | LLM Zoomcamp gap analysis — add whatever CPIE doesn't already cover | Project Attempt 1 — Mon 28 Jul |
 
 **Time commitment:** 2 hrs/weekday, 3–4 hrs/weekend (~16–18 hrs/week)
 
@@ -251,6 +267,13 @@ Build `src/ingestion/chunker.py`:
 - Add `chunk_index` and `token_count` to metadata per chunk
 - Save output: `data/processed/<doc_id>.json` — list of chunk dicts
 
+> **Implementation note — 512-token assert placement:** The ceiling assert must fire in `pdf_loader.py` *after* heading injection, not inside `chunk_page()`. The chunker sees raw text (≤400 tokens); heading injection in `pdf_loader.py` prepends `[Section: ...]` (~15–18 tokens) afterwards. Assert on the final combined token count so the guard checks what the reranker actually receives:
+> ```python
+> final_tokens = len(tokenizer.encode(chunk_with_heading))
+> assert final_tokens <= 512, f"Chunk exceeds ceiling after heading injection: {final_tokens}"
+> ```
+> Risk is low in practice (400 + ~18 = 418, well under 512) but the assert is in the wrong place until this is fixed.
+
 Validate before moving on:
 - Total chunk count across all 12 docs (expect 800–2500)
 - Avg token length per doc
@@ -321,6 +344,8 @@ class AnalystBrief(BaseModel):
 - `chunk_type: table` handling — instruct LLM to extract specific values, not paraphrase
 - Handle out-of-corpus queries explicitly: if no chunk scores above confidence threshold, return `confidence=0.0` with `answer="The corpus does not contain sufficient information to answer this query."`
 - Note: contradiction detection is experimental in v1 — implement but do not treat as core feature
+- **Confidence must come from the pipeline, not the LLM.** Combine: top reranker score + retrieval score spread (are top chunks clustered or scattered?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
+- **Citation verification:** after synthesis, check every cited passage against the actual retrieved chunks. If a cited passage does not appear in any retrieved chunk, flag or remove it. Prevents fabricated citations.
 
 - Commit: `feat: synthesis layer`
 
@@ -335,7 +360,7 @@ class AnalystBrief(BaseModel):
 
 `src/monitoring/logger.py`:
 - JSON lines format, one record per query
-- Log: `timestamp`, `query`, `retrieved_doc_ids`, `reranker_latency_ms`, `synthesis_latency_ms`, `confidence`, `model_used`
+- Log: `timestamp`, `query`, `retrieved_doc_ids`, `retrieval_scores`, `reranker_scores`, `reranker_latency_ms`, `synthesis_latency_ms`, `confidence`, `model_used`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `failure_reason`
 - Write to `logs/queries.jsonl`
 - Logging goes in NOW — not in Week 5. Every query logged from day one.
 
@@ -403,13 +428,15 @@ Run 5 real queries manually, inspect output quality before committing:
 - Log issues as GitHub issues or failures.md
 - Commit: `chore: eval failure analysis`
 
-**Step 3 — Monitoring dashboard**
-- *Current state: query logs accumulating in logs/, no dashboard.*
-- *Target state: Streamlit dashboard live showing query volume, confidence, latency, feedback.*
-- Build `src/monitoring/dashboard.py` — Streamlit app
-- Charts: query volume, confidence distribution, latency per stage, top retrieved docs
-- User feedback widget in `app.py` — thumbs up / thumbs down per response
-- Commit: `feat: monitoring dashboard`
+**Step 3 — Logfire monitoring**
+- *Current state: query logs accumulating in logs/queries.jsonl, no observability layer.*
+- *Target state: Logfire integrated, failures and unusual outputs visible, user feedback captured.*
+- Add `logfire` to pyproject.toml dependencies
+- Instrument `src/monitoring/logger.py` to emit to Logfire alongside existing JSONL logging
+- Log spans for: retrieval latency, reranker latency, synthesis latency, confidence score per query
+- Surface failures — low confidence responses, synthesis errors, out-of-corpus queries
+- User feedback widget in `app.py` — thumbs up / thumbs down per response, logged to Logfire
+- Commit: `feat: logfire monitoring`
 
 **Step 4 — Tests + Monitoring + Eval submission** *(course deadline Fri 13 Jun)*
 - *Current state: all three components built.*
@@ -461,10 +488,53 @@ Run 5 real queries manually, inspect output quality before committing:
 
 
 
+## Week 7+ — LLM Zoomcamp Integration (after Jun 20)
+
+**Rule: do not touch this until CPIE Week 6 is fully complete and submitted.**
+
+After the 6-week CPIE build is done, do one gap analysis pass:
+- Compare LLM Zoomcamp homework topics against what CPIE already has
+- Identify anything missing from the intersection
+- Add only what's missing — do not rebuild things that already exist
+
+**Known topics to check at that point:**
+
+| LLM Zoomcamp topic | CPIE coverage | Gap? |
+|---|---|---|
+| Agentic RAG | Simple RAG only — agentic is v2 | Likely yes — assess HW1 requirements |
+| Vector Search | Chroma + BAAI/bge-base-en-v1.5 | No gap |
+| Orchestration | main.py full pipeline | No gap |
+| Evaluation | LLM-as-judge + eval runner | No gap |
+| Monitoring | Logfire | No gap |
+
+**Submission deadline:** Project Attempt 1 — Mon 28 Jul 2026. Project Attempt 2 (buffer) — Tue 11 Aug 2026.
+
+---
+
 1. **Current state → target state.** Every session starts with: where is the project now, what is the target by end of session.
 2. **Ship E2E early.** Working simple pipeline by end of Week 3 is the anchor. Tests, monitoring, eval grow on top.
 3. **Eval follows business goals.** Metrics are: does the answer correctly reflect the document, does the system know when it can't answer, does the citation support the claim. Not generic AI benchmarks.
 4. **Monitoring is part of building.** Logging goes in during Week 3 alongside the E2E pipeline — not bolted on in Week 5.
+
+---
+
+## v2 Roadmap — Do Not Build Until v1 Is Shipped
+
+These are validated improvements deferred deliberately. Add them after Week 6 submission.
+
+| Item | Why deferred | Value |
+|---|---|---|
+| Contradiction detector redesign | Current `contradictions[]` is LLM self-report — unreliable. v2: cluster by source → summarise each → compare claims → LLM explains differences. Rename to `conflicting_sources`. | High |
+| Metadata filtering | Institution/jurisdiction/date stored but unused in retrieval. Add pre-retrieval filter: if query names DESNZ, filter `institution=DESNZ` before BM25+dense. Improves precision significantly. | High |
+| Query classification | Classify query type (factual / comparison / summarisation / cross-document / numeric) before retrieval. Choose strategy per type. Lightweight classifier, big retrieval gain. | High |
+| Retrieval metrics (Recall@5, MRR, nDCG@10) | Requires labeled relevance judgments per query. Add after ground truth dataset exists. Shows whether retrieval is improving independently of the LLM. | Medium |
+| Universal heading injection | v1 injects section headings for CCC/IEA/ESO (section strategy) and Tier 2 table pages only. BoE prose docs and DESNZ have no section context on their chunks. v2: extend heading injection to every chunk in every document, or move to hierarchical trail (`[Chapter 3 > Transport > Cars & vans]`). Run A/B with retrieval metrics to confirm gain before committing. | Medium |
+| Prompt versioning | Version prompts (v1/v2/v3) and log which version generated each response. Required for A/B testing. Add when you have multiple prompt variants to test. | Medium |
+| Incremental indexing | Add/update documents without rebuilding Chroma from scratch. Needed when corpus grows. | Medium |
+| Async retrieval | Run BM25 and dense retrieval in parallel. Reduces retrieval latency by ~30–40%. | Medium |
+| Embedding + query caching | Cache embeddings for repeated queries. Reduces cost and latency at scale. | Low |
+| Automatic document ingestion | Ingest from Ofgem/FCA/DESNZ RSS feeds or GOV.UK APIs. Keeps corpus current. | Low |
+| Agentic workflow | Query decomposition, multi-step retrieval, tool use for complex cross-document questions. | v3 |
 
 ---
 
@@ -484,7 +554,7 @@ Run 5 real queries manually, inspect output quality before committing:
 - [x] Embedding model — BAAI/bge-base-en-v1.5. Beat all-MiniLM-L6-v2 on top-5 relevance and cosine sim distribution (mean 0.543 vs 0.278). Locked in config.yaml.
 - [x] Chunk size — 400 tokens / 80-token overlap. Validated: avg=397-400, max=400, zero chunks over 512 ceiling. Locked in config.yaml.
 - [x] RRF k value — k=60. Literature default (Cormack et al. 2009); k=10/30/60 identical on test query. Locked in config.yaml.
-- [ ] LLM synthesis model — Haiku 3.5 vs GPT-4o mini comparison, document in model_selection.md
+- [x] LLM synthesis model — GPT-4o mini. Beat Haiku 4.5 on quality (4.0 vs 2.7) and cost (6x cheaper). Locked in config.yaml, documented in model_selection.md.
 
 ---
 
@@ -533,7 +603,7 @@ cpie/
       eval_runner.py             # Run eval on ground truth dataset
     monitoring/
       logger.py                  # JSON lines query logging
-      dashboard.py               # Streamlit monitoring view
+      dashboard.py               # Logfire monitoring integration
   tests/
     test_ingestion.py
     test_retrieval.py

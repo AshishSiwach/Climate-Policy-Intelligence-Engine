@@ -12,8 +12,8 @@ import logging
 import time
 from pathlib import Path
 
-import chromadb
 import torch
+import chromadb
 from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)

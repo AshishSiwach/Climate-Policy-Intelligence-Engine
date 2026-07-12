@@ -1,0 +1,564 @@
+[
+  {
+    "query_id": "Q01",
+    "query": "What load control licensing requirements does Ofgem propose for flexibility service providers?",
+    "type": "factual",
+    "expected_source": "OFGEM_SSES_2025",
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "Ofgem proposes a new load control licensing regime for organisations involved in providing load control to certain domestic-scale ESAs, including flexibility service providers. Applicants would need to supply standard company and ownership details, disclose any other licences held, show that directors and senior individuals are fit and proper, and explain their operational arrangements for starting the licensable activity. Ofgem also says the regime should be proportionate while still ensuring consumers are adequately protected.",
+        "citations": [
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "a new load control licensing regime is being developed which will put in place requirements on organisations that are involved in providing load control to certain domestic-scale ESAs, such as EV chargers and heat pumps. It will do this by introducing two new, distinct l",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Table 2: Load control licence application and requirements\nRegulation area \nDescription of evidence requirements \nStandard questions  \n(questions 1.1-8.4) \nDetails about the company, including structure \nand ownership, and any other licences held. \nSuitability to hold a licence \n(questions 10.1-10.7) \nConfirmation that directors and key senior \nindividuals are fit and proper to hold a licence",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "we believe it should be proportiona\n\n2.19 At the same time, it is essential to ensure that consumers are consistently and \nadequately protected, regardless of how they engage in flexibility (whether via an \nindependent Load Controller or FSP, or their supplier).",
+            "page": -1
+          }
+        ],
+        "confidence": 0.89,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 4103,
+      "input_tokens": 993,
+      "output_tokens": 580,
+      "cost_usd": 0.003355
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "Ofgem proposes a new load control licensing regime that will require organizations providing load control to domestic-scale energy storage assets (ESAs) to meet specific evidence requirements. These include details about the company, confirmation of the suitability of directors, and operational capability arrangements for commencing licensable activity.",
+        "citations": [
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "a new load control licensing regime is being developed which will put in place requirements on organisations that are involved in providing load control to certain domestic-scale ESAs, such as EV chargers and heat pumps.",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Details about the company, including structure and ownership, and any other licences held. Confirmation that directors and key senior individuals are fit and proper to hold a licence.",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "A summary of the proposed arrangements for commencing licensable activity.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.9,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 3845,
+      "input_tokens": 994,
+      "output_tokens": 268,
+      "cost_usd": 0.00031
+    },
+    "manual_scores": {
+      "gpt54": 5,
+      "gpt": 4
+    }
+  },
+  {
+    "query_id": "Q02",
+    "query": "What enforcement powers will Ofgem have against unlicensed load control operators?",
+    "type": "factual",
+    "expected_source": "OFGEM_SSES_2025",
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Ofgem will regulate the load control licensing regime and be responsible for granting licences, monitoring licensees' compliance with regulatory requirements, and taking any enforcement action as necessary.",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Subject to government decision, Ofgem will have the power to revoke a load control licence on the basis of failure to comply with enforcement notices under NIS.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.22,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 2107,
+      "input_tokens": 983,
+      "output_tokens": 277,
+      "cost_usd": 0.001984
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "Ofgem will have the power to revoke a load control licence if the operator fails to comply with enforcement notices under the Network and Information Systems (NIS) regime. Additionally, Ofgem will be responsible for monitoring compliance and taking necessary enforcement actions against licensed load control operators.",
+        "citations": [
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Ofgem will have the power to revoke a load control licence on the basis of failure to comply with enforcement notices under NIS.",
+            "page": 54
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Ofgem will regulate the load control licensing regime and be responsible for granting licences, monitoring licensees' compliance with regulatory requirements, and taking any enforcement action as necessary.",
+            "page": 1
+          }
+        ],
+        "confidence": 0.9,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 4167,
+      "input_tokens": 984,
+      "output_tokens": 208,
+      "cost_usd": 0.000272
+    },
+    "manual_scores": {
+      "gpt54": 2,
+      "gpt": 5
+    }
+  },
+  {
+    "query_id": "Q03",
+    "query": "What aggregate loan losses did UK banks face under the CBES early action scenario?",
+    "type": "factual",
+    "expected_source": "BOE_CBES_RESULTS_2022",
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "The Climate Biennial Exploratory Scenario (CBES) includes three scenarios exploring both transition and physical risks, to different degrees. The exercise considered two possible routes to net-zero UK greenhouse gas emissions by 2050: an \u2018Early Action\u2019 (EA) scenario and a \u2018Late Action\u2019 (LA) scenario.",
+            "page": -1
+          },
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "Some factors were not included in the CBES. Examples of omissions include potential trading losses, and detailed projections of the impact of climate risks on banks\u2019 risk-weighted assets.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.12,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 2442,
+      "input_tokens": 1013,
+      "output_tokens": 326,
+      "cost_usd": 0.002227
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [],
+        "confidence": 0.2,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 1012,
+      "input_tokens": 1014,
+      "output_tokens": 42,
+      "cost_usd": 0.000177
+    },
+    "manual_scores": {
+      "gpt54": 4,
+      "gpt": 4
+    }
+  },
+  {
+    "query_id": "Q04",
+    "query": "How did the CBES late policy transition scenario affect UK bank profitability and capital ratios?",
+    "type": "factual",
+    "expected_source": "BOE_CBES_RESULTS_2022",
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "The Climate Biennial Exploratory Scenario (CBES) includes three scenarios exploring both transition and physical risks, to different degrees. The exercise considered two possible routes to net-zero UK greenhouse gas emissions by 2050: an \u2018Early Action\u2019 (EA) scenario and a \u2018Late Action\u2019 (LA) scenario.",
+            "page": -1
+          },
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "aim to evaluate the full impact on participants\u2019 income and capital positions. Some factors were not included in the CBES. Examples of omissions include potential trading losses, and detailed projections of the impact of climate risks on banks\u2019 risk-weighted assets.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.18,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 1981,
+      "input_tokens": 1038,
+      "output_tokens": 260,
+      "cost_usd": 0.001948
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The CBES late policy transition scenario suggests that UK banks may face significant challenges in profitability and capital ratios due to potential credit supply limits to carbon-intensive sectors. If the transition is not managed carefully, it could lead to increased financial risks for banks, impacting their income and capital positions.",
+        "citations": [
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "Limits in the supply of credit to fossil fuel producers could outpace the new investment in sustainable energy alternatives and improvements in energy efficiency.",
+            "page": 70
+          },
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "Loss projections for the CBES scenarios are based on the balance sheets of participants as they stood at the end of 2020.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.8,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 5202,
+      "input_tokens": 1039,
+      "output_tokens": 203,
+      "cost_usd": 0.000278
+    },
+    "manual_scores": {
+      "gpt54": 2,
+      "gpt": 4
+    }
+  },
+  {
+    "query_id": "Q05",
+    "query": "What does the IEA project for peak global fossil fuel demand in its Stated Policies Scenario?",
+    "type": "factual",
+    "expected_source": "IEA_WEO_2025",
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "In the Stated Policies Scenario, the IEA projects global fossil fuel demand to peak before 2030 and then decline. The excerpted material indicates this as part of a broader pattern in which the energy system \u201cPeaks before 2030, then falls rapidly.\u201d",
+        "citations": [
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "Peaks before 2030,\nthen falls rapidly",
+            "page": -1
+          },
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "Chapter 4 | Stated Policies Scenario \n173 \n\n4 \n4.1 \nIntroduction \nThe Stated Policies Scenario (STEPS) has a long pedigree in the International Energy Agency \n(IEA) family of scenarios.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.86,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 3407,
+      "input_tokens": 1113,
+      "output_tokens": 467,
+      "cost_usd": 0.002936
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The IEA projects that global fossil fuel demand will reach its maximum level around 2035 in the Stated Policies Scenario (STEPS). After peaking, it is expected to stop growing around 2030 and subsequently decline by 20% by 2035.",
+        "citations": [
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "Reaches its maximum level around 2035. Stops growing around 2030.",
+            "page": 173
+          },
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "Drops 20% by 2035.",
+            "page": 173
+          }
+        ],
+        "confidence": 0.9,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 4054,
+      "input_tokens": 1114,
+      "output_tokens": 161,
+      "cost_usd": 0.000264
+    },
+    "manual_scores": {
+      "gpt54": 3,
+      "gpt": 4
+    }
+  },
+  {
+    "query_id": "Q06",
+    "query": "What annual clean energy investment does the IEA project will be needed globally by 2030?",
+    "type": "factual",
+    "expected_source": "IEA_WEO_2025",
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "In the CPS, average annual energy investment between 2025 and 2035 remains similar to 2024 levels; in the STEPS, it reaches over USD 3.4 trillion; in the NZE Scenario, it reaches nearly USD 4.8 trillion.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.18,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 1770,
+      "input_tokens": 1093,
+      "output_tokens": 227,
+      "cost_usd": 0.001841
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The IEA projects that by 2030, nearly USD 4.8 trillion in annual clean energy investment will be needed globally under the NZE Scenario. This represents a significant increase compared to current investment levels.",
+        "citations": [
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "In the NZE Scenario, it reaches nearly USD 4.8 trillion.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.9,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 2195,
+      "input_tokens": 1094,
+      "output_tokens": 121,
+      "cost_usd": 0.000237
+    },
+    "manual_scores": {
+      "gpt54": 1,
+      "gpt": 5
+    }
+  },
+  {
+    "query_id": "Q07",
+    "query": "How do Ofgem load control licensing proposals relate to the energy transition goals described in the IEA World Energy Outlook?",
+    "type": "synthesis",
+    "expected_source": null,
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query. They describe Ofgem\u2019s load control licensing proposals as part of a regulatory framework meant to support innovation, consumer protection, and the energy transition, but they do not provide any excerpt from the IEA World Energy Outlook or its specific energy transition goals for comparison.",
+        "citations": [
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Ofgem's goal is to create a regulatory framework that is forward-looking, encourages competition and innovation, and ensures consumer protection throughout the energy transition.",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "the SSES programme... aims to create the technical, regulatory, and governance structures needed to unlock load control from ESAs.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.17,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 2315,
+      "input_tokens": 993,
+      "output_tokens": 291,
+      "cost_usd": 0.002054
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "Ofgem's load control licensing proposals are designed to support the energy transition by creating a regulatory framework that encourages innovation and competition while ensuring consumer protection. This aligns with the IEA World Energy Outlook's goals of facilitating a transition to sustainable energy systems through effective regulation and the integration of new technologies.",
+        "citations": [
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "Ofgem's goal is to create a regulatory framework that is forward-looking, encourages competition and innovation, and ensures consumer protection throughout the energy transition.",
+            "page": -1
+          },
+          {
+            "doc_id": "OFGEM_SSES_2025",
+            "passage": "the SSES programme... aims to create the technical, regulatory, and governance structures needed to unlock load control from ESAs.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.8,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 3248,
+      "input_tokens": 994,
+      "output_tokens": 207,
+      "cost_usd": 0.000273
+    },
+    "manual_scores": {
+      "gpt54": 5,
+      "gpt": 2
+    }
+  },
+  {
+    "query_id": "Q08",
+    "query": "What do the CBES bank stress test results imply about UK financial sector readiness for the clean energy investment the IEA projects?",
+    "type": "synthesis",
+    "expected_source": null,
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The CBES results suggest the UK financial sector is being prepared for the transition, but readiness is uneven rather than fully assured. The exercise found that participants\u2019 responses were mixed, with some credible and others less coherent, indicating firms still need to improve climate risk management and scenario planning. At the same time, the Bank says the work is meant to ensure the financial system is resilient to climate-related risks and to support the economy\u2019s transition to net zero.",
+        "citations": [
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "The CBES is one of the Bank\u2019s workstreams aiming to ensure the financial system is resilient to climate-related financial risks.",
+            "page": -1
+          },
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "Participants\u2019 ability to articulate how their responses to the scenarios might vary under different potential assumptions was mixed. Some answers were well thought out and credible, while others appeared less coherent.",
+            "page": -1
+          },
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "the Bank\u2019s work in supporting the financial system\u2019s role in the economy\u2019s transition to net zero.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.82,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 3949,
+      "input_tokens": 1025,
+      "output_tokens": 448,
+      "cost_usd": 0.002785
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The CBES results indicate that the UK financial sector's readiness for clean energy investment is mixed, with some banks demonstrating coherent strategies while others lack clarity. This variability suggests that while there is potential for supporting clean energy investments, significant improvements in climate risk management are necessary to align with the IEA's projected needs.",
+        "citations": [
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "Participants\u2019 ability to articulate how their responses to the scenarios might vary under different potential assumptions was mixed. Some answers were well thought out and credible, while others appeared less coherent.",
+            "page": 79
+          },
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "The findings will also inform the PRA\u2019s supervisory policy and approach.",
+            "page": 7
+          }
+        ],
+        "confidence": 0.8,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 3394,
+      "input_tokens": 1026,
+      "output_tokens": 205,
+      "cost_usd": 0.000277
+    },
+    "manual_scores": {
+      "gpt54": 4,
+      "gpt": 3
+    }
+  },
+  {
+    "query_id": "Q09",
+    "query": "What are the EU taxonomy green bond standards for small modular reactor financing?",
+    "type": "negative",
+    "expected_source": null,
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [
+          {
+            "doc_id": "IEA_WEO_2025",
+            "passage": "investment rising in both traditional large-scale plants and new designs, including small modular reactors (SMRs).",
+            "page": -1
+          }
+        ],
+        "confidence": 0.14,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 1507,
+      "input_tokens": 996,
+      "output_tokens": 139,
+      "cost_usd": 0.001373
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [],
+        "confidence": 0.2,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 899,
+      "input_tokens": 997,
+      "output_tokens": 42,
+      "cost_usd": 0.000175
+    },
+    "manual_scores": {
+      "gpt54": 5,
+      "gpt": 5
+    }
+  },
+  {
+    "query_id": "Q10",
+    "query": "What Basel III Pillar 2 capital add-ons apply to fossil fuel lending exposures under EBA guidelines?",
+    "type": "negative",
+    "expected_source": null,
+    "gpt54": {
+      "model": "gpt-5.4-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [
+          {
+            "doc_id": "BOE_CBES_RESULTS_2022",
+            "passage": "banks projected large reductions in exposure to the petroleum & gas extraction, petroleum manufacturing, and mining & quarrying sectors.",
+            "page": -1
+          }
+        ],
+        "confidence": 0.12,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 1493,
+      "input_tokens": 935,
+      "output_tokens": 158,
+      "cost_usd": 0.001412
+    },
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "parsed": {
+        "answer": "The available documents do not contain sufficient information to answer this query.",
+        "citations": [],
+        "confidence": 0.2,
+        "contradictions": []
+      },
+      "json_valid": true,
+      "latency_ms": 969,
+      "input_tokens": 936,
+      "output_tokens": 42,
+      "cost_usd": 0.000166
+    },
+    "manual_scores": {
+      "gpt54": 5,
+      "gpt": 5
+    }
+  }
+]

@@ -4,14 +4,13 @@
 
 # --- Chunking ---
 chunking:
-  default_chunk_size: 400        # tokens — validate in pdf_quality_audit.ipynb
+  default_chunk_size: 400        # tokens (LOCKED Week 2)
   default_overlap: 80            # tokens
   max_chunk_size: 512            # hard ceiling — reranker degrades above this
-  # Document-type-aware strategy:
-  # ofgem: numbered paragraph boundaries
-  # fca: section headings; footnotes attached to paragraph above
-  # desnz: page-based with overlap; headers as metadata
-  # ipcc/iea: section-based; executive summary as separate high-priority chunk
+  min_chunk_size: 50             # floor — discard fragments below this
+  # v1 strategy: sliding window across all documents. Simple, standard baseline.
+  # v2 experiments (document-aware, heading trails) will be measured against this
+  # once ground truth dataset exists (Week 5).
 
 # --- Embedding model (LOCKED Week 2) ---
 embedding:
@@ -47,8 +46,8 @@ vector_store:
 
 # --- LLM synthesis (TBD — lock after Week 2 model_selection.ipynb) ---
 synthesis:
-  model: null  # candidates: claude-haiku-3-5 | gpt-4o-mini
-  max_tokens: 1024
+  model: gpt-4o-mini  # LOCKED — GPT-4o mini won model selection (Week 2 Step 6 revisit vs GPT-5.4 mini)
+  max_tokens: 512
   temperature: 0.0
   # Lock after: quality, latency, cost comparison on 10 queries
 

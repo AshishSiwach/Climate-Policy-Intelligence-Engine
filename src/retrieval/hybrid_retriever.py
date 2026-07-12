@@ -8,8 +8,8 @@ Locked decisions (Week 2 audit):
 
 import logging
 
-from .bm25_retriever import BM25Retriever
-from .dense_retriever import DenseRetriever
+from retrieval.bm25_retriever import BM25Retriever
+from retrieval.dense_retriever import DenseRetriever
 
 logger = logging.getLogger(__name__)
 

@@ -24,14 +24,44 @@ from typing import Any
 
 from openai import OpenAI
 
-from synthesis.output_schema import AnalystBrief, Citation, LLMResponse
+from synthesis.output_schema import AnalystBrief, Citation, LLMCitation, LLMResponse
 
 logger = logging.getLogger(__name__)
 
 MODEL = "gpt-4o-mini"
 TEMPERATURE = 0.0
 MAX_TOKENS = 800
-OUT_OF_CORPUS_RRF_THRESHOLD = 0.020   # empirical: real hits score ~0.03+, out-of-corpus <0.02
+
+# ─── Confidence signal placeholders — all v1, all replaced by Week 5 calibration ───
+# These constants shape the confidence formula but none is empirically derived.
+# Each was chosen as a plausible starting value; Week 5 fits real values against
+# LLM-as-judge scores on the 35-50 query ground truth dataset.
+# Do NOT interpret these as "empirical thresholds" — they are normalisers.
+
+# Value at which top RRF saturates the score_signal at 1.0.
+# Any value in ~[0.02, 0.10] would work here; choice affects how quickly the
+# signal reaches full credit, not whether high RRF beats low RRF.
+SCORE_NORMALISER = 0.05
+
+# Value at which (top-1 − top-2) saturates the margin_signal at 1.0.
+# Same story: normaliser, not a threshold.
+MARGIN_NORMALISER = 0.01
+
+# Number of verified citations at which citation_signal saturates at 1.0.
+# Cap not calibrated; arbitrarily chosen. Citation-count-vs-quality relationship
+# is question-type-dependent and needs Week 5 data to resolve.
+CITATION_SATURATION = 3
+
+# Below this top-RRF value, the pipeline short-circuits without calling the LLM
+# and returns the canonical out-of-corpus brief with confidence=0.0.
+# Chosen from 3-5 pilot queries as the rough boundary between real hits (~0.03+)
+# and out-of-corpus queries (<0.02). Not statistically justified. Week 5
+# calibration sets this at the empirical elbow of the true score distribution.
+OUT_OF_CORPUS_RRF_THRESHOLD = 0.020
+
+# Tool/API resilience — defends against "Tool/API timeout" failure mode
+OPENAI_TIMEOUT_SEC = 30.0             # per-request wall clock timeout
+OPENAI_MAX_RETRIES = 2                # SDK retries transient errors (429, 500s, timeouts)
 
 OUT_OF_CORPUS_ANSWER = (
     "The corpus does not contain sufficient information to answer this query."
@@ -66,7 +96,11 @@ class Synthesiser:
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self._client = OpenAI(api_key=api_key or os.environ.get("OPENAI_API_KEY"))
+        self._client = OpenAI(
+            api_key=api_key or os.environ.get("OPENAI_API_KEY"),
+            timeout=OPENAI_TIMEOUT_SEC,
+            max_retries=OPENAI_MAX_RETRIES,
+        )
 
     # ------------------------------------------------------------------
     # Public API
@@ -205,15 +239,21 @@ def _format_context(chunks: list[dict]) -> str:
 # Citation verification
 # ---------------------------------------------------------------------------
 
-def _verify_citations(citations: list[Citation], chunks: list[dict]) -> list[Citation]:
+def _verify_citations(citations: list[LLMCitation], chunks: list[dict]) -> list[Citation]:
     """
-    Drop citations whose passage does not appear in any retrieved chunk.
+    Verify each LLM-produced citation against retrieved chunks and enrich with
+    metadata (publication_date) pulled from the source chunk.
 
     Comparison is case-insensitive with whitespace normalised. Fabricated
-    citations (LLM invented a passage) get dropped; genuine ones survive.
+    citations (LLM invented a passage) get dropped; genuine ones survive and
+    are upgraded from LLMCitation → Citation with pipeline-injected fields.
     """
-    verified = []
-    normalised_chunks = [_normalise(c["text"]) for c in chunks]
+    verified: list[Citation] = []
+    # Pair each normalised chunk text with the original chunk dict so we can
+    # inject metadata (publication_date) after a successful match.
+    normalised_chunks: list[tuple[str, dict]] = [
+        (_normalise(c["text"]), c) for c in chunks
+    ]
 
     for cit in citations:
         target = _normalise(cit.passage)
@@ -224,8 +264,18 @@ def _verify_citations(citations: list[Citation], chunks: list[dict]) -> list[Cit
         # to be distinctive, short enough that minor extraction noise doesn't
         # break the match.
         anchor = target[:60]
-        if any(anchor in chunk_text for chunk_text in normalised_chunks):
-            verified.append(cit)
+        matched_chunk = next(
+            (chunk for chunk_text, chunk in normalised_chunks if anchor in chunk_text),
+            None,
+        )
+
+        if matched_chunk is not None:
+            verified.append(Citation(
+                doc_id=cit.doc_id,
+                passage=cit.passage,
+                page=cit.page,
+                publication_date=matched_chunk.get("publication_date"),
+            ))
         else:
             logger.info(
                 "Dropped unverified citation: doc_id=%s page=%d passage=%r",
@@ -250,21 +300,19 @@ def _compute_confidence(
     Combine signals into a [0, 1] confidence score AND return them
     individually for downstream logging.
 
-      score_signal     — top RRF score, mapped to [0, 1]
-      agreement_signal — mean(top-3) / top-1. High = retrievers agree on the top
-                         cluster. Low = top-1 is a lone outlier above the rest.
-      margin_signal    — gap between top-1 and top-2 RRF (higher = less ambiguous).
-                         Currently NAIVE — does not distinguish "same document tied"
-                         from "different documents tied." Penalises the healthy
-                         case where multiple chunks from the right doc score
-                         similarly. Week 5 candidate: doc-aware margin.
-      citation_signal  — how many chunks the answer actually leans on.
+      score_signal     — top RRF normalised by SCORE_NORMALISER
+      agreement_signal — mean(top-3) / top-1; high = retrievers agree on top cluster
+      margin_signal    — (top-1 − top-2) normalised by MARGIN_NORMALISER; high = less ambiguous.
+                         NAIVE version — does not distinguish same-doc from cross-doc ties.
+                         Doc-aware margin is a Week 5 candidate.
+      citation_signal  — verified-citation count normalised by CITATION_SATURATION
 
-    v1 combined formula: EQUAL WEIGHTS (0.25 each) across all four signals.
-    Rationale: any deviation from equal weights would be an unmeasured claim
-    that one signal matters more than another. Equal weights = the least-
-    opinionated "we don't know yet" position. Week 5 fits real weights via
-    logistic regression against LLM-as-judge scores.
+    v1 combined formula: EQUAL WEIGHTS (0.25 each). No signal is claimed to matter
+    more than another until Week 5 calibration fits real weights via logistic
+    regression against LLM-as-judge scores on the ground truth dataset.
+
+    All four normalising constants are v1 placeholders (see module top). Their
+    specific values are arbitrary — Week 5 replaces them with fitted transforms.
     """
     if not chunks:
         return 0.0, {
@@ -279,28 +327,26 @@ def _compute_confidence(
     rrf_scores = [c.get("rrf_score", 0.0) for c in chunks]
     top = rrf_scores[0]
 
-    # score_signal — top RRF above the out-of-corpus floor is a good sign.
-    # Real hits typically 0.03; strong hits 0.05+. Clamp above 0.05.
-    score_signal = min(top / 0.05, 1.0)
+    # score_signal — top RRF normalised into [0, 1] by SCORE_NORMALISER.
+    score_signal = min(top / SCORE_NORMALISER, 1.0)
 
-    # agreement_signal — mean of top-3 relative to top-1. If top-3 are tightly
-    # clustered near top-1, retrievers agree (signal ≈ 1). If top-1 is a lone
-    # outlier well above top-2/top-3, agreement drops.
+    # agreement_signal — mean(top-3) / top-1. High = top cluster tightly grouped
+    # (retrievers agree). Low = top-1 is a lone outlier above the rest.
     top3 = rrf_scores[:3]
     agreement_signal = (sum(top3) / len(top3)) / top if top > 0 else 0.0
 
-    # margin_signal — gap between top-1 and top-2 RRF, normalised by 0.01
-    # (the observed "clearly ambiguous vs clearly separated" band).
-    # Catches ambiguity that agreement misses: e.g. rrf=[0.030, 0.028, 0.005]
-    # has agreement≈0.7 (looks OK) but margin=0.002 (genuinely ambiguous top-1).
-    # If only one chunk retrieved, margin is undefined → treat as max (1.0).
+    # margin_signal — (top-1 − top-2) normalised into [0, 1] by MARGIN_NORMALISER.
+    # High margin = top-1 clearly separated (unambiguous). Low margin = ambiguous.
+    # NAIVE version: does not distinguish "same doc tied at top" (healthy) from
+    # "different docs tied at top" (ambiguity). Doc-aware version is a Week 5 candidate.
+    # Single-chunk edge case: margin undefined, treat as max (1.0).
     if len(rrf_scores) >= 2:
-        margin_signal = min(max((top - rrf_scores[1]) / 0.01, 0.0), 1.0)
+        margin_signal = min(max((top - rrf_scores[1]) / MARGIN_NORMALISER, 0.0), 1.0)
     else:
         margin_signal = 1.0
 
-    # citation_signal — count of verified citations, capped at 3 for full credit.
-    citation_signal = min(len(citations) / 3.0, 1.0)
+    # citation_signal — verified citation count normalised into [0, 1] by CITATION_SATURATION.
+    citation_signal = min(len(citations) / float(CITATION_SATURATION), 1.0)
 
     # Equal weights across all four signals — see docstring for rationale.
     # Week 5 replaces these with fitted values from logistic regression.

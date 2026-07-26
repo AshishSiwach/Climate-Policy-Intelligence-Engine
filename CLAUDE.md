@@ -659,6 +659,12 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 | OpenAI prompt caching | Server-side automatic caching of identical system prompt + retrieved chunks. ~50% cost, ~80% latency reduction on cache hits. Free win once traffic has repeats. Requires stable system prompt (already have) + stable chunk ordering. | Medium |
 | Embedding cache | Cache dense embeddings for repeated query strings. Skips the ~10ms encoding step. Small standalone value; noticeable in combination with response cache misses. | Low |
 | Automatic document ingestion | Ingest from Ofgem/FCA/DESNZ RSS feeds or GOV.UK APIs. Keeps corpus current. | Low |
+| Faithful-synthesis check (narrative hallucination) | v1 citation verification only catches fabricated *quoted* passages; it does not check whether the LLM's *narrative* text is faithful to the retrieved chunks. See `docs/week3_observations.md` for the concrete failure mode. Options: (a) second-LLM faithfulness check per answer, (b) NLI model scoring answer sentences against chunks. Trigger for adopting: Week 5 LLM-as-judge shows > 5% narrative-hallucination rate. | High |
+| Model version pinning | Pin `gpt-4o-mini` to a specific snapshot (e.g. `gpt-4o-mini-2024-07-18`); log the version per query. Defends against silent OpenAI-side model changes drifting our confidence calibration. | Medium |
+| Corpus freshness monitoring | Grafana chart of "days since latest corpus update" per document; alert if > 90 days. Prevents high-confidence answers from stale sources when UK policy has moved on. | Medium |
+| Grafana alert thresholds | Alerts on: refusal rate > 20%, avg confidence < 0.4 sustained, cost per query > $0.002, daily cost > $2. Currently dashboards only, no alerting. | Medium |
+| Random production LLM-as-judge audit | Sample 1% of real production queries and re-score with LLM-as-judge. Detects drift in answer quality between eval runs. Complements ground-truth eval which is static. | Medium |
+| Vigilance testing (inject known-wrong) | Inject 1-in-100 known-wrong-answer scenarios into analyst view (marked as such after they've responded). Measures whether analysts are still verifying vs drifting into complacency. Defends against the "almost-right problem" — 90% correct becomes trusted, 10% wrong slips through. | Low |
 | ~~Query rewriting~~ | Promoted to v1 — Week 5 Step 3 implements synonym expansion. HyDE remains a v2 upgrade if synonym expansion isn't enough. | Done in v1 |
 | Streaming synthesis output | Perceived latency drops from ~7s to ~800ms first token. Stream `answer` field to terminal / UI while buffering `citations` + `contradictions` for post-stream Pydantic validation. Referenced throughout CLAUDE.md as the fix for GPT-4o mini latency; deferred to v2 to ship v1 E2E first. | High |
 | FastAPI endpoint alongside CLI | Wrap `run_query` in a `/query` POST endpoint. Auto-generated OpenAPI docs. Enables Streamlit UI to call HTTP instead of importing the pipeline directly, and demonstrates API-design competence. | High |
@@ -683,11 +689,12 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 - **CPIE corpus is TRUSTED.** All source PDFs are curated public documents from named institutions (Ofgem, DESNZ, CCC, IEA, BoE, ESO). **User-uploaded documents are NOT accepted in v1.** Accepting user-uploaded content would require corpus-side prompt-injection scanning, content-provenance metadata, and per-user isolation — that's a v3 or new-project scope.
 - **CPIE is NOT a financial, legal, or regulatory advice tool.** UI and README must display a disclaimer: *"Verify all citations against source documents before relying on them. CPIE does not provide investment, legal, or regulatory advice."* If the target user base ever shifts toward advice generation, the guardrail stack (content moderation, professional-liability review, licensed-advisor language) must be built first.
 - **Secrets stay in `.env`. Never committed. Never logged.** Production deploys must use the deployment platform's secret store (Streamlit Cloud secrets, cloud provider secret manager). API keys and connection strings never appear in source code, log output, error messages, or query records.
-- **v1 input guardrails (all four required before public deploy):**
+- **v1 input guardrails (all required before public deploy):**
   1. Query length limit — reject queries above `MAX_QUERY_CHARS = 500` (cost-blow-up defense)
   2. Prompt-injection line in the system prompt — mark user query as untrusted, refuse to reveal system prompt or follow instructions inside the query
   3. Daily cost circuit breaker — refuse queries once cumulative daily API spend exceeds `DAILY_COST_LIMIT` (default $5 for demo deploy); logged as a distinct refusal reason
-  4. Disclaimer visible in UI + README — text as stated above
+  4. OpenAI SDK resilience — per-request `timeout=30s` and `max_retries=2` on transient errors. Defends against Tool/API-timeout failure mode.
+  5. Disclaimer visible in UI + README — text as stated above
 
 ---
 

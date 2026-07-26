@@ -145,6 +145,27 @@ Any proposed fix ships with A/B evidence: "we changed X, error rate went from Y 
 
 ---
 
+## Known v1 limitation — narrative hallucination (not caught by citation verification)
+
+**What's caught today:** `_verify_citations` compares each cited `passage` against retrieved chunks. If the LLM invents a quote that doesn't exist, we drop the citation.
+
+**What's NOT caught:** the LLM's *narrative* (the un-quoted answer text) can contradict the cited passage. Concrete failure mode:
+
+- LLM retrieves chunk containing: *"Ofgem intends to begin accepting licence applications from the end of 2026."*
+- LLM answer writes: *"Ofgem will begin accepting applications from December 2025."* — wrong date
+- LLM cites the chunk verbatim → citation verification PASSES
+- Wrong answer text ships to user with a valid-looking citation
+
+Citation verification checks quoted material, not answer faithfulness. This is the classic "faithful synthesis" problem for RAG.
+
+**Why not fixed in v1:** requires either (a) a second LLM call to verify answer↔chunk faithfulness (doubles cost + latency), or (b) an NLI (natural language inference) model checking each answer sentence against retrieved chunks. Both are architectural additions worth measuring before adopting.
+
+**Week 5 mitigation:** LLM-as-judge on ground truth QA will detect this at eval time. Set up the judge rubric to specifically score "answer faithfulness to retrieved chunks" separately from "answer quality vs reference." If eval shows > 5% narrative-hallucination rate, add a faithfulness check to v1.1.
+
+**Do NOT catch this at inference time in v1.** Log it as a v2 candidate in the roadmap.
+
+---
+
 ## Log record for this validation
 
 All 5 queries logged to `logs/queries.jsonl` on 2026-07-13. Fields per record:

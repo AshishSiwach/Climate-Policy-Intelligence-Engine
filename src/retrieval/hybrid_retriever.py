@@ -6,10 +6,18 @@ Locked decisions (Week 2 audit):
   - top_k = 20  candidates passed to reranker
 """
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from retrieval.bm25_retriever import BM25Retriever
-from retrieval.dense_retriever import DenseRetriever
+
+if TYPE_CHECKING:
+    # DenseRetriever pulls in sentence_transformers/torch — heavy. Type-only
+    # import means test code that mocks the dense retriever doesn't need the
+    # ML stack loaded just to import HybridRetriever.
+    from retrieval.dense_retriever import DenseRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +35,8 @@ class HybridRetriever:
     bm25 : BM25Retriever
         Built BM25 index.
     dense : DenseRetriever
-        Built dense index (Chroma).
+        Built dense index (Chroma). Any duck-typed object with a
+        `query(text, top_k)` method works — used by tests to inject mocks.
     rrf_k : int
         RRF smoothing constant. Locked at 60.
     """
@@ -35,7 +44,7 @@ class HybridRetriever:
     def __init__(
         self,
         bm25: BM25Retriever,
-        dense: DenseRetriever,
+        dense: "DenseRetriever",
         rrf_k: int = 60,
     ) -> None:
         self.bm25 = bm25

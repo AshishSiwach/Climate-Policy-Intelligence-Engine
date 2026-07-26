@@ -23,8 +23,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from monitoring import QueryLogger, build_query_record
-from retrieval import BM25Retriever, DenseRetriever, HybridRetriever
+from retrieval import BM25Retriever, HybridRetriever
 from synthesis import AnalystBrief, Synthesiser
+
+# DenseRetriever imported lazily inside build_pipeline() — its dep
+# (sentence_transformers/torch) is heavy and crashes some Windows setups
+# during test collection. Tests never call build_pipeline; they mock the
+# retriever directly, so the import cost only lands at real CLI startup.
 
 logger = logging.getLogger("cpie.main")
 
@@ -78,6 +83,9 @@ def build_pipeline() -> tuple[HybridRetriever, Synthesiser]:
         raise SystemExit(
             f"Chroma index not found at {CHROMA_DIR}. Run: uv run python scripts/build_indices.py"
         )
+
+    # Lazy import — see module-level note.
+    from retrieval import DenseRetriever
 
     bm25 = BM25Retriever.load(BM25_PATH)
     dense = DenseRetriever(persist_dir=CHROMA_DIR)

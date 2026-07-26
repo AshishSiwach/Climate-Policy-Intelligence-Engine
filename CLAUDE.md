@@ -15,6 +15,15 @@ of pages of dense documentation from Ofgem, FCA, DESNZ, IPCC, IEA.
 **The output:** Structured JSON brief — direct answer, grounding citations,
 confidence level, flagged contradictions.
 
+**System framing:** CPIE v1 is a **single-turn domain RAG system**, NOT a deep research system. It aspires to deep-research-quality answers (verified citations, pipeline confidence, contradiction detection) through a simpler architecture — one retrieval pass, one LLM call, structured brief out. Deep-research architecture (query decomposition, agentic loops, iterative retrieval, multi-minute latencies, report-length output) is explicitly deferred to v2/v3. This framing dictates how failure patterns are interpreted: v1 failures are single-turn-RAG failures (prompt calibration, threshold calibration, top-k coverage), not architecture gaps.
+
+**Confidence layer framing (CRAG-style):** CPIE implements a coarse Corrective RAG pattern between retrieval and synthesis:
+- **CORRECT** (top RRF ≥ 0.020, LLM does not refuse) → synthesise and return brief with pipeline-derived confidence.
+- **INCORRECT** (top RRF < 0.020, OR LLM emits `message.refusal`) → return canonical brief with `confidence=0.0`. Two distinct paths (short-circuit vs refusal) both land here; both are logged.
+- **AMBIGUOUS** (mid-range confidence → hedged answer, query rewriting, or additional retrieval) → **v2 gap**. Requires query rewriting / HyDE from v2 roadmap.
+
+Use the CRAG naming explicitly in README and interview conversations — it's the established production pattern this architecture implements.
+
 ---
 
 ## Stack
@@ -28,12 +37,16 @@ confidence level, flagged contradictions.
 | Fusion | **LOCKED: RRF k=60** — Cormack et al. 2009 default. k=10/30/60 indistinguishable on test query (retrievers agreed). Conservative fusion correct for small single-domain corpus. |
 | Reranker | **v1: NOT USED** — 3-query ablation showed reranker adds 172ms per query with zero hit-rate improvement over hybrid (3/3 top-1 on both). Code preserved in `src/retrieval/reranker.py` for Week 5 re-evaluation with full ground truth dataset. If Week 5 LLM-as-judge shows meaningful synthesis quality gain, add back. Model when re-enabled: `cross-encoder/ms-marco-MiniLM-L-6-v2`. |
 | Vector store | Chroma (v1). FAISS / Pinecone / Qdrant / pgvector are upgrade paths only. |
-| LLM synthesis | **LOCKED: GPT-4o mini** — beat Haiku 4.5 on quality (4.0 vs 2.7 avg) and cost (6x cheaper per query). Streaming planned to reduce perceived latency to ~800ms first token. Decision documented in model_selection.md. |
+| LLM synthesis | **LOCKED: GPT-4o mini** — beat Haiku 4.5 on quality (4.0 vs 2.7 avg) and cost (6x cheaper per query). Higher latency (~7s full-response) accepted for v1 as the correct trade-off for a research tool; streaming to reduce first-token latency to ~800ms is a v2 item. Decision documented in model_selection.md. |
 | Output schema | Pydantic: `answer`, `citations[]`, `confidence` (0–1), `contradictions[]` |
 | Verification | Three-check loop: relevance → confidence → contradiction |
-| Monitoring | JSON lines logging (Week 3, raw data layer) + Logfire (Week 5, observability — course specified) |
-| UI | Streamlit |
-| Containerisation | Docker + docker-compose |
+| Ingestion orchestration | **dlt → DuckDB** (Week 4) — replaces `chunk_all()`. dlt writes chunks to a DuckDB table (`cpie.chunks`); `build_indices.py` reads from DuckDB to build BM25 + Chroma. Matches LLM Zoomcamp course tooling. |
+| Monitoring storage | **PostgreSQL** (Week 5) — replaces JSONL for live queries. Every query writes a row to `query_logs` table. Matches LLM Zoomcamp Module 5. |
+| Monitoring dashboards | **Grafana** (Week 5) reading from PostgreSQL, min 5 dashboards for full monitoring rubric marks. Streamlit user-feedback widget (thumbs up/down) writes to PostgreSQL too. Matches Module 5. |
+| Log analytics | **dlt → DuckDB → marimo** (Week 6) — offline pipeline pulls PostgreSQL logs into DuckDB for exploration in marimo notebooks. Matches the dlt workshop directly. |
+| Query rewriting | **Enabled Week 5** — LLM generates 2–3 query rewrites (synonym expansion); retrieval takes union of top-k across rewrites before RRF. Behind a config flag so eval can A/B against baseline. Earns rubric best-practices point. |
+| UI | Streamlit chat app (Week 5) — same app hosts the feedback widget |
+| Containerisation | Docker + docker-compose — includes services for app, PostgreSQL, Grafana |
 | Build tooling | Makefile targets: install, run, test, eval, build, docker-build, docker-run |
 
 ---
@@ -347,8 +360,9 @@ class AnalystBrief(BaseModel):
 - `chunk_type: table` handling — instruct LLM to extract specific values, not paraphrase
 - Handle out-of-corpus queries explicitly: if no chunk scores above confidence threshold, return `confidence=0.0` with `answer="The corpus does not contain sufficient information to answer this query."`
 - Note: contradiction detection is experimental in v1 — implement but do not treat as core feature
-- **Confidence must come from the pipeline, not the LLM.** Combine: top RRF score + retrieval score spread (are top chunks clustered or scattered?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
-- **Confidence weights are v1 placeholders (0.5 score / 0.3 spread / 0.2 citation) — not empirically calibrated.** Individual signals (`score_signal`, `spread_signal`, `citation_signal`) are returned by `Synthesiser.synthesise()` and must be logged per query. Week 5 calibrates real weights by fitting logistic regression against LLM-as-judge scores on the ground truth dataset.
+- **Confidence must come from the pipeline, not the LLM.** Combine: top RRF score + retriever agreement (do BM25 and dense concentrate on the same top chunks?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
+- **Confidence weights are v1 placeholders (0.25 each across score / agreement / margin / citation) — deliberately equal.** Rationale: any deviation from equal weights would be an unmeasured claim that one signal matters more than another. Equal weights are the least-opinionated "we don't know yet" position. Individual signals (`score_signal`, `agreement_signal`, `margin_signal`, `citation_signal`) are returned by `Synthesiser.synthesise()` and must be logged per query. Week 5 fits real weights via logistic regression against LLM-as-judge scores on the ground truth dataset.
+- **Known v1 quirk: `margin_signal` is naive.** It does not distinguish "same document tied at top" (healthy retrieval, multiple relevant chunks) from "different documents tied at top" (genuine source ambiguity). With margin at 0.25 weight, correct retrievals with tied-top chunks get penalised. Doc-aware margin is a Week 5 candidate — see Week 5 Step 2.
 - **Citation verification:** after synthesis, check every cited passage against the actual retrieved chunks. If a cited passage does not appear in any retrieved chunk, flag or remove it. Prevents fabricated citations.
 
 - Commit: `feat: synthesis layer`
@@ -411,7 +425,36 @@ Run 5 real queries manually, inspect output quality before committing:
 - **CRITICAL: write questions BEFORE running the system on them**
 - Include 5–8 negatives and 3–5 cross-document synthesis questions
 - Save to `data/eval/ground_truth.json`
+- **Read `docs/week3_observations.md` before writing.** The Week 3 E2E validation surfaced three failure patterns (LLM over-refusal on vocabulary mismatch, marginal out-of-corpus threshold, cross-doc top-k coverage). Include queries designed to test each pattern so Week 5 has calibration data:
+  - Vocabulary-mismatch probes: multiple queries where chunk phrasing differs from query terminology (e.g., ask about "aggregate losses" when doc uses "corporate losses")
+  - Wording variants: same underlying question with/without modifiers ("global", "aggregate", "recent") to characterise threshold sensitivity
+  - Cross-doc queries with 2–3 explicitly named sources so retrieval top-k coverage can be measured
 - Commit: `data: ground truth dataset complete`
+
+**Step 4 — dlt PDF ingestion pipeline → DuckDB** *(course-aligned)*
+- *Current state: `chunk_all()` writes `data/processed/*.json`; `build_indices.py` reads those JSONs.*
+- *Target state: `src/ingestion/dlt_pipeline.py` writes chunks into DuckDB (`cpie.chunks` table); `build_indices.py` reads from DuckDB; JSON intermediate deleted.*
+- Add dependency: `dlt[duckdb]` in pyproject.toml
+- Build `src/ingestion/dlt_pipeline.py`:
+  ```python
+  @dlt.resource(primary_key="chunk_id", write_disposition="merge")
+  def pdf_chunks_resource(raw_dir: str = "data/raw"):
+      for filename, meta in DOC_REGISTRY.items():
+          for chunk in chunk_document(raw_dir + "/" + filename):
+              yield {**chunk, "chunk_id": f"{chunk['doc_id']}_{chunk['chunk_index']}"}
+
+  pipeline = dlt.pipeline(
+      pipeline_name="cpie_ingestion",
+      destination="duckdb",
+      dataset_name="cpie",
+  )
+  ```
+- Update `build_indices.py` to `duckdb.sql("SELECT * FROM cpie.chunks").fetchdf().to_dict('records')`
+- Delete `data/processed/*.json` — DuckDB is now canonical
+- Verify: rebuild indices from DuckDB, re-run 3 pilot queries via `scripts/validate_pipeline_e2e.py`, results must match Week 3 output
+- **Why course-aligned:** LLM Zoomcamp's dlt workshop uses dlt + DuckDB. Peer reviewers recognise this pattern immediately.
+- **Free bonus:** incremental ingestion works out of the box (merge on `chunk_id`) — the v2 roadmap item "Incremental indexing" lands automatically. Remove from v2 roadmap after this ships.
+- Commit: `feat: dlt + duckdb ingestion pipeline`
 
 ---
 
@@ -427,26 +470,65 @@ Run 5 real queries manually, inspect output quality before committing:
 
 **Step 2 — Inspect failures** *(do in Claude.ai Projects)*
 - *Current state: eval results available, failures not yet analysed.*
-- *Target state: failure patterns identified, issues logged, at least one fix applied.*
+- *Target state: failure patterns identified, issues logged, at least one fix applied WITH A/B evidence.*
 - Read every failing query manually
 - Identify patterns: retrieval misses, synthesis errors, confidence miscalibration
-- Log issues as GitHub issues or failures.md
-- Commit: `chore: eval failure analysis`
+- **Explicitly measure the three patterns flagged in `docs/week3_observations.md`:**
+  - Pattern A — LLM refusal rate on queries with good retrieval but vocabulary mismatch (target: report actual %)
+  - Pattern B — out-of-corpus threshold precision/recall using the true RRF score distribution across all 35–50 queries; set threshold at the empirical elbow, not 0.020 gut-feel
+  - Pattern C — top-k coverage on cross-doc queries; measure how often top-5 misses a named source
+- **Also calibrate confidence weights.** The v1 weights (equal 0.25 across all four signals) are placeholders. Fit real weights via logistic regression against LLM-as-judge scores using logged `confidence_signals`. Replace `_compute_confidence` weights with fitted values.
+- **Also test additional confidence signals.** `margin_signal` (RRF top-1 minus top-2, normalised) is already logged from v1 but not weighted into the combined formula. Run regression on it too. Note the naive-margin trap: chunks tied at top from the *same* document (a healthy retrieval) look identical to chunks tied at top from *different* documents (genuine source ambiguity). A doc-aware margin (top-1 minus top-scoring chunk from a different `doc_id`) is likely more informative — worth adding as a candidate signal here.
+  - Also consider `semantic_sim` — cosine similarity between query embedding and top-1 chunk embedding. Independent of RRF.
+  - Log all candidates alongside current signals; keep whichever survive the regression.
+- **Also re-run retrieval ablation.** The Week 3 3-query ablation dropped the reranker with no evidence gain over hybrid. Re-run BM25 / Dense / Hybrid / Hybrid+Rerank across the full ground truth. If rerank meaningfully improves top-5 relevance or LLM-as-judge scores, re-enable in `main.py` (one-line change; module preserved in `src/retrieval/reranker.py`).
+- Every fix ships with A/B evidence: "error rate went from Y to Z on the same ground truth."
+- Log issues + measured metrics in `docs/week5_failure_analysis.md`
+- Commit: `chore: eval failure analysis with calibration`
 
-**Step 3 — Logfire monitoring**
-- *Current state: query logs accumulating in logs/queries.jsonl, no observability layer.*
-- *Target state: Logfire integrated, failures and unusual outputs visible, user feedback captured.*
-- Add `logfire` to pyproject.toml dependencies
-- Instrument `src/monitoring/logger.py` to emit to Logfire alongside existing JSONL logging
-- Log spans for: retrieval latency, reranker latency, synthesis latency, confidence score per query
-- Surface failures — low confidence responses, synthesis errors, out-of-corpus queries
-- User feedback widget in `app.py` — thumbs up / thumbs down per response, logged to Logfire
-- Commit: `feat: logfire monitoring`
+**Step 3 — Query rewriting** *(rubric best-practices point)*
+- *Current state: raw user query goes directly to hybrid retrieval.*
+- *Target state: LLM generates 2–3 rewrites; retrieval fuses results across all variants.*
+- Build `src/synthesis/query_rewriter.py`:
+  - `rewrite(query) -> list[str]` — one LLM call, GPT-4o mini, returns 2–3 synonym/rephrased variants
+  - Cache rewrites by normalised original query to avoid re-cost on repeats
+- Update `main.py` retrieval flow: retrieve top-k for each variant, union, RRF-fuse across the full candidate pool
+- Behind config flag `retrieval.query_rewriting_enabled` (default: on) so ablation in Step 2 can measure impact against baseline
+- **Measure it** — re-run eval runner with and without rewriting; report Δ hit-rate and Δ LLM-as-judge score
+- Commit: `feat: query rewriting`
 
-**Step 4 — Tests + Monitoring + Eval submission** *(course deadline Fri 13 Jun)*
-- *Current state: all three components built.*
+**Step 4 — PostgreSQL + Grafana monitoring stack** *(course-aligned, replaces Logfire)*
+- *Current state: query logs accumulating in `logs/queries.jsonl`, no observability layer.*
+- *Target state: PostgreSQL captures live query records + user feedback; Grafana renders ≥5 dashboards.*
+- Add dependencies: `psycopg[binary]` (or `sqlalchemy` + `psycopg2`), Postgres in docker-compose, Grafana in docker-compose
+- Create `src/monitoring/db.py` — connection pool, `insert_query_record()`, `insert_feedback()`
+- Update `src/monitoring/logger.py`:
+  - Keep the JSONL append (fallback + Week 6 offline analytics)
+  - Also insert each record to Postgres `query_logs` table (columns match current JSONL schema)
+- Streamlit chat app `app.py`:
+  - Chat interface calls `run_query`
+  - Renders AnalystBrief with confidence as a discrete HIGH/MEDIUM/LOW badge:
+    - HIGH ≥ 0.7 (green) — answer directly
+    - MEDIUM 0.4–0.7 (amber) — "verify against sources" hint
+    - LOW < 0.4 (red) — "corpus may not contain…" caveat
+  - Thumbs up/down widget → writes to `user_feedback` table
+  - Thresholds are placeholders; Step 2 calibration replaces them
+- **Grafana dashboards (≥5 charts total, matches rubric's "2 pts for dashboard + feedback"):**
+  1. Query volume over time (line)
+  2. Confidence distribution histogram
+  3. Latency breakdown (retrieval / synthesis / total) — box plot or percentiles
+  4. Top-cited docs (bar) — which sources actually get used
+  5. User feedback ratio over time (thumbs up vs down)
+  6. Cost per day (line) — cumulative $ spend
+  7. Refusal / out-of-corpus rate over time
+- Persist Grafana dashboards as JSON in `monitoring/grafana/dashboards/` so they're reproducible
+- **Why course-aligned:** matches LLM Zoomcamp Module 5 exactly (Streamlit + PostgreSQL + Grafana + user feedback + LLM-as-judge). Peer reviewers recognise the stack immediately.
+- Commit: `feat: postgres + grafana monitoring stack`
+
+**Step 5 — Tests + Monitoring + Eval submission** *(course deadline Fri 13 Jun)*
+- *Current state: all four components built.*
 - *Target state: all confirmed working, submitted to course.*
-- Confirm tests pass, eval results documented, dashboard running
+- Confirm tests pass, eval results documented, dashboards running with real data
 - Submit to course
 
 ---
@@ -455,11 +537,24 @@ Run 5 real queries manually, inspect output quality before committing:
 
 **Step 1 — Docker + Makefile** *(checkpoint Mon 16 Jun)*
 - *Current state: working local pipeline, no containerisation.*
-- *Target state: Docker build succeeds, app runs in container, Makefile targets complete.*
-- Write `Dockerfile` and `docker-compose.yml`
-- Update Makefile with: docker-build, docker-run targets
-- Test clean install from scratch inside Docker
-- Commit: `chore: docker and makefile complete`
+- *Target state: `docker-compose up` starts the full stack (app + Postgres + Grafana + ingestion service). Makefile targets complete.*
+- Write `Dockerfile` for the Streamlit app + CLI (single image, entrypoint chooses)
+- Write `docker-compose.yml` with services:
+  - `app` — Streamlit + main.py, mounts data/raw for ingestion, connects to postgres
+  - `postgres` — Postgres 16, volume for persistence, initial `query_logs` + `user_feedback` schema loaded from init SQL
+  - `grafana` — Grafana OSS, provisioned datasource (Postgres) and provisioned dashboards from `monitoring/grafana/dashboards/`
+- Update Makefile: `install`, `run`, `test`, `eval`, `data` (download PDFs), `ingest` (dlt → DuckDB), `docker-build`, `docker-up`, `docker-down`
+- Test clean install from scratch: `git clone → cp .env.example .env → make data → docker-compose up` → browse Streamlit + Grafana in browser
+- Commit: `chore: docker-compose with app + postgres + grafana`
+
+**Step 1b — Data download script** *(reproducibility rubric point)*
+- *Current state: 12 PDFs must be sourced manually; `data/raw` is gitignored.*
+- *Target state: `scripts/download_data.py` fetches all 12 PDFs from their canonical public URLs.*
+- All 12 documents are public (Ofgem, GOV.UK, IEA, BoE, CCC). Store canonical URLs in `configs/corpus_sources.yaml` next to `DOC_REGISTRY`.
+- Verify: SHA-256 checksums logged so reviewers know they got the same file
+- Makefile target: `make data` downloads to `data/raw/`
+- README explicitly states: "Run `make data` to fetch the corpus. Do not commit PDFs — they're licensed public documents linked from source URLs."
+- Commit: `feat: data download script for reproducibility`
 
 **Step 2 — README** *(do in Claude.ai Projects)*
 - *Current state: no README beyond placeholder.*
@@ -470,15 +565,36 @@ Run 5 real queries manually, inspect output quality before committing:
 - Model selection decision summary
 - Eval results table
 - Design decisions section
+- **Name the confidence layer explicitly as CRAG-style.** In the "Design Decisions" section, note the CORRECT / INCORRECT branches CPIE implements and the AMBIGUOUS branch (query rewriting / HyDE) that's deferred to v2. Cite the CRAG paper (Yan et al. 2024). Signals to interview panels that the architecture uses a recognised production pattern.
 - Known limitations and v2 extensions
 - Commit: `docs: readme complete`
 
 **Step 3 — Deploy demo**
 - *Current state: app runs locally, not publicly accessible.*
 - *Target state: live URL accessible, confirmed working end-to-end in browser.*
-- Deploy to Streamlit Cloud, Hugging Face Spaces, or equivalent
+- Deploy Streamlit app to Streamlit Cloud (Postgres + Grafana stay local since Streamlit Cloud can't host multi-service compose; note limitation in README)
 - Confirm live URL accessible
 - Commit: `chore: deploy demo`
+
+**Step 3b — Log analytics with dlt → DuckDB → marimo** *(dlt workshop alignment)*
+- *Current state: PostgreSQL captures live query logs; Grafana handles real-time dashboards.*
+- *Target state: `notebooks/log_analytics.py` (marimo) pulls Postgres logs into DuckDB via dlt and enables ad-hoc analysis.*
+- Build `src/monitoring/log_pipeline.py`:
+  ```python
+  @dlt.source
+  def query_logs_source(postgres_uri):
+      return dlt.resource(fetch_query_logs, primary_key="query_id")
+
+  pipeline = dlt.pipeline("cpie_logs", destination="duckdb", dataset_name="analytics")
+  pipeline.run(query_logs_source(POSTGRES_URI))
+  ```
+- Create `notebooks/log_analytics.py` (marimo) with cells for:
+  - Query volume trend
+  - Confidence distribution by query type
+  - Cost per week trend
+  - Top failed queries (low confidence + no citations)
+- **Why:** matches the LLM Zoomcamp dlt workshop directly (local logs → dlt → DuckDB → marimo). Peer reviewers who did the workshop recognise this pattern.
+- Commit: `feat: log analytics with dlt duckdb marimo`
 
 **Step 4 — Walkthrough** *(do in Claude.ai Projects)*
 - *Current state: demo deployed, no walkthrough.*
@@ -507,10 +623,11 @@ After the 6-week CPIE build is done, do one gap analysis pass:
 | LLM Zoomcamp topic | CPIE coverage | Gap? |
 |---|---|---|
 | Agentic RAG | Simple RAG only — agentic is v2 | Likely yes — assess HW1 requirements |
-| Vector Search | Chroma + BAAI/bge-base-en-v1.5 | No gap |
-| Orchestration | main.py full pipeline | No gap |
-| Evaluation | LLM-as-judge + eval runner | No gap |
-| Monitoring | Logfire | No gap |
+| Vector Search | Chroma + BAAI/bge-base-en-v1.5 (course teaches sqlitesearch/PGVector) | Chroma is standard, no rebuild needed |
+| Orchestration | dlt → DuckDB for ingestion + dlt → DuckDB → marimo for log analytics | No gap |
+| Evaluation | LLM-as-judge + eval runner + retrieval metrics | No gap |
+| Monitoring | PostgreSQL + Grafana + Streamlit feedback widget (course-aligned) | No gap |
+| Best practices | Hybrid search + query rewriting (rerank re-evaluated Week 5) | No gap |
 
 **Submission deadline:** Project Attempt 1 — Mon 28 Jul 2026. Project Attempt 2 (buffer) — Tue 11 Aug 2026.
 
@@ -536,10 +653,19 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 | Universal heading injection | v1 injects section headings for CCC/IEA/ESO (section strategy) and Tier 2 table pages only. BoE prose docs and DESNZ have no section context on their chunks. v2: extend heading injection to every chunk in every document, or move to hierarchical trail (`[Chapter 3 > Transport > Cars & vans]`). Run A/B with retrieval metrics to confirm gain before committing. | Medium |
 | Reranker re-evaluation | Cross-encoder rerank dropped from v1 pipeline after 3-query ablation showed no hit-rate gain over hybrid (all 3 configs got 3/3 top-1) at cost of 172ms/query. Test unrepresentative — too few queries, all named the institution. Week 5: re-run ablation with 35–50 ground truth queries + LLM-as-judge scoring. If rerank meaningfully improves top-5 relevance or synthesis quality, re-enable in `main.py` (one-line change; module preserved in `src/retrieval/reranker.py`). | Medium |
 | Prompt versioning | Version prompts (v1/v2/v3) and log which version generated each response. Required for A/B testing. Add when you have multiple prompt variants to test. | Medium |
-| Incremental indexing | Add/update documents without rebuilding Chroma from scratch. Needed when corpus grows. | Medium |
+| ~~Incremental indexing~~ | Promoted to v1 — dlt's merge write-disposition (Week 4 Step 4) gives us incremental ingestion into DuckDB automatically. Chroma still rebuilt for now; incremental Chroma upsert is a follow-up. | Partly done in v1 |
 | Async retrieval | Run BM25 and dense retrieval in parallel. Reduces retrieval latency by ~30–40%. | Medium |
-| Embedding + query caching | Cache embeddings for repeated queries. Reduces cost and latency at scale. | Low |
+| Response cache (query → brief) | Cache the full AnalystBrief keyed by normalised query. Repeat queries skip retrieval + LLM entirely — biggest cost/latency win at scale. Add TTL (e.g. 24h) so cached briefs invalidate when corpus updates. Highest-impact scaling optimization; more valuable than async retrieval. | High |
+| OpenAI prompt caching | Server-side automatic caching of identical system prompt + retrieved chunks. ~50% cost, ~80% latency reduction on cache hits. Free win once traffic has repeats. Requires stable system prompt (already have) + stable chunk ordering. | Medium |
+| Embedding cache | Cache dense embeddings for repeated query strings. Skips the ~10ms encoding step. Small standalone value; noticeable in combination with response cache misses. | Low |
 | Automatic document ingestion | Ingest from Ofgem/FCA/DESNZ RSS feeds or GOV.UK APIs. Keeps corpus current. | Low |
+| ~~Query rewriting~~ | Promoted to v1 — Week 5 Step 3 implements synonym expansion. HyDE remains a v2 upgrade if synonym expansion isn't enough. | Done in v1 |
+| Streaming synthesis output | Perceived latency drops from ~7s to ~800ms first token. Stream `answer` field to terminal / UI while buffering `citations` + `contradictions` for post-stream Pydantic validation. Referenced throughout CLAUDE.md as the fix for GPT-4o mini latency; deferred to v2 to ship v1 E2E first. | High |
+| FastAPI endpoint alongside CLI | Wrap `run_query` in a `/query` POST endpoint. Auto-generated OpenAPI docs. Enables Streamlit UI to call HTTP instead of importing the pipeline directly, and demonstrates API-design competence. | High |
+| CI/CD (GitHub Actions) | Run `pytest` + `ruff check` on every push. Enforces test passes before merge. Green build badge in README. | High |
+| Cost / latency aggregation dashboard | Read `logs/queries.jsonl` and render per-day cost, latency distribution, confidence distribution, failure rate. Complements Logfire (which shows individual traces) with a portfolio view. | Medium |
+| Pre-commit hooks + strict mypy | ruff format + ruff check + pytest via `pre-commit`. `mypy --strict` on the `src/` tree. Signals professional Python hygiene to hiring engineers. | Medium |
+| Load test (Locust) | 50 concurrent users hitting the FastAPI endpoint. Report p50/p95/p99 latency and throughput. Shows scale-thinking; matters for AI Engineering roles even when the actual load never materialises. | Medium |
 | Agentic workflow | Query decomposition, multi-step retrieval, tool use for complex cross-document questions. | v3 |
 
 ---
@@ -552,6 +678,16 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 - One conversation per task. Do not mix concerns across sessions.
 - Simple RAG for v1. Agentic RAG (query decomposition, monitor_corpus, assess_materiality) is v2.
 - Contradiction detection is experimental in v1 — do not treat as a core feature.
+- **CPIE is an ASSISTANT, not a source of truth.** All user-facing copy (README, Streamlit UI, walkthrough, demo, cover letter language) frames CPIE as a cited-brief helper for verification-required workflows. Analysts always verify against the source before citing. Every safety design (out-of-corpus short-circuit, LLM refusal, confidence tiers, "verify against sources" hint) assumes this relationship. A source-of-truth pivot requires expanded corpus + HITL review queue + accuracy SLA + legal review — that's a v3 or new-project scope, NOT a CPIE version bump. Never soften or omit the "verify before citing" framing to make the project sound more impressive.
+- **Confidence is a promise to the user.** Any change that touches retrieval, chunking, prompt, model, or reranker AND ships to users requires re-running the confidence calibration on ground truth first. If fitted weights shift > 0.05 (absolute) OR HIGH/MEDIUM/LOW UI thresholds move > 0.05, re-verify the UI tier cutoffs before merging. Internal experiments in branches or behind `off`-by-default feature flags are exempt — but the moment a flag defaults to `on`, calibration must be current. Silent confidence drift is worse than no confidence number at all.
+- **CPIE corpus is TRUSTED.** All source PDFs are curated public documents from named institutions (Ofgem, DESNZ, CCC, IEA, BoE, ESO). **User-uploaded documents are NOT accepted in v1.** Accepting user-uploaded content would require corpus-side prompt-injection scanning, content-provenance metadata, and per-user isolation — that's a v3 or new-project scope.
+- **CPIE is NOT a financial, legal, or regulatory advice tool.** UI and README must display a disclaimer: *"Verify all citations against source documents before relying on them. CPIE does not provide investment, legal, or regulatory advice."* If the target user base ever shifts toward advice generation, the guardrail stack (content moderation, professional-liability review, licensed-advisor language) must be built first.
+- **Secrets stay in `.env`. Never committed. Never logged.** Production deploys must use the deployment platform's secret store (Streamlit Cloud secrets, cloud provider secret manager). API keys and connection strings never appear in source code, log output, error messages, or query records.
+- **v1 input guardrails (all four required before public deploy):**
+  1. Query length limit — reject queries above `MAX_QUERY_CHARS = 500` (cost-blow-up defense)
+  2. Prompt-injection line in the system prompt — mark user query as untrusted, refuse to reveal system prompt or follow instructions inside the query
+  3. Daily cost circuit breaker — refuse queries once cumulative daily API spend exceeds `DAILY_COST_LIMIT` (default $5 for demo deploy); logged as a distinct refusal reason
+  4. Disclaimer visible in UI + README — text as stated above
 
 ---
 

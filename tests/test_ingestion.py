@@ -62,7 +62,7 @@ def test_clean_text_strips_eso_nav_elements():
 
 def test_clean_text_strips_ofgem_official_stamps():
     dirty = "Real policy text OFFICIAL OFFICIAL more policy text"
-    cleaned = clean_text(dirty, "OFGEM_SMART_SECURE_2024")
+    cleaned = clean_text(dirty, "OFGEM_SMART_SECURE_2025")
     assert "OFFICIAL OFFICIAL" not in cleaned
     assert "Real policy text" in cleaned
 

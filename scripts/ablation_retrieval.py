@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.WARNING)
 QUERIES = [
     {
         "query": "What load control licensing requirements does Ofgem propose?",
-        "expected_doc": "OFGEM_SMART_SECURE_2024",
+        "expected_doc": "OFGEM_SMART_SECURE_2025",
     },
     {
         "query": "What aggregate losses did UK banks face under the CBES early action scenario?",

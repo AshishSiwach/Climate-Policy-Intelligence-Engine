@@ -1,0 +1,551 @@
+[
+  {
+    "id": "ofgem_licence_timeline_01",
+    "query_type": "factual",
+    "question": "What are Ofgem's proposed timelines for load control licence applications?",
+    "expected_answer": "Ofgem intends to begin accepting licence applications from the end of 2026. Organisations already undertaking load control activities are encouraged to apply within three months of applications opening. There is a 12-month transition period after which a licence is required to continue such activities.",
+    "expected_source_docs": [
+      "OFGEM_SMART_SECURE_2024"
+    ],
+    "expected_page_range": [
+      30,
+      65
+    ],
+    "notes": "Your verified example. Timeline stated in Exec summary (p7), indicative timescales (p11), para 4.25 (p33) and Annex A (p63). [STATUS: final]"
+  },
+  {
+    "id": "ofgem_scope_300mw_02",
+    "query_type": "factual",
+    "question": "Which load control activities and appliances fall within scope of Ofgem's licensing regime, and what is the 300MW threshold?",
+    "expected_answer": "The regime covers two licensable activities: acting as a Load Controller (creating, changing or sending load control signals to energy smart appliances) and acting as a Flexibility Service Provider (contracting to provide load control arrangements). In-scope appliances are domestic-scale ESAs such as private EVs, EV smart charge points, smart electric heating appliances (including heat pumps and storage heaters) and smart battery storage. Load Controllers are split at a maximum aggregate potential load of 300MW, with cyber security requirements calibrated to that threshold.",
+    "expected_source_docs": [
+      "OFGEM_SMART_SECURE_2024"
+    ],
+    "expected_page_range": [
+      14,
+      17
+    ],
+    "notes": "Chapter 2, load control licence scope (Table 1, para 2.7-2.13). [STATUS: final]"
+  },
+  {
+    "id": "ofgem_cyber_03",
+    "query_type": "factual",
+    "question": "What cyber security requirements does Ofgem propose for Load Controllers, and how do they differ above and below 300MW?",
+    "expected_answer": "Load Controllers below 300MW must meet cyber security requirements set in the load control licence, self-assessing against a Tier 2 Cyber Assessment Framework profile being developed by DESNZ. Load Controllers at or above 300MW are expected to be brought into the NIS Regulations as Operators of Essential Services, using a Tier 1 CAF profile, and would follow NIS cyber requirements instead of the licence conditions once designated. Applicants must submit a CAF self-assessment and a statement of intent to meet the profile by the government deadline.",
+    "expected_source_docs": [
+      "OFGEM_SMART_SECURE_2024"
+    ],
+    "expected_page_range": [
+      47,
+      53
+    ],
+    "notes": "Chapter 7, cyber security implementation. [STATUS: final]"
+  },
+  {
+    "id": "ofgem_summary_04",
+    "query_type": "summarisation",
+    "question": "Summarise Ofgem's key proposals in the Smart Secure Electricity Systems load control licensing consultation.",
+    "expected_answer": "Ofgem proposes a new licensing regime for load control of domestic energy smart appliances under the Energy Act 2023, jointly with DESNZ. It defines two licensable activities (Load Controller and Flexibility Service Provider), a dual-track application process that reduces duplication for existing supply licence holders, and a 12-month transition period with applications opening end of 2026. It sets out proportionate, tiered cyber security requirements around a 300MW threshold, a three-tiered monitoring approach, a risk-based compliance and enforcement model, and cost recovery through Ofgem's existing licence-fee levy.",
+    "expected_source_docs": [
+      "OFGEM_SMART_SECURE_2024"
+    ],
+    "expected_page_range": [
+      7,
+      8
+    ],
+    "notes": "Synthesis of Executive summary chapter overview. [STATUS: final]"
+  },
+  {
+    "id": "zev_uk_framework_05",
+    "query_type": "factual",
+    "question": "What did the government decide on a UK-wide regulatory framework and targets for the ZEV mandate?",
+    "expected_answer": "The government confirmed a single regulatory framework with annual targets applying across England, Wales and Scotland (Great Britain-wide), rather than separate devolved schemes, reflecting near-unanimous consultation support. Northern Ireland intends to join once its Assembly can pass the legislation; until then it retains a scaled version of the existing new car and van CO2 regulation.",
+    "expected_source_docs": [
+      "ZEV_MANDATE_2023"
+    ],
+    "expected_page_range": [
+      9,
+      11
+    ],
+    "notes": "Questions 1-2 responses. [STATUS: final]"
+  },
+  {
+    "id": "zev_svm_derogation_06",
+    "query_type": "factual",
+    "question": "What derogations does the ZEV mandate provide for small and micro volume manufacturers?",
+    "expected_answer": "Manufacturers registering fewer than 1,000 cars or vans per year (micro volume manufacturers) are automatically derogated from ZEV targets up to and including 2030. Manufacturers registering fewer than 2,500 but more than 999 per year (small volume manufacturers) may apply for a derogation, eligible until and including 2029 with a transitional year in 2030. The requirement to end sales of new non-zero-emission cars and vans by 2035 still applies.",
+    "expected_source_docs": [
+      "ZEV_MANDATE_2023"
+    ],
+    "expected_page_range": [
+      16,
+      17
+    ],
+    "notes": "Question 5 response. [STATUS: final]"
+  },
+  {
+    "id": "zev_min_requirements_07",
+    "query_type": "factual",
+    "question": "What minimum requirements must a vehicle meet to count as a ZEV under the mandate?",
+    "expected_answer": "A ZEV is defined as a vehicle emitting 0g CO2/km under the WLTP test, with fuel-cell electric vehicles also treated as 0g CO2/km. The government set a minimum range of 100 miles (reduced from the proposed 120), and battery warranty requirements of 65% capacity retention at 8 years/100,000 miles for vans (aligning with emerging UNECE standards), with the definition excluding other greenhouse gases such as NOx due to the absence of agreed test regimes.",
+    "expected_source_docs": [
+      "ZEV_MANDATE_2023"
+    ],
+    "expected_page_range": [
+      21,
+      22
+    ],
+    "notes": "Question 9 response. [STATUS: final]"
+  },
+  {
+    "id": "zev_trajectory_num_08",
+    "query_type": "numeric",
+    "question": "What are the annual ZEV uptake targets for new cars and vans from 2024 to 2030?",
+    "expected_answer": "For cars the targets are 22% (2024), 28% (2025), 33% (2026), 38% (2027), 52% (2028), 66% (2029) and 80% (2030). For vans the targets are 10% (2024), 16% (2025), 24% (2026), 34% (2027), 46% (2028), 58% (2029) and 70% (2030). Targets for 2031-2035 rise to 100% and are to be set in later legislation.",
+    "expected_source_docs": [
+      "ZEV_MANDATE_2023"
+    ],
+    "expected_page_range": [
+      12,
+      15
+    ],
+    "notes": "Question 3 (car table) and Question 4 (van table). [STATUS: final]"
+  },
+  {
+    "id": "zev_payments_num_09",
+    "query_type": "numeric",
+    "question": "What are the final compliance payment levels under the ZEV mandate and the non-ZEV CO2 standard?",
+    "expected_answer": "The ZEV mandate final compliance payment is £15,000 per car ZEV allowance; for vans it is £9,000 in 2024 only, rising to £18,000 thereafter. Under the non-ZEV CO2 standard the payment is £86 per gram (or fraction of a gram) of CO2 above the manufacturer's target, multiplied by the number of non-ZEV cars or vans sold.",
+    "expected_source_docs": [
+      "ZEV_MANDATE_2023"
+    ],
+    "expected_page_range": [
+      26,
+      36
+    ],
+    "notes": "Question 13 (mandate payments) and Question 22 (CO2 standard payment). [STATUS: final]"
+  },
+  {
+    "id": "boe_key_scenarios_10",
+    "query_type": "factual",
+    "question": "What three scenarios does the Bank of England's 2021 Climate Biennial Exploratory Scenario use?",
+    "expected_answer": "The CBES uses three scenarios spanning 2021-50: Early Action, where the transition to net zero begins in 2021 and policy intensifies gradually (warming limited to 1.8°C); Late Action, where policy is delayed until 2031 and is then sudden and disorderly (also 1.8°C but with material short-term macroeconomic disruption); and No Additional Action, where no new policies are introduced and warming reaches 3.3°C by 2050, primarily exploring physical risks.",
+    "expected_source_docs": [
+      "BOE_CBES_KEY_ELEMENTS_2021"
+    ],
+    "expected_page_range": [
+      4,
+      5
+    ],
+    "notes": "Executive summary; also Table 1.A and section 3.4. [STATUS: final]"
+  },
+  {
+    "id": "boe_key_fossil_11",
+    "query_type": "factual",
+    "question": "What do the CBES transition scenarios assume about the phase-out of fossil fuels in the UK energy mix?",
+    "expected_answer": "In the Early and Late Action scenarios fossil fuels are almost entirely replaced by renewables in the UK primary energy mix by 2050, with renewables meeting around 90% of UK energy needs and about 70% of global needs. In the No Additional Action scenario fossil fuels remain dominant, at roughly 60% of the UK and 75% of the global primary energy mix in 2050.",
+    "expected_source_docs": [
+      "BOE_CBES_KEY_ELEMENTS_2021"
+    ],
+    "expected_page_range": [
+      23,
+      24
+    ],
+    "notes": "Section 4.1.2, phase-out of fossil fuels (Chart 4.1). [STATUS: final]"
+  },
+  {
+    "id": "boe_key_transition_policies_12",
+    "query_type": "factual",
+    "question": "What specific UK transition policies do the CBES scenarios build in for buildings and vehicles?",
+    "expected_answer": "The scenarios incorporate announced UK policies: improving as many homes as possible to EPC band C by 2035 and higher bands by 2050, scaling annual heat pump installations to 600,000 by 2028, and banning sales of new internal combustion engine vehicles from 2030 and hybrids from 2035. From 2035 domestic properties below EPC band E are assumed to become unmarketable in the transition scenarios.",
+    "expected_source_docs": [
+      "BOE_CBES_KEY_ELEMENTS_2021"
+    ],
+    "expected_page_range": [
+      46,
+      48
+    ],
+    "notes": "Box B, UK transition policies. [STATUS: final]"
+  },
+  {
+    "id": "boe_key_gdp_num_13",
+    "query_type": "numeric",
+    "question": "What are the CBES estimated UK GDP impacts (relative to counterfactual) by the end of each scenario?",
+    "expected_answer": "By the end of the scenario, UK GDP is about 1.4% below the counterfactual in Early Action, about 4.6% below in Late Action, and about 7.8% below in No Additional Action. Impacts are larger in some other economies (for example China at roughly -1.8%, -5.3% and -15.3% respectively).",
+    "expected_source_docs": [
+      "BOE_CBES_KEY_ELEMENTS_2021"
+    ],
+    "expected_page_range": [
+      34,
+      35
+    ],
+    "notes": "Table 4.D, GDP impacts in international scenarios. [STATUS: final]"
+  },
+  {
+    "id": "boe_results_aggregate_losses_14",
+    "query_type": "factual",
+    "question": "What does the Bank of England's climate scenario exercise find about aggregate losses for the corporate sector and firms' profitability?",
+    "expected_answer": "The exercise found that, if banks and insurers do not respond effectively, climate risks could create a persistent and material drag on profitability equivalent to around 10-15% of annual profits on average across scenarios. Uncertainty bands are very large: firms' estimated loss rates on the same corporate counterparties can differ by roughly ten times between the most and least conservative estimates.",
+    "expected_source_docs": [
+      "BOE_CBES_RESULTS_2021"
+    ],
+    "expected_page_range": [
+      12,
+      12
+    ],
+    "notes": "[PROBE: vocab_mismatch] The report uses 'drag on profits'/'corporate' framing rather than 'aggregate losses' - deliberate vocabulary mismatch. Tests LLM over-refusal. [STATUS: final]"
+  },
+  {
+    "id": "boe_results_maturity_15",
+    "query_type": "factual",
+    "question": "What did the CBES conclude about UK banks' and insurers' climate risk management capabilities?",
+    "expected_answer": "The Bank concluded that participants had made good progress in some aspects of climate risk management and that the exercise had spurred firms to develop their capabilities, but that they still need to do considerably more to understand and manage their exposures - particularly in obtaining data on, and understanding, their counterparties' and customers' transition plans. The findings were consistent with the PRA's supervisory expectations in SS3/19.",
+    "expected_source_docs": [
+      "BOE_CBES_RESULTS_2021"
+    ],
+    "expected_page_range": [
+      11,
+      11
+    ],
+    "notes": "Overall assessment section (p11; good-practice detail p31). [STATUS: final]"
+  },
+  {
+    "id": "boe_measuring_approach_16",
+    "query_type": "factual",
+    "question": "What approach does the Bank of England set out for measuring climate-related financial risks using scenario analysis?",
+    "expected_answer": "The article sets out how central banks and financial institutions can use scenario analysis to quantify climate-related financial risks, focusing on how firms can 'extend' macro-climate scenarios into granular, asset-level analysis. It works through examples across sovereign bonds, corporate bonds and residential mortgages, and discusses how the scenario outputs can be fed into institutions' existing financial-modelling toolkits.",
+    "expected_source_docs": [
+      "BOE_MEASURING_RISKS_SCENARIO"
+    ],
+    "expected_page_range": [
+      4,
+      8
+    ],
+    "notes": "Abstract/approach (p4) and asset-class worked examples (through p8). [STATUS: final]"
+  },
+  {
+    "id": "boe_measuring_challenges_17",
+    "query_type": "factual",
+    "question": "What data and modelling challenges does the Bank identify in scenario-based measurement of climate risk?",
+    "expected_answer": "The article stresses that climate risks are inherently difficult to quantify, which can limit institutions' ability to mitigate them, and that although extending macro-climate scenarios to asset-level analysis is at the cutting edge of climate risk measurement, it remains subject to a number of limitations - including modelling and data constraints - which it discusses through to its conclusion.",
+    "expected_source_docs": [
+      "BOE_MEASURING_RISKS_SCENARIO"
+    ],
+    "expected_page_range": [
+      4,
+      4
+    ],
+    "notes": "Limitations noted in abstract (p4) and expanded through the article to the conclusion (p38). [STATUS: final]"
+  },
+  {
+    "id": "boe_disclosure_scope_18",
+    "query_type": "factual",
+    "question": "What does the Bank of England's 2024 climate-related financial disclosure cover about its own exposures?",
+    "expected_answer": "The disclosure sets out the Bank's own exposure to climate risks across both its physical operations (its buildings and estate) and its financial operations (the portfolios it holds for monetary policy purposes), covering governance, strategy, risk management and metrics. It is organised around pillars including supporting an orderly economy-wide transition to net zero, and reports the emissions associated with the Bank's financial and physical operations.",
+    "expected_source_docs": [
+      "BOE_CLIMATE_DISCLOSURE_2024"
+    ],
+    "expected_page_range": [
+      2,
+      6
+    ],
+    "notes": "Disclosure scope; pillars (p2, p14); physical + financial operations exposure (p6). [STATUS: final]"
+  },
+  {
+    "id": "boe_disclosure_metrics_19",
+    "query_type": "factual",
+    "question": "What emissions or climate metrics and targets does the Bank report in its 2024 climate-related financial disclosure?",
+    "expected_answer": "The Bank reports greenhouse gas emissions for its physical operations and its financial (monetary policy) portfolios, and states a target to reach net-zero greenhouse gas emissions from its physical operations by 2040, delivered through its Climate Transition Plan. It reports remaining on track against both of its physical-operations emissions targets, each consistent with limiting warming in line with the Paris Agreement.",
+    "expected_source_docs": [
+      "BOE_CLIMATE_DISCLOSURE_2024"
+    ],
+    "expected_page_range": [
+      3,
+      6
+    ],
+    "notes": "Net-zero-by-2040 target (p3); portfolio emissions (p6). [STATUS: final]"
+  },
+  {
+    "id": "boe_macro_channels_20",
+    "query_type": "factual",
+    "question": "What macroeconomic implications of climate change does the Bank of England identify, and why do they matter for monetary policy?",
+    "expected_answer": "The article explores how the physical impacts of climate change (such as extreme weather) and the transition to net zero can affect key macroeconomic variables such as output and inflation - for example, weather-related supply disruptions raising some prices, including food. Because these variables drive the Monetary Policy Committee's decisions in meeting the 2% inflation target, climate change matters for monetary policy; it also examines monetary-policy trade-offs and possible changes to the transmission mechanism, while noting that monetary policy cannot itself solve climate change.",
+    "expected_source_docs": [
+      "BOE_MACRO_IMPLICATIONS"
+    ],
+    "expected_page_range": [
+      3,
+      6
+    ],
+    "notes": "Introduction/scope (p3); effects on macroeconomic fluctuations (p6); monetary policy considerations follow. [STATUS: final]"
+  },
+  {
+    "id": "ccc_seventh_level_21",
+    "query_type": "factual",
+    "question": "What level does the CCC recommend for the Seventh Carbon Budget, and what period does it cover?",
+    "expected_answer": "The CCC recommends a Seventh Carbon Budget of 535 MtCO2e, a limit on UK greenhouse gas emissions over the five-year period 2038 to 2042, including emissions from international aviation and shipping. The recommendation is based on the CCC's Balanced Pathway to Net Zero by 2050 and is designed to be met through domestic action without relying on international credits.",
+    "expected_source_docs": [
+      "CCC_SEVENTH_BUDGET_2025"
+    ],
+    "expected_page_range": [
+      10,
+      10
+    ],
+    "notes": "Executive summary / recommended level statement (confirm page against PDF). [STATUS: final]"
+  },
+  {
+    "id": "ccc_seventh_pathway_22",
+    "query_type": "factual",
+    "question": "What is the CCC's Balanced Pathway and how does it underpin the Seventh Carbon Budget?",
+    "expected_answer": "The Balanced Pathway is the CCC's recommended emissions-reduction route from 2025 to Net Zero by 2050. It sets the level for the Seventh Carbon Budget, is consistent with the UK's legislated carbon budgets and Nationally Determined Contributions, and pairs the emissions limit with sector pathways and associated actions, taking economic and social factors into account.",
+    "expected_source_docs": [
+      "CCC_SEVENTH_BUDGET_2025"
+    ],
+    "expected_page_range": [
+      11,
+      11
+    ],
+    "notes": "Balanced Pathway description (confirm page against PDF). [STATUS: final]"
+  },
+  {
+    "id": "ccc_seventh_recommendations_23",
+    "query_type": "factual",
+    "question": "How many priority recommendations does the CCC make to deliver the Seventh Carbon Budget?",
+    "expected_answer": "The CCC makes 43 priority recommendations to put the UK on track to deliver the Seventh Carbon Budget, organised around seven core themes, with the full set given in Annex 1.",
+    "expected_source_docs": [
+      "CCC_SEVENTH_BUDGET_2025"
+    ],
+    "expected_page_range": [
+      19,
+      19
+    ],
+    "notes": "Priority recommendations overview (confirm page against PDF). [STATUS: final]"
+  },
+  {
+    "id": "ccc_prog25_ndc_24",
+    "query_type": "factual",
+    "question": "What is the UK's 2030 emissions target as assessed in the CCC's 2025 progress report, and is it on track?",
+    "expected_answer": "The report assesses the UK's target to reduce emissions by 68% on 1990 levels by 2030 - the UK's Nationally Determined Contribution and its first target consistent with Net Zero by 2050. The CCC judges the target within reach provided the Government stays the course, with progress so far driven mainly by decarbonising electricity and future progress needing electrification of surface transport, heat and industry.",
+    "expected_source_docs": [
+      "CCC_PROGRESS_2025"
+    ],
+    "expected_page_range": [
+      10,
+      10
+    ],
+    "notes": "Executive summary, 2030 NDC statement. [STATUS: final]"
+  },
+  {
+    "id": "ccc_prog25_transport_25",
+    "query_type": "factual",
+    "question": "According to the CCC's 2025 progress report, what is the CCC's trajectory for surface transport emissions and how is progress going?",
+    "expected_answer": "The report notes surface transport emissions fell for a second consecutive year, with the number of electric cars on the road roughly doubling every two years and lower-cost EV models reaching price parity in parts of the used market. Surface transport is expected to deliver almost 30% of the emissions reduction required over the period to 2030 and continues to be a major contributor beyond 2030.",
+    "expected_source_docs": [
+      "CCC_PROGRESS_2025"
+    ],
+    "expected_page_range": [
+      11,
+      12
+    ],
+    "notes": "[PROBE: vocab_mismatch] Uses 'trajectory'/'pathway'/'contribution' rather than 'target' - vocabulary mismatch to test LLM over-refusal. [STATUS: final]"
+  },
+  {
+    "id": "ccc_prog25_split_26",
+    "query_type": "numeric",
+    "question": "In the CCC's 2025 progress report, what share of the emissions reduction needed for the 2030 NDC is covered by credible plans?",
+    "expected_answer": "The CCC assesses that 61% of the required emissions reduction to hit the 2030 NDC is covered either by credible plans or plans with some associated risks (mainly in electricity supply and surface transport). For the remaining 39% there are significant risks or insufficient/unquantified plans, with the biggest risks around scaling up heat pump roll-out and industrial electrification.",
+    "expected_source_docs": [
+      "CCC_PROGRESS_2025"
+    ],
+    "expected_page_range": [
+      11,
+      11
+    ],
+    "notes": "Executive summary, 61%/39% assessment. [STATUS: final]"
+  },
+  {
+    "id": "ccc_prog24_headline_27",
+    "query_type": "factual",
+    "question": "What was the CCC's headline assessment of UK progress in its 2024 report to Parliament?",
+    "expected_answer": "The 2024 report judged that the UK was not on track to hit its 2030 target of a 68% cut in emissions on 1990 levels, despite a significant fall in emissions in 2023 (driven largely by phasing out coal power). The CCC assessed that only about a third of the emissions reductions needed for the 2030 target were covered by credible plans, with almost all low-carbon technology roll-out indicators off track, and called for urgent, decisive action across all sectors.",
+    "expected_source_docs": [
+      "CCC_PROGRESS_2024"
+    ],
+    "expected_page_range": [
+      8,
+      8
+    ],
+    "notes": "Executive summary headline judgement. [STATUS: final]"
+  },
+  {
+    "id": "iea_scenarios_28",
+    "query_type": "factual",
+    "question": "What scenarios does the IEA World Energy Outlook 2025 use, and how do fossil fuels differ across them?",
+    "expected_answer": "WEO 2025 uses the Current Policies Scenario (CPS), the Stated Policies Scenario (STEPS) and the Net Zero Emissions by 2050 (NZE) Scenario. In the CPS, oil and gas demand keep growing to mid-century while coal declines before 2030. In the STEPS, coal peaks and oil demand flattens around 2030 but gas demand keeps growing into the 2030s. In the NZE Scenario, demand for all fossil fuels declines.",
+    "expected_source_docs": [
+      "IEA_WEO_2025"
+    ],
+    "expected_page_range": null,
+    "notes": "Scenario framing and fossil-fuel outlook (confirm page against PDF). [STATUS: final]"
+  },
+  {
+    "id": "iea_fossil_peak_29",
+    "query_type": "factual",
+    "question": "What does the IEA WEO say about the peak of global fossil fuel demand?",
+    "expected_answer": "In the STEPS, coal use peaks and oil demand flattens around 2030, but natural gas demand continues to grow into the 2030s (a change from the previous Outlook, driven by US policy shifts and lower gas prices). In the Current Policies Scenario oil and gas keep growing to mid-century with only coal declining before 2030, while in the NZE Scenario all fossil fuel demand falls.",
+    "expected_source_docs": [
+      "IEA_WEO_2025"
+    ],
+    "expected_page_range": null,
+    "notes": "[PROBE: wording_variant] 'fossil fuel peak' phrasing. Confirm page against PDF. [STATUS: final]"
+  },
+  {
+    "id": "iea_fossil_peak_variant_30",
+    "query_type": "factual",
+    "question": "When does the IEA project global fossil fuel demand to peak?",
+    "expected_answer": "It depends on the fuel and scenario: in the STEPS coal peaks and oil flattens around 2030 while gas keeps growing into the 2030s; in the Current Policies Scenario oil and gas continue growing to mid-century with coal declining before 2030; in the NZE Scenario all fossil fuels decline.",
+    "expected_source_docs": [
+      "IEA_WEO_2025"
+    ],
+    "expected_page_range": null,
+    "notes": "[PROBE: wording_variant] Same underlying question as iea_fossil_peak_29, reworded ('fossil fuel peak' vs 'peak of global fossil fuel demand'). Same answer/pages expected. Tests threshold sensitivity. [STATUS: final]"
+  },
+  {
+    "id": "eso_offshore_31",
+    "query_type": "factual",
+    "question": "What does National Grid ESO's Beyond 2030 report set out for offshore wind and network investment?",
+    "expected_answer": "Beyond 2030 sets out the transmission network needed to connect large volumes of offshore wind and help deliver the UK Government's target of 50GW of offshore wind by 2030, including a substantial block of additional offshore wind connected directly. The report estimates the recommended network investment could add up to £15 billion to the UK network.",
+    "expected_source_docs": [
+      "ESO_BEYOND2030_2024"
+    ],
+    "expected_page_range": null,
+    "notes": "Headline offshore wind target and £15bn network figure (confirm page against PDF). [STATUS: final]"
+  },
+  {
+    "id": "eso_flexibility_32",
+    "query_type": "factual",
+    "question": "What does ESO's Beyond 2030 report recommend about the strategic location of flexible demand?",
+    "expected_answer": "Beyond 2030 finds that strategically locating flexible demand can reduce the network build required and deliver wider societal benefits: the analysis shows that siting up to 5GW of flexible demand in the right places can offset a larger block of network reinforcement, so the report recommends that new infrastructure and flexible-demand siting be planned together rather than in isolation.",
+    "expected_source_docs": [
+      "ESO_BEYOND2030_2024"
+    ],
+    "expected_page_range": null,
+    "notes": "Flexible-demand siting recommendation. ESO PDF exceeds the 10MB download limit, so page range must be confirmed against the PDF. [STATUS: final]"
+  },
+  {
+    "id": "xdoc_ccc_iea_transport_33",
+    "query_type": "cross_document",
+    "question": "How do the CCC's transport targets compare with the IEA's global fossil fuel and transport pathway?",
+    "expected_answer": "The CCC's UK view (2025 progress report) shows surface transport as a leading domestic decarbonisation route, delivering almost 30% of the reduction needed to 2030, driven by rapid EV uptake. The IEA's global view (WEO 2025) is that oil demand only flattens around 2030 in the STEPS and keeps growing in the Current Policies Scenario, with fast transport electrification appearing decisively only in the NZE Scenario. The comparison highlights the UK moving faster on road transport than the central global pathway.",
+    "expected_source_docs": [
+      "CCC_PROGRESS_2025",
+      "IEA_WEO_2025"
+    ],
+    "expected_page_range": null,
+    "notes": "[PROBE: crossdoc_named] All sources explicitly named; also spans the 'targets' vs 'pathway' vocabulary gap. Tests top-k coverage across two docs. Confirm pages against PDFs. [STATUS: final]"
+  },
+  {
+    "id": "xdoc_ofgem_eso_flex_34",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's load control licensing regime relate to the network needs identified in ESO's Beyond 2030 report?",
+    "expected_answer": "Ofgem's regime aims to make consumer-level flexibility (via EV chargers, heat pumps and batteries) safe, secure and trusted so it can be scaled, while ESO's Beyond 2030 sets out the transmission build-out and siting of flexible demand needed to integrate large volumes of renewables. Together they show demand-side flexibility being regulated at the consumer end (Ofgem) and planned for at the network end (ESO) to support Clean Power 2030.",
+    "expected_source_docs": [
+      "OFGEM_SMART_SECURE_2024",
+      "ESO_BEYOND2030_2024"
+    ],
+    "expected_page_range": null,
+    "notes": "Demand-side flexibility across regulator vs system operator. Confirm pages against PDFs. [STATUS: final]"
+  },
+  {
+    "id": "xdoc_boe_iea_scenarios_35",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's Late Action scenario compare with the IEA's scenario framing of the transition?",
+    "expected_answer": "The BoE's Late Action scenario models a delayed, disorderly transition starting in 2031 that causes sharp short-term GDP and financial-market disruption, sitting between orderly action and inaction. The IEA's WEO frames transition speed through CPS, STEPS and NZE, where only the NZE delivers the rapid change the BoE's Early Action assumes; the BoE's Late Action broadly corresponds to a delayed move toward an NZE-style outcome with higher transition risk.",
+    "expected_source_docs": [
+      "BOE_CBES_KEY_ELEMENTS_2021",
+      "IEA_WEO_2025"
+    ],
+    "expected_page_range": null,
+    "notes": "Transition-risk framing across two docs. Confirm pages against PDFs. [STATUS: final]"
+  },
+  {
+    "id": "xdoc_ccc_boe_budget_36",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget relate to the Bank of England's view of the macroeconomic implications of climate change?",
+    "expected_answer": "The CCC's Seventh Carbon Budget sets a 535 MtCO2e limit for 2038-2042 on a Balanced Pathway to Net Zero by 2050, i.e. the policy-driven transition itself. The Bank's work examines what such physical and transition developments mean for output and inflation and hence for monetary policy - so the CCC defines the emissions trajectory and required actions, while the Bank analyses the macroeconomic and monetary-policy consequences of following (or missing) that kind of pathway. CCC page range to confirm against the (>10MB) Seventh Budget PDF.",
+    "expected_source_docs": [
+      "CCC_SEVENTH_BUDGET_2025",
+      "BOE_MACRO_IMPLICATIONS"
+    ],
+    "expected_page_range": null,
+    "notes": "CCC pathway vs BoE macro/monetary-policy lens. Seventh Budget PDF exceeds 10MB download limit; confirm its pages against the PDF. [STATUS: final]"
+  },
+  {
+    "id": "summ_boe_scenarios_37",
+    "query_type": "summarisation",
+    "question": "Summarise the three scenarios used in the Bank of England's 2021 Climate Biennial Exploratory Scenario.",
+    "expected_answer": "The CBES tested large UK banks and insurers against three 30-year scenarios. Early Action assumes an orderly transition from 2021 with warming held to 1.8°C and modest GDP impact. Late Action delays policy to 2031, producing a disorderly transition, sharp short-term GDP falls and financial-market stress while still reaching 1.8°C. No Additional Action introduces no new policy, so warming reaches 3.3°C by 2050 and physical risks (flooding, heat, sea-level rise) drive a permanent, growing hit to GDP.",
+    "expected_source_docs": [
+      "BOE_CBES_KEY_ELEMENTS_2021"
+    ],
+    "expected_page_range": [
+      4,
+      5
+    ],
+    "notes": "Synthesis of the three-scenario overview. [STATUS: final]"
+  },
+  {
+    "id": "neg_sourdough_38",
+    "query_type": "negative",
+    "question": "What is the best sourdough starter recipe?",
+    "expected_answer": "The corpus does not contain sufficient information to answer this query.",
+    "expected_source_docs": [],
+    "expected_page_range": null,
+    "notes": "Cooking domain. Out-of-corpus; system should refuse. [STATUS: final]"
+  },
+  {
+    "id": "neg_champions_league_39",
+    "query_type": "negative",
+    "question": "Who won the 2025 UEFA Champions League final?",
+    "expected_answer": "The corpus does not contain sufficient information to answer this query.",
+    "expected_source_docs": [],
+    "expected_page_range": null,
+    "notes": "Sports/news domain. Out-of-corpus; system should refuse. [STATUS: final]"
+  },
+  {
+    "id": "neg_python_error_40",
+    "query_type": "negative",
+    "question": "How do I fix a Python ModuleNotFoundError?",
+    "expected_answer": "The corpus does not contain sufficient information to answer this query.",
+    "expected_source_docs": [],
+    "expected_page_range": null,
+    "notes": "Software-support domain. Out-of-corpus; system should refuse. [STATUS: final]"
+  },
+  {
+    "id": "neg_fca_sdr_41",
+    "query_type": "negative",
+    "question": "What are the FCA's Sustainability Disclosure Requirements and investment label categories?",
+    "expected_answer": "The corpus does not contain sufficient information to answer this query.",
+    "expected_source_docs": [],
+    "expected_page_range": null,
+    "notes": "CLOSE-BUT-OUT: UK climate-finance topic and a real regulator, but the FCA SDR is NOT in this corpus (no FCA document). Out-of-corpus; system should refuse. [STATUS: final]"
+  },
+  {
+    "id": "neg_eu_csrd_42",
+    "query_type": "negative",
+    "question": "What are the disclosure requirements under the EU Corporate Sustainability Reporting Directive?",
+    "expected_answer": "The corpus does not contain sufficient information to answer this query.",
+    "expected_source_docs": [],
+    "expected_page_range": null,
+    "notes": "CLOSE-BUT-OUT: climate-disclosure vocabulary, but EU/CSRD and not in this UK-focused corpus. Out-of-corpus; system should refuse. [STATUS: final]"
+  },
+  {
+    "id": "neg_ofgem_pricecap_43",
+    "query_type": "negative",
+    "question": "What is Ofgem's energy price cap level for the first quarter of 2027?",
+    "expected_answer": "The corpus does not contain sufficient information to answer this query.",
+    "expected_source_docs": [],
+    "expected_page_range": null,
+    "notes": "CLOSE-BUT-OUT: correct regulator (Ofgem) but a future price-cap figure absent from these documents. Out-of-corpus; system should refuse. [STATUS: final]"
+  }
+]

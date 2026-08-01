@@ -32,11 +32,11 @@ DOC_REGISTRY = {
         "tier2_inject": False,
     },
     "Smart-Secure-Electricity-Systems-Implementing-the-load-control-licensing-regime-consultation.pdf": {
-        "doc_id": "OFGEM_SMART_SECURE_2024",
+        "doc_id": "OFGEM_SMART_SECURE_2025",   # renamed from _2024; actual publication 10 Dec 2025
         "institution": "Ofgem",
         "doc_type": "consultation",
         "jurisdiction": "UK",
-        "publication_date": "2024",
+        "publication_date": "2025",
         "tier1_strip": True,
         "tier2_inject": False,
     },
@@ -86,11 +86,11 @@ DOC_REGISTRY = {
         "tier2_inject": True,
     },
     "results-of-the-2021-climate-biennial-exploratory-scenario.pdf": {
-        "doc_id": "BOE_CBES_RESULTS_2021",
+        "doc_id": "BOE_CBES_RESULTS_2021",   # "2021" = CBES exercise year (kept); actual publication 24 May 2022
         "institution": "BoE",
         "doc_type": "report",
         "jurisdiction": "UK",
-        "publication_date": "2021",
+        "publication_date": "2022",
         "tier1_strip": False,
         "tier2_inject": False,
     },
@@ -104,29 +104,29 @@ DOC_REGISTRY = {
         "tier2_inject": False,
     },
     "measuring-climate-related-financial-risks-using-scenario-analysis.pdf": {
-        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",   # actual publication 17 Apr 2024
         "institution": "BoE",
         "doc_type": "report",
-        "jurisdiction": "UK",
-        "publication_date": "2020",
-        "tier1_strip": False,
-        "tier2_inject": False,
-    },
-    "zev-mandate-consultation-summary-of-responses-and-joint-government-response.pdf": {
-        "doc_id": "DESNZ_ZEV_MANDATE_2024",
-        "institution": "DESNZ",
-        "doc_type": "consultation",
         "jurisdiction": "UK",
         "publication_date": "2024",
         "tier1_strip": False,
         "tier2_inject": False,
     },
+    "zev-mandate-consultation-summary-of-responses-and-joint-government-response.pdf": {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",   # renamed from _2024; actual publication Sep 2023
+        "institution": "DESNZ",
+        "doc_type": "consultation",
+        "jurisdiction": "UK",
+        "publication_date": "2023",
+        "tier1_strip": False,
+        "tier2_inject": False,
+    },
     "climate-change-possible-macroeconomic-implications.pdf": {
-        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "doc_id": "BOE_MACRO_IMPLICATIONS",   # actual publication 21 Oct 2022 (Quarterly Bulletin 2022 Q4)
         "institution": "BoE",
         "doc_type": "working_paper",
         "jurisdiction": "UK",
-        "publication_date": "2019",
+        "publication_date": "2022",
         "tier1_strip": False,
         "tier2_inject": False,
     },

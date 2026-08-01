@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 
 class LLMCitation(BaseModel):
     """What the LLM returns via Structured Outputs. No enriched metadata."""
-    doc_id: str = Field(..., description="Source document identifier, e.g. OFGEM_SMART_SECURE_2024")
+    doc_id: str = Field(..., description="Source document identifier, e.g. OFGEM_SMART_SECURE_2025")
     passage: str = Field(..., description="Verbatim quote from the retrieved chunk that supports the claim")
     page: int = Field(..., ge=1, description="Page number in the source document")
 

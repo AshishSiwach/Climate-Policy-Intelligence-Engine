@@ -5,8 +5,6 @@ Input:  query + top-k retrieved chunks (from HybridRetriever)
 Output: AnalystBrief (validated Pydantic model)
 
 Key design decisions (see CLAUDE.md):
-  - Confidence is pipeline-derived (RRF scores + retriever agreement + citation
-    count), NOT self-assessed by the LLM.
   - Citations are verified against retrieved chunks after synthesis;
     fabricated ones are dropped.
   - Table chunks are flagged in the prompt so the LLM extracts values
@@ -17,6 +15,13 @@ Key design decisions (see CLAUDE.md):
     LLM correctly refused all pile-up negatives on its own). See
     docs/week5_failure_analysis.md § Step 2b. A retriever-agreement gate
     is a v2 candidate.
+  - Confidence: removed from v1 in Week 5 Step 2d. On 47 ground-truth
+    queries the v1 pipeline-derived signals had at best AUC 0.668 for
+    predicting correctness (95% CI overlapping random); three of the four
+    signals were noise or anti-correlated. Shipping a weak signal as a
+    user promise was worse than shipping nothing. v2 roadmap: re-introduce
+    once signals are strong (semantic_sim + doc_aware_margin candidates,
+    n>=100 data, AUC >= 0.75). See docs/week5_failure_analysis.md § 2d.
 """
 
 from __future__ import annotations
@@ -35,26 +40,6 @@ logger = logging.getLogger(__name__)
 MODEL = "gpt-4o-mini"
 TEMPERATURE = 0.0
 MAX_TOKENS = 800
-
-# ─── Confidence signal placeholders — all v1, all replaced by Week 5 calibration ───
-# These constants shape the confidence formula but none is empirically derived.
-# Each was chosen as a plausible starting value; Week 5 fits real values against
-# LLM-as-judge scores on the 35-50 query ground truth dataset.
-# Do NOT interpret these as "empirical thresholds" — they are normalisers.
-
-# Value at which top RRF saturates the score_signal at 1.0.
-# Any value in ~[0.02, 0.10] would work here; choice affects how quickly the
-# signal reaches full credit, not whether high RRF beats low RRF.
-SCORE_NORMALISER = 0.05
-
-# Value at which (top-1 − top-2) saturates the margin_signal at 1.0.
-# Same story: normaliser, not a threshold.
-MARGIN_NORMALISER = 0.01
-
-# Number of verified citations at which citation_signal saturates at 1.0.
-# Cap not calibrated; arbitrarily chosen. Citation-count-vs-quality relationship
-# is question-type-dependent and needs Week 5 data to resolve.
-CITATION_SATURATION = 3
 
 # Tool/API resilience — defends against "Tool/API timeout" failure mode
 OPENAI_TIMEOUT_SEC = 30.0             # per-request wall clock timeout
@@ -124,20 +109,12 @@ class Synthesiser:
                 "brief": AnalystBrief(
                     answer=OUT_OF_CORPUS_ANSWER,
                     citations=[],
-                    confidence=0.0,
                     contradictions=[],
                 ),
                 "latency_ms": 0.0,
                 "prompt_tokens": 0,
                 "completion_tokens": 0,
                 "cost_usd": 0.0,
-                "confidence_signals": {
-                    "score_signal": 0.0,
-                    "agreement_signal": 0.0,
-                    "margin_signal": 0.0,
-                    "citation_signal": 0.0,
-                    "llm_refusal": False,
-                },
             }
 
         context = _format_context(chunks)
@@ -160,27 +137,19 @@ class Synthesiser:
         usage = response.usage
         cost_usd = _estimate_cost(self.model, usage.prompt_tokens, usage.completion_tokens)
 
-        # LLM refused via Structured Outputs — return canonical brief with zero confidence
+        # LLM refused via Structured Outputs — return canonical brief
         if message.refusal:
             logger.info("LLM refusal: %s", message.refusal)
             return {
                 "brief": AnalystBrief(
                     answer=OUT_OF_CORPUS_ANSWER,
                     citations=[],
-                    confidence=0.0,
                     contradictions=[],
                 ),
                 "latency_ms": latency_ms,
                 "prompt_tokens": usage.prompt_tokens,
                 "completion_tokens": usage.completion_tokens,
                 "cost_usd": cost_usd,
-                "confidence_signals": {
-                    "score_signal": 0.0,
-                    "agreement_signal": 0.0,
-                    "margin_signal": 0.0,
-                    "citation_signal": 0.0,
-                    "llm_refusal": True,
-                },
                 "refusal_reason": message.refusal,
             }
 
@@ -190,13 +159,9 @@ class Synthesiser:
         # Verify citations against retrieved chunks — drop fabricated ones
         verified_citations = _verify_citations(llm_response.citations, chunks)
 
-        # Pipeline-derived confidence (with individual signals for Week 5 calibration)
-        confidence, signals = _compute_confidence(chunks, verified_citations)
-
         brief = AnalystBrief(
             answer=llm_response.answer,
             citations=verified_citations,
-            confidence=confidence,
             contradictions=llm_response.contradictions,
         )
 
@@ -211,7 +176,6 @@ class Synthesiser:
             "prompt_tokens": usage.prompt_tokens,
             "completion_tokens": usage.completion_tokens,
             "cost_usd": cost_usd,
-            "confidence_signals": signals,   # log for Week 5 calibration
         }
 
 
@@ -285,84 +249,6 @@ def _verify_citations(citations: list[LLMCitation], chunks: list[dict]) -> list[
 
 def _normalise(text: str) -> str:
     return " ".join(text.lower().split())
-
-
-# ---------------------------------------------------------------------------
-# Pipeline-derived confidence
-# ---------------------------------------------------------------------------
-
-def _compute_confidence(
-    chunks: list[dict], citations: list[Citation]
-) -> tuple[float, dict[str, float]]:
-    """
-    Combine signals into a [0, 1] confidence score AND return them
-    individually for downstream logging.
-
-      score_signal     — top RRF normalised by SCORE_NORMALISER
-      agreement_signal — mean(top-3) / top-1; high = retrievers agree on top cluster
-      margin_signal    — (top-1 − top-2) normalised by MARGIN_NORMALISER; high = less ambiguous.
-                         NAIVE version — does not distinguish same-doc from cross-doc ties.
-                         Doc-aware margin is a Week 5 candidate.
-      citation_signal  — verified-citation count normalised by CITATION_SATURATION
-
-    v1 combined formula: EQUAL WEIGHTS (0.25 each). No signal is claimed to matter
-    more than another until Week 5 calibration fits real weights via logistic
-    regression against LLM-as-judge scores on the ground truth dataset.
-
-    All four normalising constants are v1 placeholders (see module top). Their
-    specific values are arbitrary — Week 5 replaces them with fitted transforms.
-    """
-    if not chunks:
-        return 0.0, {
-            "score_signal": 0.0,
-            "agreement_signal": 0.0,
-            "margin_signal": 0.0,
-            "citation_signal": 0.0,
-            "llm_refusal": False,
-        }
-
-    rrf_scores = [c.get("rrf_score", 0.0) for c in chunks]
-    top = rrf_scores[0]
-
-    # score_signal — top RRF normalised into [0, 1] by SCORE_NORMALISER.
-    score_signal = min(top / SCORE_NORMALISER, 1.0)
-
-    # agreement_signal — mean(top-3) / top-1. High = top cluster tightly grouped
-    # (retrievers agree). Low = top-1 is a lone outlier above the rest.
-    top3 = rrf_scores[:3]
-    agreement_signal = (sum(top3) / len(top3)) / top if top > 0 else 0.0
-
-    # margin_signal — (top-1 − top-2) normalised into [0, 1] by MARGIN_NORMALISER.
-    # High margin = top-1 clearly separated (unambiguous). Low margin = ambiguous.
-    # NAIVE version: does not distinguish "same doc tied at top" (healthy) from
-    # "different docs tied at top" (ambiguity). Doc-aware version is a Week 5 candidate.
-    # Single-chunk edge case: margin undefined, treat as max (1.0).
-    if len(rrf_scores) >= 2:
-        margin_signal = min(max((top - rrf_scores[1]) / MARGIN_NORMALISER, 0.0), 1.0)
-    else:
-        margin_signal = 1.0
-
-    # citation_signal — verified citation count normalised into [0, 1] by CITATION_SATURATION.
-    citation_signal = min(len(citations) / float(CITATION_SATURATION), 1.0)
-
-    # Equal weights across all four signals — see docstring for rationale.
-    # Week 5 replaces these with fitted values from logistic regression.
-    confidence = (
-        0.25 * score_signal
-        + 0.25 * agreement_signal
-        + 0.25 * margin_signal
-        + 0.25 * citation_signal
-    )
-    confidence = round(max(0.0, min(1.0, confidence)), 3)
-
-    signals = {
-        "score_signal": round(score_signal, 3),
-        "agreement_signal": round(agreement_signal, 3),
-        "margin_signal": round(margin_signal, 3),
-        "citation_signal": round(citation_signal, 3),
-        "llm_refusal": False,
-    }
-    return confidence, signals
 
 
 # ---------------------------------------------------------------------------

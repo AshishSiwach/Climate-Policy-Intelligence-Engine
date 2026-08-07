@@ -129,13 +129,6 @@ def _score_pair(pair: dict, retrieve, top_score_field: str, synth, judge) -> dic
     row["retrieved_doc_ids"] = list(dict.fromkeys(c["doc_id"] for c in chunks))
     row["retrieved_chunk_types"] = [c.get("chunk_type", "prose") for c in chunks]
 
-    # Note: the synthesiser's `_compute_confidence` reads `rrf_score` from each
-    # chunk. Non-Hybrid configs (BM25, Dense, Rerank) don't populate that field
-    # → confidence signals for those configs will report 0. This is intended
-    # (honest — we don't have an equivalent native-score→confidence mapping for
-    # each config yet), and the ablation decision uses judge Correctness, not
-    # confidence, so it doesn't affect the config comparison.
-
     # 2. Retrieval metrics (positives) / rejection flag (negatives)
     if pair["query_type"] == "negative":
         # No standard threshold across all four score scales — record top_score
@@ -161,8 +154,6 @@ def _score_pair(pair: dict, retrieve, top_score_field: str, synth, judge) -> dic
     row["synthesis_cost_usd"] = synth_result["cost_usd"]
     row["generated_answer"] = brief.answer
     row["generated_citation_count"] = len(brief.citations)
-    row["generated_confidence"] = brief.confidence
-    row["confidence_signals"] = synth_result["confidence_signals"]
 
     # 4. Judge
     try:

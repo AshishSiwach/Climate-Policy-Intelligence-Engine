@@ -52,8 +52,10 @@ synthesis:
   # Lock after: quality, latency, cost comparison on 10 queries
 
 # --- Output schema ---
+# Confidence removed from v1 in Week 5 Step 2d — see docs/week5_failure_analysis.md.
+# v2 candidate: re-introduce once pipeline-derived signals are strong enough
+# (semantic_sim + doc_aware_margin, n>=100 ground truth, AUC >= 0.75).
 output:
-  confidence_threshold: 0.5   # below this, flag low confidence in response
   include_contradictions: true
 
 # --- Monitoring / logging ---

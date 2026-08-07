@@ -13,18 +13,22 @@ structured analyst briefs for climate finance and policy researchers.
 of pages of dense documentation from Ofgem, FCA, DESNZ, IPCC, IEA.
 
 **The output:** Structured JSON brief — direct answer, grounding citations,
-confidence level, flagged contradictions.
+flagged contradictions. (Pipeline-derived confidence was removed in v1 after
+Week 5 Step 2d calibration showed the signals were too weak to promise to
+users; deferred to v2. See `docs/week5_failure_analysis.md § 2d`.)
 
 **System framing:** CPIE v1 is a **single-turn domain RAG system**, NOT a deep research system. It aspires to deep-research-quality answers (verified citations, pipeline confidence, contradiction detection) through a simpler architecture — one retrieval pass, one LLM call, structured brief out. Deep-research architecture (query decomposition, agentic loops, iterative retrieval, multi-minute latencies, report-length output) is explicitly deferred to v2/v3. This framing dictates how failure patterns are interpreted: v1 failures are single-turn-RAG failures (prompt calibration, threshold calibration, top-k coverage), not architecture gaps.
 
-**Confidence layer framing (CRAG-style):** CPIE implements a coarse Corrective RAG pattern between retrieval and synthesis:
-- **CORRECT** (LLM does not refuse) → synthesise and return brief with pipeline-derived confidence.
-- **INCORRECT** (LLM emits `message.refusal`, OR empty retrieval) → return canonical brief with `confidence=0.0`. Both paths logged distinctly.
-- **AMBIGUOUS** (mid-range confidence → hedged answer, query rewriting, or additional retrieval) → **v2 gap**. Requires query rewriting / HyDE from v2 roadmap.
+**Correction layer (CRAG-style, simplified in v1):** CPIE implements a coarse Corrective RAG pattern between retrieval and synthesis:
+- **CORRECT** (LLM does not refuse) → synthesise and return brief
+- **INCORRECT** (LLM emits `message.refusal`, OR empty retrieval) → return canonical refusal brief. Both paths logged distinctly.
+- **AMBIGUOUS** → v2 (query rewriting / HyDE / retriever-agreement gate).
 
-**Note (Week 5 Step 2b):** An earlier RRF-threshold short-circuit (top RRF < 0.020 → auto-refuse) was removed after calibration showed it was net-harmful — it blocked more legitimate positives (5) than negatives it caught (3), because RRF top-1 is a retriever-agreement signal, not a corpus-relevance signal. See `docs/week5_failure_analysis.md § Step 2b`. Replacing it with a proper retriever-agreement gate is a v2 roadmap item.
+**Notes on what got removed during Week 5 calibration** (see `docs/week5_failure_analysis.md`):
+- **Step 2b — RRF-threshold short-circuit deleted.** Top RRF < 0.020 → auto-refuse blocked more legitimate positives (5) than negatives it caught (3). Root cause: RRF top-1 is a retriever-agreement signal, not a corpus-relevance signal. Replacement by a proper retriever-agreement gate is a v2 roadmap item.
+- **Step 2d — pipeline-derived confidence deleted from user-facing output.** On 47 ground-truth queries, best-single-signal AUC was 0.668 (95% CI overlapping random); three of four signals were noise or anti-correlated. Shipping a weak signal as a user promise was worse than shipping nothing. v2 candidate once stronger signals exist (`semantic_sim`, `doc_aware_margin`) and more data (n ≥ 100).
 
-Use the CRAG naming explicitly in README and interview conversations — it's the established production pattern this architecture implements.
+Use the CRAG naming explicitly in README and interview conversations — it's the established production pattern this architecture implements (LLM refusal + citation verification + logged retrieval signals; confidence layer and retriever-agreement gate are the v2 completions).
 
 ---
 
@@ -40,8 +44,8 @@ Use the CRAG naming explicitly in README and interview conversations — it's th
 | Reranker | **v1: NOT USED** — 3-query ablation showed reranker adds 172ms per query with zero hit-rate improvement over hybrid (3/3 top-1 on both). Code preserved in `src/retrieval/reranker.py` for Week 5 re-evaluation with full ground truth dataset. If Week 5 LLM-as-judge shows meaningful synthesis quality gain, add back. Model when re-enabled: `cross-encoder/ms-marco-MiniLM-L-6-v2`. |
 | Vector store | Chroma (v1). FAISS / Pinecone / Qdrant / pgvector are upgrade paths only. |
 | LLM synthesis | **LOCKED: GPT-4o mini** — beat Haiku 4.5 on quality (4.0 vs 2.7 avg) and cost (6x cheaper per query). Higher latency (~7s full-response) accepted for v1 as the correct trade-off for a research tool; streaming to reduce first-token latency to ~800ms is a v2 item. Decision documented in model_selection.md. |
-| Output schema | Pydantic: `answer`, `citations[]`, `confidence` (0–1), `contradictions[]` |
-| Verification | Three-check loop: relevance → confidence → contradiction |
+| Output schema | Pydantic: `answer`, `citations[]`, `contradictions[]`. (Confidence removed in Week 5 Step 2d — v2 candidate.) |
+| Verification | LLM refusal branch + citation verification. (Pipeline-derived confidence check removed in Week 5 Step 2d.) |
 | Ingestion orchestration | **dlt → DuckDB** (Week 4) — replaces `chunk_all()`. dlt writes chunks to a DuckDB table (`cpie.chunks`); `build_indices.py` reads from DuckDB to build BM25 + Chroma. Matches LLM Zoomcamp course tooling. |
 | Monitoring storage | **PostgreSQL** (Week 5) — replaces JSONL for live queries. Every query writes a row to `query_logs` table. Matches LLM Zoomcamp Module 5. |
 | Monitoring dashboards | **Grafana** (Week 5) reading from PostgreSQL, min 5 dashboards for full monitoring rubric marks. Streamlit user-feedback widget (thumbs up/down) writes to PostgreSQL too. Matches Module 5. |
@@ -149,7 +153,6 @@ Used at synthesis time — LLM instructed to extract specific values from table 
       "page": 14
     }
   ],
-  "confidence": 0.82,
   "contradictions": [
     { "doc_a": "...", "doc_b": "...", "summary": "..." }
   ]
@@ -349,22 +352,20 @@ class Citation(BaseModel):
     doc_id: str
     passage: str
     page: int
+    publication_date: str | None    # enriched from chunk metadata
 
 class AnalystBrief(BaseModel):
     answer: str
     citations: list[Citation]
-    confidence: float          # 0.0–1.0
     contradictions: list[dict] # experimental — list of {doc_a, doc_b, summary}
 ```
 
 `src/synthesis/synthesiser.py`:
-- Three-check verification loop: relevance → confidence → contradiction
+- **Two-check verification loop: LLM refusal branch → citation verification.** (An earlier "confidence check" step was removed in Week 5 Step 2d after signals proved too weak.)
 - `chunk_type: table` handling — instruct LLM to extract specific values, not paraphrase
-- Handle out-of-corpus queries: return `confidence=0.0` with `answer="The corpus does not contain sufficient information to answer this query."` when either (a) retrieval returns zero chunks, or (b) LLM emits `message.refusal`. Prior RRF-threshold short-circuit removed in Week 5 Step 2b (see `docs/week5_failure_analysis.md`); LLM's own refusal behaviour is more accurate on this corpus.
+- Handle out-of-corpus queries: return canonical refusal (`"The corpus does not contain sufficient information..."`) when either (a) retrieval returns zero chunks, or (b) LLM emits `message.refusal`. Prior RRF-threshold short-circuit removed in Week 5 Step 2b (see `docs/week5_failure_analysis.md`); LLM's own refusal behaviour is more accurate on this corpus.
 - Note: contradiction detection is experimental in v1 — implement but do not treat as core feature
-- **Confidence must come from the pipeline, not the LLM.** Combine: top RRF score + retriever agreement (do BM25 and dense concentrate on the same top chunks?) + citation count (how many chunks support the answer). Map these signals to 0.0–1.0. Do not ask the LLM to self-assess confidence — it is unreliable.
-- **Confidence weights are v1 placeholders (0.25 each across score / agreement / margin / citation) — deliberately equal.** Rationale: any deviation from equal weights would be an unmeasured claim that one signal matters more than another. Equal weights are the least-opinionated "we don't know yet" position. Individual signals (`score_signal`, `agreement_signal`, `margin_signal`, `citation_signal`) are returned by `Synthesiser.synthesise()` and must be logged per query. Week 5 fits real weights via logistic regression against LLM-as-judge scores on the ground truth dataset.
-- **Known v1 quirk: `margin_signal` is naive.** It does not distinguish "same document tied at top" (healthy retrieval, multiple relevant chunks) from "different documents tied at top" (genuine source ambiguity). With margin at 0.25 weight, correct retrievals with tied-top chunks get penalised. Doc-aware margin is a Week 5 candidate — see Week 5 Step 2.
+- **Pipeline-derived confidence: removed from v1 (Week 5 Step 2d).** On 47 ground-truth queries, best single-signal AUC = 0.668 (95% CI overlapping random); three of four signals were noise or anti-correlated with correctness. Shipping a weak signal as a user promise was worse than shipping nothing. **Do NOT add a confidence field back until v2 conditions are met** (stronger signals like `semantic_sim` + `doc_aware_margin`, n ≥ 100 ground truth, AUC ≥ 0.75). See `docs/week5_failure_analysis.md § 2d`.
 - **Citation verification:** after synthesis, check every cited passage against the actual retrieved chunks. If a cited passage does not appear in any retrieved chunk, flag or remove it. Prevents fabricated citations.
 
 - Commit: `feat: synthesis layer`
@@ -380,7 +381,7 @@ class AnalystBrief(BaseModel):
 
 `src/monitoring/logger.py`:
 - JSON lines format, one record per query
-- Log: `timestamp`, `query`, `retrieved_doc_ids`, `retrieval_scores`, `rrf_scores`, `retrieval_latency_ms`, `synthesis_latency_ms`, `confidence`, `model_used`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `failure_reason`
+- Log: `timestamp`, `query`, `retrieved_doc_ids`, `retrieved_pages`, `rrf_scores`, `retrieval_latency_ms`, `synthesis_latency_ms`, `model_used`, `prompt_tokens`, `completion_tokens`, `cost_usd`, `citation_count`, `contradiction_count`, `failure_reason`. (Confidence + confidence_signals removed in Week 5 Step 2d.)
 - Write to `logs/queries.jsonl`
 - Note: `rerank_scores` / `rerank_latency_ms` will be added back when reranker is re-enabled.
 - Logging goes in NOW — not in Week 5. Every query logged from day one.
@@ -390,7 +391,7 @@ Run 5 real queries manually, inspect output quality before committing:
 2. Factual — CBES loss estimates
 3. Factual — IEA fossil fuel demand peak
 4. Cross-document — CCC vs IEA on net zero pathways
-5. Out-of-corpus negative — confirm system returns low confidence, not a hallucination
+5. Out-of-corpus negative — confirm system correctly refuses, not a hallucination
 
 - Commit: `feat: end-to-end CLI pipeline with logging`
 
@@ -474,16 +475,13 @@ Run 5 real queries manually, inspect output quality before committing:
 - *Current state: eval results available, failures not yet analysed.*
 - *Target state: failure patterns identified, issues logged, at least one fix applied WITH A/B evidence.*
 - Read every failing query manually
-- Identify patterns: retrieval misses, synthesis errors, confidence miscalibration
+- Identify patterns: retrieval misses, synthesis errors, refusal misclassification
 - **Explicitly measure the three patterns flagged in `docs/week3_observations.md`:**
   - Pattern A — LLM refusal rate on queries with good retrieval but vocabulary mismatch (target: report actual %)
   - Pattern B — out-of-corpus threshold: **DONE Week 5 Step 2b** — calibration showed the RRF threshold cannot separate positives from negatives (both share top-1 scores across the full range; 8/47 queries pile up at 0.0164 = 5 positives + 3 negatives). Threshold deleted; LLM handles negatives correctly on its own. See `docs/week5_failure_analysis.md`.
   - Pattern C — top-k coverage on cross-doc queries; measure how often top-5 misses a named source
-- **Also calibrate confidence weights.** The v1 weights (equal 0.25 across all four signals) are placeholders. Fit real weights via logistic regression against LLM-as-judge scores using logged `confidence_signals`. Replace `_compute_confidence` weights with fitted values.
-- **Also test additional confidence signals.** `margin_signal` (RRF top-1 minus top-2, normalised) is already logged from v1 but not weighted into the combined formula. Run regression on it too. Note the naive-margin trap: chunks tied at top from the *same* document (a healthy retrieval) look identical to chunks tied at top from *different* documents (genuine source ambiguity). A doc-aware margin (top-1 minus top-scoring chunk from a different `doc_id`) is likely more informative — worth adding as a candidate signal here.
-  - Also consider `semantic_sim` — cosine similarity between query embedding and top-1 chunk embedding. Independent of RRF.
-  - Log all candidates alongside current signals; keep whichever survive the regression.
-- **Also re-run retrieval ablation.** The Week 3 3-query ablation dropped the reranker with no evidence gain over hybrid. Re-run BM25 / Dense / Hybrid / Hybrid+Rerank across the full ground truth. If rerank meaningfully improves top-5 relevance or LLM-as-judge scores, re-enable in `main.py` (one-line change; module preserved in `src/retrieval/reranker.py`).
+- **Confidence calibration: DONE Week 5 Step 2d — confidence deleted from v1.** On 47 queries, best-single-signal AUC was 0.668 (95% CI overlapping random); three of four signals were noise or anti-correlated. Deleted from `AnalystBrief`, `synthesiser.py`, logger, and all downstream consumers. v2 re-introduction requires stronger signals (`semantic_sim`, `doc_aware_margin`), n ≥ 100 ground truth, and AUC ≥ 0.75. See `docs/week5_failure_analysis.md § 2d`.
+- **Reranker re-eval: DONE Week 5 Step 2e** — full 47-query × 4-config ablation. Reranker adds 5.2× retrieval latency for zero aggregate Correctness gain. Hybrid stays as v1 default. Per-query-type reranker activation on numeric queries is a v2 candidate. See `docs/week5_failure_analysis.md § 2e`.
 - Every fix ships with A/B evidence: "error rate went from Y to Z on the same ground truth."
 - Log issues + measured metrics in `docs/week5_failure_analysis.md`
 - Commit: `chore: eval failure analysis with calibration`
@@ -523,15 +521,11 @@ Run 5 real queries manually, inspect output quality before committing:
   - Also insert each record to Postgres `query_logs` table (columns match current JSONL schema)
 - Streamlit chat app `app.py`:
   - Chat interface calls `run_query`
-  - Renders AnalystBrief with confidence as a discrete HIGH/MEDIUM/LOW badge:
-    - HIGH ≥ 0.7 (green) — answer directly
-    - MEDIUM 0.4–0.7 (amber) — "verify against sources" hint
-    - LOW < 0.4 (red) — "corpus may not contain…" caveat
+  - Renders AnalystBrief: answer + citations + (if any) contradictions. **No confidence badge in v1** — pipeline-derived confidence removed after Step 2d showed signals were too weak (AUC 0.668). Every answer displays a standing "verify against sources before citing" caveat instead. HIGH/MEDIUM/LOW badges return in v2 once confidence signals are re-introduced.
   - Thumbs up/down widget → writes to `user_feedback` table
-  - Thresholds are placeholders; Step 2 calibration replaces them
 - **Grafana dashboards (≥5 charts total, matches rubric's "2 pts for dashboard + feedback"):**
   1. Query volume over time (line)
-  2. Confidence distribution histogram
+  2. Refusal rate over time (line — LLM refusal vs answered)
   3. Latency breakdown (retrieval / synthesis / total) — box plot or percentiles
   4. Top-cited docs (bar) — which sources actually get used
   5. User feedback ratio over time (thumbs up vs down)
@@ -581,7 +575,7 @@ Run 5 real queries manually, inspect output quality before committing:
 - Model selection decision summary
 - Eval results table
 - Design decisions section
-- **Name the confidence layer explicitly as CRAG-style.** In the "Design Decisions" section, note the CORRECT / INCORRECT branches CPIE implements and the AMBIGUOUS branch (query rewriting / HyDE) that's deferred to v2. Cite the CRAG paper (Yan et al. 2024). Signals to interview panels that the architecture uses a recognised production pattern.
+- **Name the correction layer explicitly as CRAG-style.** In the "Design Decisions" section, note the CORRECT / INCORRECT branches CPIE implements in v1 (LLM refusal + citation verification), and the deferred items that complete the pattern: pipeline-derived confidence (removed in Week 5 Step 2d after signals proved too weak) and retriever-agreement gate (v2). Cite the CRAG paper (Yan et al. 2024). Signals to interview panels that the architecture uses a recognised production pattern and that its scope reflects measured evidence, not intuition.
 - Known limitations and v2 extensions
 - Commit: `docs: readme complete`
 
@@ -608,7 +602,7 @@ Run 5 real queries manually, inspect output quality before committing:
   - Query volume trend
   - Confidence distribution by query type
   - Cost per week trend
-  - Top failed queries (low confidence + no citations)
+  - Top failed queries (LLM refusal + zero citations)
 - **Why:** matches the LLM Zoomcamp dlt workshop directly (local logs → dlt → DuckDB → marimo). Peer reviewers who did the workshop recognise this pattern.
 - Commit: `feat: log analytics with dlt duckdb marimo`
 
@@ -679,16 +673,17 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 | Embedding cache | Cache dense embeddings for repeated query strings. Skips the ~10ms encoding step. Small standalone value; noticeable in combination with response cache misses. | Low |
 | Automatic document ingestion | Ingest from Ofgem/FCA/DESNZ RSS feeds or GOV.UK APIs. Keeps corpus current. | Low |
 | Faithful-synthesis check (narrative hallucination) | v1 citation verification only catches fabricated *quoted* passages; it does not check whether the LLM's *narrative* text is faithful to the retrieved chunks. See `docs/week3_observations.md` for the concrete failure mode. Options: (a) second-LLM faithfulness check per answer, (b) NLI model scoring answer sentences against chunks. Trigger for adopting: Week 5 LLM-as-judge shows > 5% narrative-hallucination rate. | High |
-| Model version pinning | Pin `gpt-4o-mini` to a specific snapshot (e.g. `gpt-4o-mini-2024-07-18`); log the version per query. Defends against silent OpenAI-side model changes drifting our confidence calibration. | Medium |
-| Corpus freshness monitoring | Grafana chart of "days since latest corpus update" per document; alert if > 90 days. Prevents high-confidence answers from stale sources when UK policy has moved on. | Medium |
-| Grafana alert thresholds | Alerts on: refusal rate > 20%, avg confidence < 0.4 sustained, cost per query > $0.002, daily cost > $2. Currently dashboards only, no alerting. | Medium |
+| Pipeline-derived confidence layer | Removed from v1 in Week 5 Step 2d — 47-query calibration showed best-single-signal AUC 0.668 (95% CI overlapping random) and three of four signals noise or anti-correlated. v2 re-introduction conditions: (a) collect n ≥ 100 ground-truth queries, (b) add `semantic_sim` (query↔top-1 chunk cosine) and `doc_aware_margin` signals, (c) re-fit; only ship if AUC ≥ 0.75 on held-out fold. Then re-introduce user-facing HIGH/MEDIUM/LOW badges. See `docs/week5_failure_analysis.md § 2d`. | High |
+| Model version pinning | Pin `gpt-4o-mini` to a specific snapshot (e.g. `gpt-4o-mini-2024-07-18`); log the version per query. Defends against silent OpenAI-side model changes drifting behaviour between eval and prod. | Medium |
+| Corpus freshness monitoring | Grafana chart of "days since latest corpus update" per document; alert if > 90 days. Prevents confidently-cited answers from stale sources when UK policy has moved on. | Medium |
+| Grafana alert thresholds | Alerts on: refusal rate > 20%, cost per query > $0.002, daily cost > $2. Currently dashboards only, no alerting. | Medium |
 | Random production LLM-as-judge audit | Sample 1% of real production queries and re-score with LLM-as-judge. Detects drift in answer quality between eval runs. Complements ground-truth eval which is static. | Medium |
 | Vigilance testing (inject known-wrong) | Inject 1-in-100 known-wrong-answer scenarios into analyst view (marked as such after they've responded). Measures whether analysts are still verifying vs drifting into complacency. Defends against the "almost-right problem" — 90% correct becomes trusted, 10% wrong slips through. | Low |
 | ~~Query rewriting~~ | Promoted to v1 — Week 5 Step 3 implements synonym expansion. HyDE remains a v2 upgrade if synonym expansion isn't enough. | Done in v1 |
 | Streaming synthesis output | Perceived latency drops from ~7s to ~800ms first token. Stream `answer` field to terminal / UI while buffering `citations` + `contradictions` for post-stream Pydantic validation. Referenced throughout CLAUDE.md as the fix for GPT-4o mini latency; deferred to v2 to ship v1 E2E first. | High |
 | FastAPI endpoint alongside CLI | Wrap `run_query` in a `/query` POST endpoint. Auto-generated OpenAPI docs. Enables Streamlit UI to call HTTP instead of importing the pipeline directly, and demonstrates API-design competence. | High |
 | CI/CD (GitHub Actions) | Run `pytest` + `ruff check` on every push. Enforces test passes before merge. Green build badge in README. | High |
-| Cost / latency aggregation dashboard | Read `logs/queries.jsonl` and render per-day cost, latency distribution, confidence distribution, failure rate. Complements Logfire (which shows individual traces) with a portfolio view. | Medium |
+| Cost / latency aggregation dashboard | Read `logs/queries.jsonl` and render per-day cost, latency distribution, failure rate, refusal rate. Complements Logfire (which shows individual traces) with a portfolio view. | Medium |
 | Pre-commit hooks + strict mypy | ruff format + ruff check + pytest via `pre-commit`. `mypy --strict` on the `src/` tree. Signals professional Python hygiene to hiring engineers. | Medium |
 | Load test (Locust) | 50 concurrent users hitting the FastAPI endpoint. Report p50/p95/p99 latency and throughput. Shows scale-thinking; matters for AI Engineering roles even when the actual load never materialises. | Medium |
 | Agentic workflow | Query decomposition, multi-step retrieval, tool use for complex cross-document questions. | v3 |
@@ -703,8 +698,8 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 - One conversation per task. Do not mix concerns across sessions.
 - Simple RAG for v1. Agentic RAG (query decomposition, monitor_corpus, assess_materiality) is v2.
 - Contradiction detection is experimental in v1 — do not treat as a core feature.
-- **CPIE is an ASSISTANT, not a source of truth.** All user-facing copy (README, Streamlit UI, walkthrough, demo, cover letter language) frames CPIE as a cited-brief helper for verification-required workflows. Analysts always verify against the source before citing. Every safety design (out-of-corpus short-circuit, LLM refusal, confidence tiers, "verify against sources" hint) assumes this relationship. A source-of-truth pivot requires expanded corpus + HITL review queue + accuracy SLA + legal review — that's a v3 or new-project scope, NOT a CPIE version bump. Never soften or omit the "verify before citing" framing to make the project sound more impressive.
-- **Confidence is a promise to the user.** Any change that touches retrieval, chunking, prompt, model, or reranker AND ships to users requires re-running the confidence calibration on ground truth first. If fitted weights shift > 0.05 (absolute) OR HIGH/MEDIUM/LOW UI thresholds move > 0.05, re-verify the UI tier cutoffs before merging. Internal experiments in branches or behind `off`-by-default feature flags are exempt — but the moment a flag defaults to `on`, calibration must be current. Silent confidence drift is worse than no confidence number at all.
+- **CPIE is an ASSISTANT, not a source of truth.** All user-facing copy (README, Streamlit UI, walkthrough, demo, cover letter language) frames CPIE as a cited-brief helper for verification-required workflows. Analysts always verify against the source before citing. Every safety design (LLM refusal branch, citation verification, "verify against sources" hint) assumes this relationship. A source-of-truth pivot requires expanded corpus + HITL review queue + accuracy SLA + legal review — that's a v3 or new-project scope, NOT a CPIE version bump. Never soften or omit the "verify before citing" framing to make the project sound more impressive.
+- **No user-facing confidence in v1.** Pipeline-derived confidence was removed in Week 5 Step 2d after calibration showed the signals were too weak (best-single-signal AUC 0.668, 95% CI overlapping random) to be a defensible promise to users. Do not re-introduce a confidence field, badge, or numeric score in v1 code, UI, or copy without meeting the v2 re-introduction conditions (n ≥ 100 ground truth, stronger signals like `semantic_sim`/`doc_aware_margin`, AUC ≥ 0.75 on held-out fold). See `docs/week5_failure_analysis.md § 2d` and the v2 roadmap. Silent re-introduction of a weak confidence signal is worse than shipping none.
 - **CPIE corpus is TRUSTED.** All source PDFs are curated public documents from named institutions (Ofgem, DESNZ, CCC, IEA, BoE, ESO). **User-uploaded documents are NOT accepted in v1.** Accepting user-uploaded content would require corpus-side prompt-injection scanning, content-provenance metadata, and per-user isolation — that's a v3 or new-project scope.
 - **CPIE is NOT a financial, legal, or regulatory advice tool.** UI and README must display a disclaimer: *"Verify all citations against source documents before relying on them. CPIE does not provide investment, legal, or regulatory advice."* If the target user base ever shifts toward advice generation, the guardrail stack (content moderation, professional-liability review, licensed-advisor language) must be built first.
 - **Secrets stay in `.env`. Never committed. Never logged.** Production deploys must use the deployment platform's secret store (Streamlit Cloud secrets, cloud provider secret manager). API keys and connection strings never appear in source code, log output, error messages, or query records.

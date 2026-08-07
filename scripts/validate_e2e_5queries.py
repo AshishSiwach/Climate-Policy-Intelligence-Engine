@@ -2,8 +2,7 @@
 Week 3 Step 5 — 5-query manual validation of the full pipeline.
 
 Runs the 5 queries specified in CLAUDE.md through main.py's pipeline
-and prints answer, citations, confidence, and latency breakdown for
-manual inspection.
+and prints answer, citations, and latency breakdown for manual inspection.
 
 Confirms: the E2E pipeline works for factual, cross-document, and
 out-of-corpus queries before Week 3 course submission.
@@ -73,7 +72,6 @@ def main() -> None:
         print(f"  Answer ({len(answer)} chars):")
         print(f"    {answer[:400]}{'...' if len(answer) > 400 else ''}")
         print()
-        print(f"  Confidence: {brief['confidence']}")
         print(f"  Citations ({len(brief['citations'])}):")
         for c in brief["citations"]:
             print(f"    - {c['doc_id']} p{c['page']}: {c['passage'][:90]!r}")

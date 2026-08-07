@@ -85,7 +85,6 @@ def test_query_length_guardrail_refuses_and_skips_pipeline(tmp_log_path):
     result = run_query(long_query, hybrid, synth, qlogger, log_path=tmp_log_path)
 
     assert result["answer"] == QUERY_TOO_LONG_MSG
-    assert result["confidence"] == 0.0
     hybrid.retrieve.assert_not_called()
     synth.synthesise.assert_not_called()
 
@@ -111,15 +110,12 @@ def test_query_length_within_limit_proceeds(sample_chunks, tmp_log_path):
     synth = MagicMock()
     synth.model = "gpt-4o-mini"
     synth.synthesise = MagicMock(return_value={
-        "brief": MagicMock(model_dump=lambda: {"answer": "ok", "confidence": 0.7,
+        "brief": MagicMock(model_dump=lambda: {"answer": "ok",
                                                "citations": [], "contradictions": []}),
         "latency_ms": 100.0,
         "prompt_tokens": 500,
         "completion_tokens": 50,
         "cost_usd": 0.0003,
-        "confidence_signals": {"score_signal": 0.6, "agreement_signal": 0.8,
-                               "margin_signal": 0.5, "citation_signal": 0.3,
-                               "llm_refusal": False},
     })
 
     qlogger = QueryLogger(log_path=tmp_log_path)
@@ -145,7 +141,6 @@ def test_cost_circuit_breaker_refuses_when_budget_exhausted(tmp_log_path):
     result = run_query("short query", hybrid, synth, qlogger, log_path=tmp_log_path)
 
     assert result["answer"] == COST_LIMIT_MSG
-    assert result["confidence"] == 0.0
     hybrid.retrieve.assert_not_called()
     synth.synthesise.assert_not_called()
 
@@ -175,13 +170,10 @@ def test_cost_circuit_breaker_below_limit_allows_query(sample_chunks, tmp_log_pa
     synth = MagicMock()
     synth.model = "gpt-4o-mini"
     synth.synthesise = MagicMock(return_value={
-        "brief": MagicMock(model_dump=lambda: {"answer": "ok", "confidence": 0.5,
+        "brief": MagicMock(model_dump=lambda: {"answer": "ok",
                                                "citations": [], "contradictions": []}),
         "latency_ms": 50.0, "prompt_tokens": 100, "completion_tokens": 20,
         "cost_usd": 0.0001,
-        "confidence_signals": {"score_signal": 0.5, "agreement_signal": 0.5,
-                               "margin_signal": 0.5, "citation_signal": 0.0,
-                               "llm_refusal": False},
     })
 
     qlogger = QueryLogger(log_path=tmp_log_path)

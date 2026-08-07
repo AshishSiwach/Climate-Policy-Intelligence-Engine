@@ -60,7 +60,7 @@ COST_LIMIT_MSG = (
 
 def _canonical_refusal(msg: str) -> AnalystBrief:
     """Uniform refusal shape so guardrail-triggered responses look like every other brief."""
-    return AnalystBrief(answer=msg, citations=[], confidence=0.0, contradictions=[])
+    return AnalystBrief(answer=msg, citations=[], contradictions=[])
 
 
 def _daily_cost_so_far(log_path: Path) -> float:
@@ -126,9 +126,6 @@ def run_query(
             synthesis_result={
                 "brief": brief, "latency_ms": 0.0, "prompt_tokens": 0,
                 "completion_tokens": 0, "cost_usd": 0.0,
-                "confidence_signals": {"score_signal": 0.0, "agreement_signal": 0.0,
-                                       "margin_signal": 0.0, "citation_signal": 0.0,
-                                       "llm_refusal": False},
             },
             model_used=synth.model,
             failure_reason=f"guardrail: query_too_long ({len(query)} chars)",
@@ -146,9 +143,6 @@ def run_query(
             synthesis_result={
                 "brief": brief, "latency_ms": 0.0, "prompt_tokens": 0,
                 "completion_tokens": 0, "cost_usd": 0.0,
-                "confidence_signals": {"score_signal": 0.0, "agreement_signal": 0.0,
-                                       "margin_signal": 0.0, "citation_signal": 0.0,
-                                       "llm_refusal": False},
             },
             model_used=synth.model,
             failure_reason=f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)",

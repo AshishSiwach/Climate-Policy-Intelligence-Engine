@@ -129,8 +129,6 @@ def _score_pair(pair: dict, hybrid, synth, judge) -> dict:
     }
     row["generated_answer"] = brief.answer
     row["generated_citation_count"] = len(brief.citations)
-    row["generated_confidence"] = brief.confidence
-    row["confidence_signals"] = synth_result["confidence_signals"]
 
     # 4. Judge
     try:

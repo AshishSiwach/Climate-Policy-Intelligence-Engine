@@ -8,7 +8,12 @@ Two Citation classes on purpose:
                 with publication_date pulled from the retrieved chunk's
                 metadata. Prevents the LLM from fabricating dates.
 
-The LLM is asked to return LLMResponse (excluding `confidence` — pipeline-derived).
+Confidence: removed from v1 in Week 5 Step 2d. Calibration on 47 queries
+showed the pipeline-derived signals had at best AUC 0.668 for predicting
+correctness (95% CI overlapping random). Shipping a weak signal as a user
+promise was worse than shipping nothing. v2 roadmap: re-introduce once
+signals are strong (semantic_sim + doc_aware_margin candidates, n>=100
+ground-truth data, AUC >= 0.75). See docs/week5_failure_analysis.md § 2d.
 """
 
 from pydantic import BaseModel, Field
@@ -40,7 +45,7 @@ class Contradiction(BaseModel):
 
 
 class LLMResponse(BaseModel):
-    """Raw JSON shape returned by the LLM. Confidence is added by the pipeline."""
+    """Raw JSON shape returned by the LLM."""
     answer: str
     citations: list[LLMCitation] = Field(default_factory=list)
     contradictions: list[Contradiction] = Field(default_factory=list)
@@ -50,6 +55,4 @@ class AnalystBrief(BaseModel):
     """Final structured brief returned to the user."""
     answer: str
     citations: list[Citation] = Field(default_factory=list)
-    # confidence is just Pydantic validation constraint(... means it's required, no default; ge=0.0, le=1.0 enforces it's a valid probability-like score between 0 and 1)
-    confidence: float = Field(..., ge=0.0, le=1.0)
     contradictions: list[Contradiction] = Field(default_factory=list)

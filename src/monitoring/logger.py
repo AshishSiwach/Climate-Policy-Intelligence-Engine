@@ -5,10 +5,15 @@ One record per query, appended to logs/queries.jsonl.
 Written from day one (Week 3, Step 5) — raw data layer for the Week 5
 Logfire observability integration.
 
-Fields logged (per CLAUDE.md Week 3 Step 5):
-  timestamp, query, retrieved_doc_ids, retrieval_scores, rrf_scores,
-  retrieval_latency_ms, synthesis_latency_ms, confidence, confidence_signals,
-  model_used, prompt_tokens, completion_tokens, cost_usd, failure_reason
+Fields logged:
+  timestamp, query, retrieved_doc_ids, retrieved_pages, rrf_scores,
+  retrieval_latency_ms, synthesis_latency_ms, model_used, prompt_tokens,
+  completion_tokens, cost_usd, citation_count, contradiction_count,
+  failure_reason
+
+(Confidence + confidence_signals removed in Week 5 Step 2d — the signals
+had at best AUC 0.668 for predicting correctness; shipping a weak signal
+was worse than shipping nothing. v2 candidate.)
 """
 
 import json
@@ -51,7 +56,6 @@ def build_query_record(
 ) -> dict[str, Any]:
     """Assemble the JSONL record from pipeline outputs. Pure function — no I/O."""
     brief = synthesis_result["brief"] if synthesis_result else None
-    signals = synthesis_result["confidence_signals"] if synthesis_result else {}
 
     record: dict[str, Any] = {
         "query": query,
@@ -62,8 +66,6 @@ def build_query_record(
         "synthesis_latency_ms": (
             round(synthesis_result["latency_ms"], 1) if synthesis_result else 0.0
         ),
-        "confidence": brief.confidence if brief else None,
-        "confidence_signals": signals,
         "model_used": model_used,
         "prompt_tokens": synthesis_result["prompt_tokens"] if synthesis_result else 0,
         "completion_tokens": synthesis_result["completion_tokens"] if synthesis_result else 0,

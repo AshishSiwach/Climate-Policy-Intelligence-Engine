@@ -1,20 +1,23 @@
 """
 Build BM25 and Chroma dense indices over all chunked documents.
 
-Reads: data/processed/*.json  (chunk output from ingestion pipeline)
+Reads: data/processed/cpie_ingestion.duckdb  (schema: cpie, table: chunks)
 Writes:
   data/processed/bm25_index.pkl   (pickled BM25Okapi + chunks)
   data/processed/chroma_db/       (Chroma persistent client)
 
 Run:
-  uv run python scripts/build_indices.py
+  uv run python scripts/ingest.py           # populate DuckDB first
+  uv run python scripts/build_indices.py    # then build BM25 + Chroma
 """
 
-import json
 import logging
 import time
 from pathlib import Path
 
+import duckdb
+
+from ingestion.dlt_pipeline import DATASET_NAME, DUCKDB_PATH, TABLE_NAME
 from retrieval import BM25Retriever, DenseRetriever
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -26,12 +29,25 @@ CHROMA_DIR = PROCESSED_DIR / "chroma_db"
 
 
 def load_all_chunks() -> list[dict]:
-    """Load every chunk JSON from data/processed/ into a flat list."""
-    chunks = []
-    for path in sorted(PROCESSED_DIR.glob("*.json")):
-        with open(path, encoding="utf-8") as f:
-            chunks.extend(json.load(f))
-    logger.info("Loaded %d chunks from %d files", len(chunks), len(list(PROCESSED_DIR.glob("*.json"))))
+    """
+    Load every chunk from DuckDB into a flat list ordered by (doc_id, chunk_index).
+
+    Casts the DataFrame back to a list of plain dicts because the retrievers
+    expect that shape (they iterate .items() / index by string keys).
+    """
+    if not DUCKDB_PATH.exists():
+        raise RuntimeError(
+            f"DuckDB file not found at {DUCKDB_PATH}. "
+            "Run `uv run python scripts/ingest.py` first."
+        )
+
+    with duckdb.connect(str(DUCKDB_PATH), read_only=True) as conn:
+        df = conn.execute(
+            f"SELECT * FROM {DATASET_NAME}.{TABLE_NAME} ORDER BY doc_id, chunk_index"
+        ).fetchdf()
+
+    chunks = df.to_dict("records")
+    logger.info("Loaded %d chunks from %s", len(chunks), DUCKDB_PATH)
     return chunks
 
 

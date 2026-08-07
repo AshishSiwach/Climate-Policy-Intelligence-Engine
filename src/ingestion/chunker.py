@@ -8,15 +8,18 @@ Ceiling: 512 tokens — reranker constraint. Assert fires after heading injectio
 
 Heading prefix (from pdf_loader.py Tier 2 injection on table pages) is prepended
 to every chunk from that page.
+
+Persistence lives in `dlt_pipeline.py` (Week 5): the dlt resource iterates
+DOC_REGISTRY, calls `chunk_document()` here, and writes chunks to DuckDB.
+This module returns chunks; it no longer writes JSON.
 """
 
-import json
 import logging
 from pathlib import Path
 
 import tiktoken
 
-from ingestion.pdf_loader import DOC_REGISTRY, load_pdf
+from ingestion.pdf_loader import load_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -42,14 +45,14 @@ def chunk_page(text: str, chunk_size: int = CHUNK_SIZE, overlap: int = OVERLAP) 
     return chunks
 
 
-def chunk_document(path: str | Path, output_dir: str | Path) -> list[dict]:
+def chunk_document(path: str | Path) -> list[dict]:
     """
-    Load a PDF, apply sliding-window chunking, validate, save to output_dir.
-    Returns the list of chunk dicts saved.
-    """
-    output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    Load a PDF, apply sliding-window chunking + Tier 2 heading injection,
+    validate token ceiling. Returns a list of chunk dicts; does NOT persist.
 
+    Each chunk dict carries: doc_id, institution, doc_type, jurisdiction,
+    publication_date, page_number, chunk_type, chunk_index, token_count, text.
+    """
     pages = load_pdf(path)
     if not pages:
         logger.warning("No pages extracted from %s", path)
@@ -82,10 +85,6 @@ def chunk_document(path: str | Path, output_dir: str | Path) -> list[dict]:
         return []
 
     doc_id = pages[0]["doc_id"]
-    out_path = output_dir / f"{doc_id}.json"
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(all_chunks, f, ensure_ascii=False, indent=2)
-
     avg_tokens = sum(c["token_count"] for c in all_chunks) / len(all_chunks)
     logger.info(
         "Chunked %s: %d chunks, avg %.0f tokens, max %d tokens",
@@ -93,26 +92,3 @@ def chunk_document(path: str | Path, output_dir: str | Path) -> list[dict]:
         max(c["token_count"] for c in all_chunks),
     )
     return all_chunks
-
-
-def chunk_all(raw_dir: str | Path, output_dir: str | Path) -> dict:
-    """Chunk all registered PDFs in raw_dir. Returns summary stats per doc."""
-    raw_dir = Path(raw_dir)
-    stats = {}
-
-    for filename, meta in DOC_REGISTRY.items():
-        pdf_path = raw_dir / filename
-        if not pdf_path.exists():
-            logger.warning("PDF not found, skipping: %s", pdf_path)
-            continue
-        chunks = chunk_document(pdf_path, output_dir)
-        if chunks:
-            stats[meta["doc_id"]] = {
-                "chunk_count": len(chunks),
-                "avg_tokens": sum(c["token_count"] for c in chunks) / len(chunks),
-                "max_tokens": max(c["token_count"] for c in chunks),
-            }
-
-    total = sum(s["chunk_count"] for s in stats.values())
-    logger.info("Total chunks across all documents: %d", total)
-    return stats

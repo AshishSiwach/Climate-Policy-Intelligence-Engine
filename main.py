@@ -13,6 +13,13 @@ Logs one record per query to logs/queries.jsonl (started day one per CLAUDE.md).
 
 from __future__ import annotations
 
+# Must import before numpy/rank_bm25/openai get a chance to (via the imports
+# below). torch bundles its own OpenBLAS/MKL DLLs and has to claim them first
+# on Windows — if plain numpy loads its copy first, the later sentence_transformers
+# import inside build_pipeline() crashes the process with an access violation
+# (exit code -1073741819) and no Python traceback.
+import torch  # noqa: F401
+
 import argparse
 import json
 import logging

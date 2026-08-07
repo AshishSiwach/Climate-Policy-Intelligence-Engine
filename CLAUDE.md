@@ -486,6 +486,20 @@ Run 5 real queries manually, inspect output quality before committing:
 - Log issues + measured metrics in `docs/week5_failure_analysis.md`
 - Commit: `chore: eval failure analysis with calibration`
 
+**Step 2b — Table-retrieval evaluation** *(answers "have we evaluated retrieval from tables?")*
+- *Current state: Tier 2 heading injection ships (WEO/Seventh CB/CCC/BoE Disclosure) but no metric confirms table chunks are actually being retrieved for numeric queries.*
+- *Target state: retrieval metrics sliced by `chunk_type`; 3–5 table-only probes in ground truth; A/B on Tier 2 heading injection.*
+- **Addition 1 — slice metrics by chunk_type.** In `retrieval_eval_runner.py`, add `retrieved_chunk_types: list[str]` to per-query output and compute `table_fraction@5`. Aggregate by `query_type` + by `probe`. Reveals whether table chunks reach the top-5 at all for numeric queries.
+- **Addition 2 — add `expected_chunk_type` to ground truth schema (optional).** For queries whose reference answer comes from a table, mark `expected_chunk_type: "table"`. Enables a `table_hit_rate` metric (did top-5 contain any chunk with `chunk_type=table` for queries that expected one). Small schema change; migration script already handles enrichment.
+- **Addition 3 — author 3–5 table-only probes.** Same time-crunch phrasing as existing probes, tag `[PROBE: table_only]`. Focus on Tier 2 heavy-table docs:
+  - `weo 2025: lcoe for solar pv utility scale, advanced economies` (WEO 2025 table)
+  - `seventh cb: transport sector emissions by 2035` (Seventh CB sector table)
+  - `boe disclosure 2024: scope 3 financed emissions total` (BoE Disclosure table)
+  - `ccc progress 2024: buildings sector rag status` (CCC RAG table — known limitation probe)
+  - `weo 2025: global electricity demand 2030 stated policies scenario` (WEO scenario table)
+- **Addition 4 — Tier 2 heading injection A/B (bigger, optional).** Rebuild indices with heading injection OFF, re-run eval on the table-only probes, compare `table_hit_rate` and LLM-as-judge Correctness. Confirms whether Tier 2 is actually earning its keep. Defer if time-pressed; the metric slice from Addition 1 will already signal if there's a problem.
+- Commit: `feat: table-retrieval evaluation`
+
 **Step 3 — Query rewriting** *(rubric best-practices point)*
 - *Current state: raw user query goes directly to hybrid retrieval.*
 - *Target state: LLM generates 2–3 rewrites; retrieval fuses results across all variants.*

@@ -26,6 +26,11 @@ env/
 # Logs
 logs/
 
+# Personal reference docs — not for commit
+# (already-tracked docs like week3_observations.md stay tracked;
+# new files added under docs/ are ignored)
+docs/
+
 # OS
 .DS_Store
 Thumbs.db

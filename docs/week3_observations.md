@@ -166,6 +166,28 @@ Citation verification checks quoted material, not answer faithfulness. This is t
 
 ---
 
+## Known environment issue — Windows torch/numpy import-order crash
+
+**Observed:** 2026-08-02, while re-running `scripts/validate_e2e_5queries.py` on the dev machine (RTX 4050, Windows).
+
+**Symptom:** `uv run python scripts/validate_e2e_5queries.py` (and `uv run python main.py "<query>"`) terminated with exit code `-1073741819` (`0xC0000005`, `STATUS_ACCESS_VIOLATION`) and **zero Python output** — no traceback, no exception, just a hard process crash. `uv`'s own error surface only showed `Caused by: program not found`, which pointed nowhere useful.
+
+**Root cause:** `torch` bundles its own OpenBLAS/MKL DLLs and must be the first thing in the process to load them on Windows. `main.py`'s import order was:
+
+```
+monitoring → retrieval (BM25Retriever/HybridRetriever, pulls in rank_bm25 → numpy) → synthesis (openai)
+```
+
+`torch` was only ever imported lazily, inside `build_pipeline()`, via `from retrieval import DenseRetriever` (see the module docstring in `src/retrieval/__init__.py`). By that point plain `numpy` had already loaded its own copy of the BLAS DLLs via `rank_bm25`. When `sentence_transformers` (which pulls in `torch`) was imported afterward, the DLL mismatch crashed the interpreter outright.
+
+**How it was isolated:** bisected via standalone probe scripts that imported subsets of `{numpy, rank_bm25, openai, torch, chromadb, sentence_transformers}` in different orders, redirecting unbuffered (`python -u`) stdout to a file so partial progress survived the crash. Confirmed: any order with `numpy` (directly or via `rank_bm25`) imported before `torch` crashes at the `sentence_transformers` import; `torch` first always succeeds, regardless of where `chromadb`/`numpy`/`openai` land afterward.
+
+**Fix:** added `import torch` as the very first import in `main.py`, before `argparse`/`json`/anything else — see `main.py` lines 14–19. One line, no behavioural change, no architecture impact.
+
+**Why this belongs here, not in Week 4/5 failure analysis:** this is a local dev-environment/Windows-DLL issue, not a retrieval or synthesis quality failure — it doesn't belong in Patterns A/B/C above. Recorded here so it isn't re-diagnosed from scratch if it resurfaces (e.g. if a future refactor reorders imports and drops the `torch`-first guard, or on a fresh machine setup).
+
+---
+
 ## Log record for this validation
 
 All 5 queries logged to `logs/queries.jsonl` on 2026-07-13. Fields per record:

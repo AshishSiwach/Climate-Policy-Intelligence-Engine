@@ -142,8 +142,8 @@ def test_score_happy_path_returns_validated_scores():
 
 
 def test_score_returns_zero_cost_for_unknown_model():
-    """gpt-5.4-mini pricing is unknown until confirmed — cost logged as 0 with warning."""
-    judge = LLMJudge(model="gpt-5.4-mini", api_key="test-key-not-used")
+    """Unknown model → cost logged as 0 with warning (see _JUDGE_PRICING guard)."""
+    judge = LLMJudge(model="gpt-nonexistent-mini", api_key="test-key-not-used")
     fake_resp = _mock_response({}, prompt_tokens=1000, completion_tokens=200)
 
     with patch.object(judge._client.beta.chat.completions, "parse", return_value=fake_resp):

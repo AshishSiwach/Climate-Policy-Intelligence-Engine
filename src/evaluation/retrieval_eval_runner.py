@@ -91,18 +91,19 @@ def _score_positive(
     }
 
 
-def _score_negative(
-    pair: dict,
-    hybrid: HybridRetriever,
-    oor_threshold: float,
-) -> dict:
-    """Negatives — correct behaviour is out-of-corpus short-circuit or no retrieval."""
+def _score_negative(pair: dict, hybrid: HybridRetriever) -> dict:
+    """
+    Negatives — retrieval-only view. Just records what retrieval surfaced;
+    whether the *system* handled the negative correctly is a downstream (LLM +
+    judge) question — see judge_runner and ablation_runner for that signal.
+    (Prior versions used an RRF-threshold-based `correctly_rejected` field;
+    removed in Week 5 2b after calibration showed the threshold was net-harmful.)
+    """
     t0 = time.time()
     chunks = hybrid.retrieve(pair["question"], top_k=RETRIEVAL_TOP_K)
     latency_ms = (time.time() - t0) * 1000
 
     top_rrf = chunks[0]["rrf_score"] if chunks else 0.0
-    correctly_rejected = top_rrf < oor_threshold
 
     return {
         "id": pair["id"],
@@ -111,7 +112,6 @@ def _score_negative(
         "retrieval_latency_ms": round(latency_ms, 1),
         "top_rrf": round(top_rrf, 6),
         "retrieved_doc_ids": [c["doc_id"] for c in chunks[:5]],
-        "correctly_rejected": correctly_rejected,
     }
 
 
@@ -132,16 +132,21 @@ def _aggregate_by_slice(
     }
 
 
-def _negatives_rejection_rate(per_query: list[dict]) -> dict:
+def _negatives_summary(per_query: list[dict]) -> dict:
+    """
+    Retrieval-only view of negatives — just top_rrf distribution. Whether the
+    system correctly handled each negative is a judge-scored question; that
+    lives in judge_runner / ablation_runner outputs, not here.
+    """
     negs = [r for r in per_query if r.get("query_type") == "negative"]
     if not negs:
         return {"n": 0}
-    n_rejected = sum(1 for r in negs if r.get("correctly_rejected"))
+    top_scores = sorted(r.get("top_rrf", 0.0) for r in negs)
     return {
         "n": len(negs),
-        "rejection_rate": n_rejected / len(negs),
-        "n_correctly_rejected": n_rejected,
-        "n_incorrectly_answered": len(negs) - n_rejected,
+        "top_rrf_min": top_scores[0],
+        "top_rrf_median": top_scores[len(top_scores) // 2],
+        "top_rrf_max": top_scores[-1],
     }
 
 
@@ -152,17 +157,14 @@ def run(output_path: Path | None = None) -> Path:
     logger.info("Loaded %d ground truth pairs", len(ground_truth))
 
     hybrid = _build_hybrid()
-    logger.info("Pipeline loaded. Loading OOR threshold from synthesis config...")
-
-    # Deferred import — see module-level note.
-    from synthesis.synthesiser import OUT_OF_CORPUS_RRF_THRESHOLD
+    logger.info("Pipeline loaded.")
 
     logger.info("Scoring...")
     per_query: list[dict] = []
     for i, pair in enumerate(ground_truth, 1):
         try:
             if pair["query_type"] == "negative":
-                result = _score_negative(pair, hybrid, OUT_OF_CORPUS_RRF_THRESHOLD)
+                result = _score_negative(pair, hybrid)
             else:
                 result = _score_positive(pair, hybrid)
             per_query.append(result)
@@ -186,12 +188,11 @@ def run(output_path: Path | None = None) -> Path:
             "retrieval_top_k": RETRIEVAL_TOP_K,
             "ks": list(KS),
             "rrf_k": 60,
-            "out_of_corpus_threshold": OUT_OF_CORPUS_RRF_THRESHOLD,
-        },   # OUT_OF_CORPUS_RRF_THRESHOLD imported above via deferred import
+        },
         "overall": aggregate_metrics(positives),
         "by_query_type": _aggregate_by_slice(positives, "query_type"),
         "by_probe": _aggregate_by_slice(per_query, "probe"),
-        "negatives": _negatives_rejection_rate(per_query),
+        "negatives": _negatives_summary(per_query),
         "per_query": per_query,
     }
 
@@ -235,13 +236,12 @@ def run(output_path: Path | None = None) -> Path:
 
     print()
     print("=" * 80)
-    print(f"NEGATIVES (n={results['negatives']['n']})")
+    print(f"NEGATIVES (n={results['negatives']['n']}) — top_rrf distribution only")
     print("=" * 80)
     if results["negatives"]["n"]:
-        print(f"  Correctly rejected:    {results['negatives']['n_correctly_rejected']}/"
-              f"{results['negatives']['n']}"
-              f" ({results['negatives']['rejection_rate']:.0%})")
-        print(f"  Incorrectly answered:  {results['negatives']['n_incorrectly_answered']}")
+        n = results["negatives"]
+        print(f"  top_rrf  min={n['top_rrf_min']:.4f}  median={n['top_rrf_median']:.4f}  max={n['top_rrf_max']:.4f}")
+        print("  (System-level negatives handling — see judge_runner / ablation_runner outputs.)")
 
     return output_path
 

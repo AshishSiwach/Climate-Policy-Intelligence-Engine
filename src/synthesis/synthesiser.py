@@ -11,8 +11,12 @@ Key design decisions (see CLAUDE.md):
     fabricated ones are dropped.
   - Table chunks are flagged in the prompt so the LLM extracts values
     rather than paraphrasing.
-  - Out-of-corpus queries: if top RRF score below threshold, return
-    confidence=0.0 without calling the LLM.
+  - Out-of-corpus decision is left to the LLM's own refusal behaviour. A
+    prior RRF-threshold short-circuit was removed in Week 5 (2b calibration
+    showed it blocked more legitimate positives than negatives it caught —
+    LLM correctly refused all pile-up negatives on its own). See
+    docs/week5_failure_analysis.md § Step 2b. A retriever-agreement gate
+    is a v2 candidate.
 """
 
 from __future__ import annotations
@@ -51,13 +55,6 @@ MARGIN_NORMALISER = 0.01
 # Cap not calibrated; arbitrarily chosen. Citation-count-vs-quality relationship
 # is question-type-dependent and needs Week 5 data to resolve.
 CITATION_SATURATION = 3
-
-# Below this top-RRF value, the pipeline short-circuits without calling the LLM
-# and returns the canonical out-of-corpus brief with confidence=0.0.
-# Chosen from 3-5 pilot queries as the rough boundary between real hits (~0.03+)
-# and out-of-corpus queries (<0.02). Not statistically justified. Week 5
-# calibration sets this at the empirical elbow of the true score distribution.
-OUT_OF_CORPUS_RRF_THRESHOLD = 0.020
 
 # Tool/API resilience — defends against "Tool/API timeout" failure mode
 OPENAI_TIMEOUT_SEC = 30.0             # per-request wall clock timeout
@@ -117,9 +114,12 @@ class Synthesiser:
           completion_tokens — usage.completion_tokens
           cost_usd       — estimated cost for this call
         """
-        # Out-of-corpus short-circuit — don't spend an LLM call
-        if not chunks or max(c.get("rrf_score", 0.0) for c in chunks) < OUT_OF_CORPUS_RRF_THRESHOLD:
-            logger.info("Out-of-corpus query — top RRF below threshold, skipping LLM call")
+        # Empty-chunks guard — retrieval should never return zero chunks with a
+        # populated index, but if it does, don't spend an LLM call on nothing.
+        # (The RRF-threshold short-circuit that used to live here was removed
+        # after Week 5 2b calibration — see module docstring.)
+        if not chunks:
+            logger.warning("Retrieval returned zero chunks — skipping LLM call")
             return {
                 "brief": AnalystBrief(
                     answer=OUT_OF_CORPUS_ANSWER,
@@ -136,7 +136,6 @@ class Synthesiser:
                     "agreement_signal": 0.0,
                     "margin_signal": 0.0,
                     "citation_signal": 0.0,
-                    "out_of_corpus": True,
                     "llm_refusal": False,
                 },
             }
@@ -180,7 +179,6 @@ class Synthesiser:
                     "agreement_signal": 0.0,
                     "margin_signal": 0.0,
                     "citation_signal": 0.0,
-                    "out_of_corpus": False,
                     "llm_refusal": True,
                 },
                 "refusal_reason": message.refusal,
@@ -320,7 +318,6 @@ def _compute_confidence(
             "agreement_signal": 0.0,
             "margin_signal": 0.0,
             "citation_signal": 0.0,
-            "out_of_corpus": False,
             "llm_refusal": False,
         }
 
@@ -363,7 +360,6 @@ def _compute_confidence(
         "agreement_signal": round(agreement_signal, 3),
         "margin_signal": round(margin_signal, 3),
         "citation_signal": round(citation_signal, 3),
-        "out_of_corpus": False,
         "llm_refusal": False,
     }
     return confidence, signals

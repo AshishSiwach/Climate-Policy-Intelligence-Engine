@@ -119,7 +119,7 @@ def test_query_length_within_limit_proceeds(sample_chunks, tmp_log_path):
         "cost_usd": 0.0003,
         "confidence_signals": {"score_signal": 0.6, "agreement_signal": 0.8,
                                "margin_signal": 0.5, "citation_signal": 0.3,
-                               "out_of_corpus": False, "llm_refusal": False},
+                               "llm_refusal": False},
     })
 
     qlogger = QueryLogger(log_path=tmp_log_path)
@@ -181,7 +181,7 @@ def test_cost_circuit_breaker_below_limit_allows_query(sample_chunks, tmp_log_pa
         "cost_usd": 0.0001,
         "confidence_signals": {"score_signal": 0.5, "agreement_signal": 0.5,
                                "margin_signal": 0.5, "citation_signal": 0.0,
-                               "out_of_corpus": False, "llm_refusal": False},
+                               "llm_refusal": False},
     })
 
     qlogger = QueryLogger(log_path=tmp_log_path)

@@ -101,11 +101,11 @@ def _score_pair(pair: dict, hybrid, synth, judge) -> dict:
     row["top_rrf"] = round(chunks[0]["rrf_score"], 6) if chunks else 0.0
     row["retrieved_doc_ids"] = list(dict.fromkeys(c["doc_id"] for c in chunks))
 
-    # 2. Retrieval metrics (positives only; negatives get the correctly_rejected flag)
-    if pair["query_type"] == "negative":
-        from synthesis.synthesiser import OUT_OF_CORPUS_RRF_THRESHOLD
-        row["correctly_rejected"] = row["top_rrf"] < OUT_OF_CORPUS_RRF_THRESHOLD
-    else:
+    # 2. Retrieval metrics (positives only). Negatives are graded downstream
+    # by the judge — see _negatives_summary. The prior RRF-threshold based
+    # `correctly_rejected` field was removed in Week 5 2b after calibration
+    # showed the threshold was net-harmful (see docs/week5_failure_analysis.md).
+    if pair["query_type"] != "negative":
         try:
             row.update(evaluate_query(chunks, pair["expected_sources"], ks=KS))
         except Exception as e:
@@ -180,16 +180,23 @@ def _aggregate_by_slice(per_query: list[dict], slice_key: str) -> dict[str, dict
     }
 
 
-def _negatives_rejection_rate(per_query: list[dict]) -> dict:
+def _negatives_summary(per_query: list[dict]) -> dict:
+    """
+    Judge-based negatives summary. `handled_well` = judge
+    `refusal_appropriateness` >= 4 (the system correctly refused rather than
+    fabricating). Replaces the retired RRF-threshold-based `correctly_rejected`.
+    """
     negs = [r for r in per_query if r.get("query_type") == "negative"]
     if not negs:
         return {"n": 0}
-    n_rejected = sum(1 for r in negs if r.get("correctly_rejected"))
+    n_handled_well = sum(1 for r in negs if (r.get("refusal_appropriateness") or 0) >= 4)
     return {
         "n": len(negs),
-        "rejection_rate": n_rejected / len(negs),
-        "n_correctly_rejected": n_rejected,
-        "n_incorrectly_answered": len(negs) - n_rejected,
+        "n_handled_well": n_handled_well,
+        "handled_well_rate": round(n_handled_well / len(negs), 4),
+        "mean_refusal_appropriateness": round(
+            sum((r.get("refusal_appropriateness") or 0) for r in negs) / len(negs), 3
+        ),
     }
 
 
@@ -242,7 +249,7 @@ def run(output_path: Path | None = None) -> Path:
         "overall_judge": aggregate_metrics(scored),
         "by_query_type": _aggregate_by_slice(scored, "query_type"),
         "by_probe": _aggregate_by_slice(per_query, "probe"),
-        "negatives": _negatives_rejection_rate(per_query),
+        "negatives": _negatives_summary(per_query),
         "per_query": per_query,
     }
 
@@ -288,12 +295,13 @@ def run(output_path: Path | None = None) -> Path:
 
     print()
     print("=" * 80)
-    print(f"NEGATIVES (n={results['negatives']['n']})")
+    print(f"NEGATIVES (n={results['negatives']['n']}) — judge-scored handling")
     print("=" * 80)
     if results["negatives"]["n"]:
-        print(f"  Correctly rejected:    {results['negatives']['n_correctly_rejected']}/"
-              f"{results['negatives']['n']}"
-              f" ({results['negatives']['rejection_rate']:.0%})")
+        n = results["negatives"]
+        print(f"  Handled well:          {n['n_handled_well']}/{n['n']}"
+              f" ({n['handled_well_rate']:.0%})   (refusal_appropriateness >= 4)")
+        print(f"  Mean refusal_appr:     {n['mean_refusal_appropriateness']:.2f}")
 
     print()
     print("=" * 80)

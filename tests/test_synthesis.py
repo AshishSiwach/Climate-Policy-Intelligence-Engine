@@ -1,6 +1,9 @@
 """
 Unit tests for synthesis — Pydantic schemas, citation verification,
-pipeline-derived confidence, and out-of-corpus short-circuit.
+pipeline-derived confidence, LLM refusal branch, and the empty-chunks guard.
+
+The RRF-threshold short-circuit was removed in Week 5 Step 2b (see
+docs/week5_failure_analysis.md); tests that exercised that branch are gone.
 
 All OpenAI calls are mocked; no network I/O.
 """
@@ -23,7 +26,6 @@ from synthesis.synthesiser import (
     CITATION_SATURATION,
     MARGIN_NORMALISER,
     OUT_OF_CORPUS_ANSWER,
-    OUT_OF_CORPUS_RRF_THRESHOLD,
     SCORE_NORMALISER,
     Synthesiser,
     _compute_confidence,
@@ -135,7 +137,7 @@ def test_compute_confidence_returns_score_and_all_four_signals(sample_chunks):
 
     assert 0.0 <= confidence <= 1.0
     for key in ("score_signal", "agreement_signal", "margin_signal",
-                "citation_signal", "out_of_corpus", "llm_refusal"):
+                "citation_signal", "llm_refusal"):
         assert key in signals
 
 
@@ -195,7 +197,7 @@ def test_compute_confidence_score_uses_normaliser():
 
 
 # ---------------------------------------------------------------------------
-# Synthesiser — out-of-corpus and LLM-refusal branches, no live API
+# Synthesiser — empty-chunks guard and LLM-refusal branch, no live API
 # ---------------------------------------------------------------------------
 
 def _stub_synthesiser() -> Synthesiser:
@@ -203,31 +205,16 @@ def _stub_synthesiser() -> Synthesiser:
     return Synthesiser(api_key="test-key-not-used")
 
 
-def test_synthesise_short_circuits_when_top_rrf_below_threshold():
-    """Out-of-corpus: top RRF below threshold → LLM never called, $0 cost."""
-    synth = _stub_synthesiser()
-
-    weak_chunks = [
-        {"rrf_score": OUT_OF_CORPUS_RRF_THRESHOLD - 0.005, "doc_id": "X",
-         "chunk_index": 0, "text": "irrelevant"}
-    ]
-
-    with patch.object(synth._client.beta.chat.completions, "parse") as mock_parse:
-        result = synth.synthesise("what is the meaning of life?", weak_chunks)
-
-    mock_parse.assert_not_called(), "LLM must not be called on out-of-corpus queries"
-    assert result["brief"].answer == OUT_OF_CORPUS_ANSWER
-    assert result["brief"].confidence == 0.0
-    assert result["cost_usd"] == 0.0
-    assert result["confidence_signals"]["out_of_corpus"] is True
-
-
 def test_synthesise_empty_chunks_short_circuits():
+    """Zero retrieved chunks → LLM never called; return canonical refusal."""
     synth = _stub_synthesiser()
     with patch.object(synth._client.beta.chat.completions, "parse") as mock_parse:
         result = synth.synthesise("anything", [])
     mock_parse.assert_not_called()
+    assert result["brief"].answer == OUT_OF_CORPUS_ANSWER
     assert result["brief"].confidence == 0.0
+    assert result["cost_usd"] == 0.0
+    assert result["confidence_signals"]["llm_refusal"] is False
 
 
 def test_synthesise_handles_llm_refusal(sample_chunks):

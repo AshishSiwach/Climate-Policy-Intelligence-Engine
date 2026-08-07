@@ -105,6 +105,25 @@ def hit_at_k(retrieved_chunks: list[dict], expected_docs: set[str], k: int) -> i
 
 
 # ---------------------------------------------------------------------------
+# chunk_type slice — added Week 5 Step 2b (CLAUDE.md) for table-retrieval eval
+# ---------------------------------------------------------------------------
+
+def table_fraction_at_k(retrieved_chunks: list[dict], k: int) -> float:
+    """
+    Fraction of top-k retrieved chunks that carry `chunk_type == "table"`.
+
+    Purely descriptive — does not need `expected_docs`. Applies to every query
+    (positive or negative). Higher = table chunks are surfacing; near-zero on
+    numeric queries would signal that Tier 2 heading injection isn't helping
+    the retriever find table pages.
+    """
+    top = retrieved_chunks[:k]
+    if not top:
+        return 0.0
+    return sum(1 for c in top if c.get("chunk_type") == "table") / len(top)
+
+
+# ---------------------------------------------------------------------------
 # Bonus: page-level in-range rate
 # ---------------------------------------------------------------------------
 
@@ -171,6 +190,7 @@ def evaluate_query(
         result[f"mrr@{k}"] = mrr_at_k(retrieved_chunks, expected_docs, k)
         result[f"ndcg@{k}"] = ndcg_at_k(retrieved_chunks, expected_docs, k)
         result[f"hit@{k}"] = hit_at_k(retrieved_chunks, expected_docs, k)
+        result[f"table_fraction@{k}"] = table_fraction_at_k(retrieved_chunks, k)
         page_rate = page_in_range_rate(retrieved_chunks, expected_sources, k)
         if page_rate is not None:
             result[f"page_in_range@{k}"] = page_rate

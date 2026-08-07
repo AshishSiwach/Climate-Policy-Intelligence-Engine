@@ -21,8 +21,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from evaluation.retrieval_metrics import aggregate_metrics, evaluate_query
+from evaluation.retrieval_metrics import aggregate_metrics, evaluate_query, table_fraction_at_k
 from retrieval import BM25Retriever, HybridRetriever
+from retrieval.institution_detector import detect_institutions
 
 # NOTE: synthesis.synthesiser is deliberately NOT imported at module load.
 # On Windows, importing it before DenseRetriever causes a downstream torch
@@ -74,8 +75,9 @@ def _score_positive(
     hybrid: HybridRetriever,
 ) -> dict:
     """Run pipeline + compute IR metrics for a non-negative query."""
+    institutions = detect_institutions(pair["question"])
     t0 = time.time()
-    chunks = hybrid.retrieve(pair["question"], top_k=RETRIEVAL_TOP_K)
+    chunks = hybrid.retrieve(pair["question"], top_k=RETRIEVAL_TOP_K, institutions=institutions)
     latency_ms = (time.time() - t0) * 1000
 
     metrics = evaluate_query(chunks, pair["expected_sources"], ks=KS)
@@ -84,9 +86,11 @@ def _score_positive(
         "id": pair["id"],
         "query_type": pair["query_type"],
         "probe": _extract_probe(pair.get("notes")),
+        "detected_institutions": institutions,
         "retrieval_latency_ms": round(latency_ms, 1),
         "top_rrf": round(chunks[0]["rrf_score"], 6) if chunks else 0.0,
         "retrieved_doc_ids": [c["doc_id"] for c in chunks[:5]],
+        "retrieved_chunk_types": [c.get("chunk_type", "prose") for c in chunks[:5]],
         **metrics,
     }
 
@@ -99,20 +103,26 @@ def _score_negative(pair: dict, hybrid: HybridRetriever) -> dict:
     (Prior versions used an RRF-threshold-based `correctly_rejected` field;
     removed in Week 5 2b after calibration showed the threshold was net-harmful.)
     """
+    institutions = detect_institutions(pair["question"])
     t0 = time.time()
-    chunks = hybrid.retrieve(pair["question"], top_k=RETRIEVAL_TOP_K)
+    chunks = hybrid.retrieve(pair["question"], top_k=RETRIEVAL_TOP_K, institutions=institutions)
     latency_ms = (time.time() - t0) * 1000
 
     top_rrf = chunks[0]["rrf_score"] if chunks else 0.0
 
-    return {
+    row = {
         "id": pair["id"],
         "query_type": pair["query_type"],
         "probe": _extract_probe(pair.get("notes")),
+        "detected_institutions": institutions,
         "retrieval_latency_ms": round(latency_ms, 1),
         "top_rrf": round(top_rrf, 6),
         "retrieved_doc_ids": [c["doc_id"] for c in chunks[:5]],
+        "retrieved_chunk_types": [c.get("chunk_type", "prose") for c in chunks[:5]],
     }
+    for k in KS:
+        row[f"table_fraction@{k}"] = table_fraction_at_k(chunks, k)
+    return row
 
 
 def _aggregate_by_slice(

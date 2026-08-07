@@ -680,5 +680,85 @@
       }
     ],
     "notes": "[PROBE: underspecified] [SOURCE: claude-assisted] Vague 'what should i know' framing. Expected behaviour: low confidence + hedged multi-source answer."
+  },
+  {
+    "id": "probe_table_weo_solar_lcoe",
+    "query_type": "numeric",
+    "question": "weo 2025: what does the iea project for the decline in solar pv costs by 2035",
+    "expected_answer": "IEA WEO 2025 (Stated Policies Scenario) projects that solar PV costs decline by about 40% from 2024 to 2035; batteries decline about 30% and onshore wind about 10% over the same period.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          201,
+          202
+        ]
+      }
+    ],
+    "notes": "[PROBE: table_only] Numeric extraction from table page (chunk_type=table). [STATUS: final]"
+  },
+  {
+    "id": "probe_table_boe_tfsme_waci",
+    "query_type": "numeric",
+    "question": "boe disclosure 2024: what was the scope 1 and 2 waci of the tfsme in 2024 and how did it change from 2023",
+    "expected_answer": "The Scope 1 and 2 WACI for the TFSME (Term Funding Scheme with additional incentives for SMEs) increased marginally to 5.0 tCO2/GBPmn revenue in 2024 from 4.2 tCO2/GBPmn revenue in 2023. Scope 1 and 2 financed emissions for the TFSME were 0.1 MtCO2e.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          34,
+          35
+        ]
+      }
+    ],
+    "notes": "[PROBE: table_only] Prose surrounding financial-metric table (chunk labelled prose but contains numerical portfolio data). [STATUS: final]"
+  },
+  {
+    "id": "probe_table_ccc_prog24_buildings_rollback",
+    "query_type": "factual",
+    "question": "ccc progress 2024: which sector saw policy rollback that increased delivery risk against the 2030 ndc",
+    "expected_answer": "The buildings sector saw policy rollback that offset some improvement in the CCC assessment and increased delivery risk. Credible plans exist for around 32% of the required emissions reductions for the 2030 NDC; buildings-sector rollback is called out as a specific driver of the shortfall.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          70,
+          71
+        ]
+      }
+    ],
+    "notes": "[PROBE: table_only] Probe targets the RAG-status assessment tables in CCC Progress reports (traffic-light table cells do not extract; prose surround carries the signal). Known limitation probe. [STATUS: final]"
+  },
+  {
+    "id": "probe_table_seventh_cb_transport_shift",
+    "query_type": "numeric",
+    "question": "seventh cb: how much additional car demand does the contingency scenario shift to public transport or active travel by 2035",
+    "expected_answer": "The Seventh Carbon Budget explores a contingency for a further 3% of car demand to be switched to public transport or active travel by 2035, on top of the baseline modal shift assumptions.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          152,
+          153
+        ]
+      }
+    ],
+    "notes": "[PROBE: table_only] Sector-level numeric extraction from Seventh CB transport chapter. [STATUS: final]"
+  },
+  {
+    "id": "probe_table_weo_electricity_2035",
+    "query_type": "numeric",
+    "question": "weo 2025: what does the stated policies scenario project for global electricity generation by 2035",
+    "expected_answer": "The 2025 STEPS projects over 44,000 TWh of global electricity generation worldwide in 2035, which is around 4% more than in the 2024 STEPS version. Higher electricity demand from data centres is a driver.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          35,
+          36
+        ]
+      }
+    ],
+    "notes": "[PROBE: table_only] Overview-chapter numeric drawn from a table page (chunk_type=table). [STATUS: final]"
   }
 ]

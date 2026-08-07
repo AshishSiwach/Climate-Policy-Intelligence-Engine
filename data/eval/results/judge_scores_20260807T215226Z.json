@@ -1,0 +1,2786 @@
+{
+  "timestamp": "2026-08-07T21:52:26.197571+00:00",
+  "n_queries": 52,
+  "n_scored": 52,
+  "wall_time_sec": 302.7,
+  "config": {
+    "retrieval_top_k": 5,
+    "synthesis_model": "gpt-4o-mini",
+    "judge_model": "gpt-5.4-mini",
+    "metadata_filter_enabled": true
+  },
+  "cost_summary": {
+    "synthesis_total_usd": 0.027557,
+    "judge_total_usd": 0.149299,
+    "total_usd": 0.176856
+  },
+  "overall_judge": {
+    "n_expected_docs": 1.186046511627907,
+    "synthesis_latency_ms": 3657.321153846154,
+    "mrr@5": 0.8844961240310077,
+    "hit@5": 0.9534883720930233,
+    "faithfulness": 4.230769230769231,
+    "synthesis_cost_usd": 0.0005299423076923077,
+    "retrieval_latency_ms": 193.06730769230768,
+    "ndcg@5": 0.8942931435060248,
+    "page_in_range@5": 0.2601010101010101,
+    "precision@5": 0.7224806201550388,
+    "correctness": 3.9615384615384617,
+    "judge_latency_ms": 1969.7730769230768,
+    "top_rrf": 0.029370846153846157,
+    "generated_citation_count": 2.4038461538461537,
+    "completeness": 3.3076923076923075,
+    "judge_cost_usd": 0.0028711346153846152,
+    "recall@5": 0.9069767441860465,
+    "table_fraction@5": 0.15348837209302327,
+    "refusal_appropriateness": 4.846153846153846
+  },
+  "by_query_type": {
+    "factual": {
+      "n_expected_docs": 1.1379310344827587,
+      "synthesis_latency_ms": 4258.81724137931,
+      "mrr@5": 0.845977011494253,
+      "hit@5": 0.9310344827586207,
+      "faithfulness": 4.172413793103448,
+      "synthesis_cost_usd": 0.0005685862068965517,
+      "retrieval_latency_ms": 266.6896551724138,
+      "ndcg@5": 0.8626853266312323,
+      "page_in_range@5": 0.24710144927536232,
+      "precision@5": 0.6862068965517241,
+      "correctness": 4.0344827586206895,
+      "judge_latency_ms": 2048.634482758621,
+      "top_rrf": 0.029648827586206898,
+      "generated_citation_count": 2.9310344827586206,
+      "completeness": 3.206896551724138,
+      "judge_cost_usd": 0.002936551724137931,
+      "recall@5": 0.896551724137931,
+      "table_fraction@5": 0.1724137931034483,
+      "refusal_appropriateness": 5.0,
+      "n": 29
+    },
+    "summarisation": {
+      "n_expected_docs": 1.0,
+      "synthesis_latency_ms": 5201.15,
+      "mrr@5": 0.75,
+      "hit@5": 1.0,
+      "faithfulness": 4.0,
+      "synthesis_cost_usd": 0.000561,
+      "retrieval_latency_ms": 106.19999999999999,
+      "ndcg@5": 0.8803197841178518,
+      "page_in_range@5": 0.1,
+      "precision@5": 0.75,
+      "correctness": 3.0,
+      "judge_latency_ms": 1961.65,
+      "top_rrf": 0.032138,
+      "generated_citation_count": 3.5,
+      "completeness": 2.0,
+      "judge_cost_usd": 0.002636,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.0,
+      "refusal_appropriateness": 5.0,
+      "n": 2
+    },
+    "numeric": {
+      "n_expected_docs": 1.0,
+      "synthesis_latency_ms": 2840.2625,
+      "mrr@5": 1.0,
+      "hit@5": 1.0,
+      "faithfulness": 4.375,
+      "synthesis_cost_usd": 0.000487,
+      "retrieval_latency_ms": 114.7125,
+      "ndcg@5": 0.9782182780853588,
+      "page_in_range@5": 0.3375,
+      "precision@5": 0.8541666666666666,
+      "correctness": 3.875,
+      "judge_latency_ms": 2009.8874999999998,
+      "top_rrf": 0.032126625,
+      "generated_citation_count": 1.75,
+      "completeness": 3.375,
+      "judge_cost_usd": 0.002890125,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.2,
+      "refusal_appropriateness": 5.0,
+      "n": 8
+    },
+    "cross_document": {
+      "n_expected_docs": 2.0,
+      "synthesis_cost_usd": 0.0005875,
+      "synthesis_latency_ms": 3982.7999999999997,
+      "retrieval_latency_ms": 102.325,
+      "mrr@5": 1.0,
+      "top_rrf": 0.0240135,
+      "ndcg@5": 0.9625862263836886,
+      "hit@5": 1.0,
+      "generated_citation_count": 3.25,
+      "recall@5": 0.75,
+      "table_fraction@5": 0.0,
+      "precision@5": 0.7083333333333333,
+      "faithfulness": 4.25,
+      "correctness": 3.75,
+      "completeness": 2.5,
+      "refusal_appropriateness": 5.0,
+      "judge_latency_ms": 2104.375,
+      "judge_cost_usd": 0.0031135,
+      "n": 4
+    },
+    "negative": {
+      "synthesis_cost_usd": 0.0004111111111111111,
+      "synthesis_latency_ms": 1957.7111111111112,
+      "retrieval_latency_ms": 85.12222222222222,
+      "generated_citation_count": 0.6666666666666666,
+      "top_rrf": 0.027791666666666666,
+      "refusal_appropriateness": 4.111111111111111,
+      "faithfulness": 4.333333333333333,
+      "completeness": 4.222222222222222,
+      "correctness": 4.111111111111111,
+      "judge_latency_ms": 1621.9888888888888,
+      "judge_cost_usd": 0.002588,
+      "n": 9
+    }
+  },
+  "by_probe": {
+    "vocab_mismatch": {
+      "n_expected_docs": 1.0,
+      "synthesis_latency_ms": 3410.55,
+      "mrr@5": 1.0,
+      "hit@5": 1.0,
+      "faithfulness": 4.0,
+      "synthesis_cost_usd": 0.0005555,
+      "retrieval_latency_ms": 147.45,
+      "ndcg@5": 0.9837339917445846,
+      "page_in_range@5": 0.3666666666666667,
+      "precision@5": 0.75,
+      "correctness": 3.5,
+      "judge_latency_ms": 1862.85,
+      "top_rrf": 0.024073499999999998,
+      "generated_citation_count": 2.5,
+      "completeness": 3.5,
+      "judge_cost_usd": 0.0030685,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.1,
+      "refusal_appropriateness": 5.0,
+      "n": 2
+    },
+    "wording_variant": {
+      "n_expected_docs": 1.0,
+      "synthesis_cost_usd": 0.000453,
+      "synthesis_latency_ms": 2274.8999999999996,
+      "retrieval_latency_ms": 90.8,
+      "mrr@5": 1.0,
+      "top_rrf": 0.022915,
+      "ndcg@5": 1.0,
+      "hit@5": 1.0,
+      "generated_citation_count": 1.5,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.2,
+      "precision@5": 1.0,
+      "faithfulness": 4.5,
+      "correctness": 4.5,
+      "completeness": 3.5,
+      "refusal_appropriateness": 5.0,
+      "judge_latency_ms": 2555.7,
+      "judge_cost_usd": 0.002831,
+      "n": 2
+    },
+    "crossdoc_named": {
+      "n_expected_docs": 2.0,
+      "synthesis_cost_usd": 0.000592,
+      "synthesis_latency_ms": 3568.6,
+      "retrieval_latency_ms": 111.2,
+      "mrr@5": 1.0,
+      "top_rrf": 0.016393,
+      "ndcg@5": 1.0,
+      "hit@5": 1.0,
+      "generated_citation_count": 2.0,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.0,
+      "precision@5": 0.6666666666666666,
+      "faithfulness": 4.0,
+      "correctness": 4.0,
+      "completeness": 2.0,
+      "refusal_appropriateness": 5.0,
+      "judge_latency_ms": 2164.6,
+      "judge_cost_usd": 0.003294,
+      "n": 1
+    },
+    "vocab_shift": {
+      "n_expected_docs": 1.0,
+      "synthesis_latency_ms": 3045.18,
+      "mrr@5": 1.0,
+      "hit@5": 1.0,
+      "faithfulness": 4.2,
+      "synthesis_cost_usd": 0.0005104,
+      "retrieval_latency_ms": 86.96,
+      "ndcg@5": 0.9965784163913376,
+      "page_in_range@5": 0.3,
+      "precision@5": 0.7666666666666667,
+      "correctness": 3.8,
+      "judge_latency_ms": 1800.9,
+      "top_rrf": 0.0282354,
+      "generated_citation_count": 2.0,
+      "completeness": 3.0,
+      "judge_cost_usd": 0.0028354,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.4,
+      "refusal_appropriateness": 5.0,
+      "n": 5
+    },
+    "colloquial": {
+      "n_expected_docs": 1.0,
+      "synthesis_latency_ms": 4709.0599999999995,
+      "mrr@5": 0.6,
+      "hit@5": 0.6,
+      "faithfulness": 4.0,
+      "synthesis_cost_usd": 0.000606,
+      "retrieval_latency_ms": 83.46000000000001,
+      "ndcg@5": 0.5839441578296375,
+      "page_in_range@5": 0.04,
+      "precision@5": 0.4666666666666667,
+      "correctness": 3.4,
+      "judge_latency_ms": 1847.4,
+      "top_rrf": 0.0317244,
+      "generated_citation_count": 2.6,
+      "completeness": 2.6,
+      "judge_cost_usd": 0.0029966,
+      "recall@5": 0.6,
+      "table_fraction@5": 0.08,
+      "refusal_appropriateness": 5.0,
+      "n": 5
+    },
+    "adversarial_negative": {
+      "synthesis_cost_usd": 0.0004913333333333333,
+      "synthesis_latency_ms": 3015.7999999999997,
+      "retrieval_latency_ms": 87.53333333333335,
+      "generated_citation_count": 1.0,
+      "top_rrf": 0.030451333333333334,
+      "refusal_appropriateness": 2.3333333333333335,
+      "faithfulness": 3.6666666666666665,
+      "completeness": 2.6666666666666665,
+      "correctness": 2.6666666666666665,
+      "judge_latency_ms": 1705.8666666666668,
+      "judge_cost_usd": 0.0027410000000000004,
+      "n": 3
+    },
+    "underspecified": {
+      "n_expected_docs": 3.0,
+      "synthesis_cost_usd": 0.0006735,
+      "synthesis_latency_ms": 5719.2,
+      "retrieval_latency_ms": 74.1,
+      "mrr@5": 0.35,
+      "top_rrf": 0.024329500000000004,
+      "ndcg@5": 0.5054516636191897,
+      "hit@5": 1.0,
+      "generated_citation_count": 5.0,
+      "recall@5": 0.5,
+      "table_fraction@5": 0.1,
+      "precision@5": 0.45,
+      "faithfulness": 3.5,
+      "correctness": 3.5,
+      "completeness": 2.5,
+      "refusal_appropriateness": 5.0,
+      "judge_latency_ms": 3998.3,
+      "judge_cost_usd": 0.0030740000000000003,
+      "n": 2
+    },
+    "table_only": {
+      "n_expected_docs": 1.0,
+      "synthesis_latency_ms": 2544.48,
+      "mrr@5": 1.0,
+      "hit@5": 1.0,
+      "faithfulness": 4.8,
+      "synthesis_cost_usd": 0.0004676,
+      "retrieval_latency_ms": 95.78,
+      "ndcg@5": 0.991165918646351,
+      "page_in_range@5": 0.25,
+      "precision@5": 0.9,
+      "correctness": 4.4,
+      "judge_latency_ms": 2077.04,
+      "top_rrf": 0.0323734,
+      "generated_citation_count": 1.6,
+      "completeness": 3.6,
+      "judge_cost_usd": 0.0028252,
+      "recall@5": 1.0,
+      "table_fraction@5": 0.2,
+      "refusal_appropriateness": 5.0,
+      "n": 5
+    }
+  },
+  "negatives": {
+    "n": 9,
+    "n_handled_well": 7,
+    "handled_well_rate": 0.7778,
+    "mean_refusal_appropriateness": 4.111
+  },
+  "per_query": [
+    {
+      "id": "ofgem_scope_300mw_02",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "Ofgem"
+      ],
+      "retrieval_latency_ms": 4845.4,
+      "top_rrf": 0.031319,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 6513.5,
+      "synthesis_cost_usd": 0.000653,
+      "synthesis_tokens": {
+        "prompt": 2593,
+        "completion": 440
+      },
+      "generated_answer": "The load control activities and appliances that fall within the scope of Ofgem's licensing regime include:  \n- Performing the function of a Load Controller, defined as creating, changing, or sending load control signals to Energy Smart Appliances (ESAs) for the purpose of effecting load control.  \n- Performing the function of a Flexibility Service Provider (FSP), defined as entering into a contract to provide load control to an ESA at a consumer’s premises.  \nThese activities are collectively referred to as ‘load control activities’ (Excerpt 1).  \n\nRegarding the 300MW threshold, Ofgem distinguishes between Load Controllers that control a maximum aggregate potential load of below 300MW and those controlling loads equal to or greater than 300MW. This distinction is made to ensure that cyber security requirements placed on organizations are proportionate to the level of risk (Excerpt 1).",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1792.2,
+      "judge_cost_usd": 0.003122,
+      "judge_tokens": {
+        "prompt": 3160,
+        "completion": 167
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer correctly identifies the two licensable activities and the 300MW split, but it omits the specific in-scope appliance examples listed in the reference.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved chunks, though the phrasing about appliances is generic and not fully grounded in the provided evidence.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the activities and threshold but misses the key appliance categories such as private EVs, EV smart charge points, smart electric heating appliances, and smart battery storage.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "ofgem_cyber_03",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "Ofgem"
+      ],
+      "retrieval_latency_ms": 114.7,
+      "top_rrf": 0.032787,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 6184.6,
+      "synthesis_cost_usd": 0.000614,
+      "synthesis_tokens": {
+        "prompt": 1944,
+        "completion": 538
+      },
+      "generated_answer": "Ofgem proposes different cyber security requirements for Load Controllers based on their maximum aggregate load. For Load Controllers controlling aggregate load below 300MW, they must comply with all requirements set out in the licence on cyber security, grid stability, management, and financial requirements, but not consumer protections. In contrast, Load Controllers controlling aggregate load above 300MW must also comply with the same requirements, but they will be designated as Operators and will adhere to additional regulations under the NIS (Network and Information Systems) regulations. Specifically, a ‘Tier 2’ CAF profile is being developed for below 300MW Load Controllers to assess and improve their cyber security and resilience, while those above 300MW will follow the NIS regulations instead of the load control licence requirements. \n\nIn summary:\n- **Below 300MW**: Comply with cyber security, grid stability, management, and financial requirements (no consumer protections).\n- **Above 300MW**: Comply with the same requirements plus NIS regulations, and designated as Operators.",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 1926.1,
+      "judge_cost_usd": 0.00277,
+      "judge_tokens": {
+        "prompt": 2542,
+        "completion": 192
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer matches the reference on the below/above 300MW split and the Tier 2 CAF vs NIS distinction, but it omits the specific Tier 1 CAF profile and the CAF self-assessment/statement of intent details.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the retrieved chunks, but the Tier 1 CAF profile and the self-assessment/statement of intent are not directly grounded in the provided passages.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the main regulatory difference by threshold, but misses the reference’s points about Tier 1 CAF for above 300MW and the applicant submission requirements by the government deadline.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "ofgem_summary_04",
+      "query_type": "summarisation",
+      "probe": null,
+      "detected_institutions": [
+        "Ofgem"
+      ],
+      "retrieval_latency_ms": 120.6,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 7312.0,
+      "synthesis_cost_usd": 0.000736,
+      "synthesis_tokens": {
+        "prompt": 2146,
+        "completion": 691
+      },
+      "generated_answer": "Ofgem's key proposals in the Smart Secure Electricity Systems (SSES) load control licensing consultation include the following:\n\n1. **Implementation of a New Licensing Regime**: Ofgem proposes a new licensing regime for load control, which will regulate arrangements delivered via Energy Smart Appliances (ESAs) such as EV chargers and heat pumps. This aims to ensure consumer protection, cyber security, and grid stability. The regulations are expected to come into effect by the end of 2026, with a licensing requirement for load control activities starting by the end of 2027 after a 12-month transition period (Excerpt 3).\n\n2. **Consultation Process**: The consultation seeks feedback on Ofgem's proposed approach to implementing the load control licensing regime, developed in collaboration with the Department for Energy Security and Net Zero (DESNZ). This includes a draft load control consumer protection guidance (Excerpt 1, Excerpt 2).\n\n3. **Strategic Approach and Policy Principles**: Ofgem outlines strategic approaches and Licence Policy Principles that will guide the implementation, including enabling vibrant markets and effective regulation to support innovation and monitor compliance (Excerpt 5).\n\n4. **Application Process**: The consultation details the proposed load control licence application process, including evidence requirements and tailored routes for different types of applicants, along with expected timescales for applications (Excerpt 4).\n\n5. **Monitoring and Compliance**: Ofgem intends to oversee the regime through a structured monitoring approach, ensuring compliance and enforcement of the licensing requirements (Excerpt 3, Excerpt 4).",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 2193.3,
+      "judge_cost_usd": 0.003048,
+      "judge_tokens": {
+        "prompt": 2864,
+        "completion": 200
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer captures the broad consultation themes but misses several reference-specific proposals such as the two licensable activities, dual-track application process, tiered cyber security threshold, and cost recovery mechanism.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most statements are supported by the retrieved chunks, though some details like the specific monitoring/compliance structure and consumer protection guidance are only loosely grounded or inferred.",
+        "completeness": 2,
+        "completeness_rationale": "It covers the new regime, collaboration with DESNZ, and application/monitoring themes, but omits multiple key points from the reference including the dual-track process, 300MW cyber tiers, three-tier monitoring, risk-based enforcement, and licence-fee levy recovery.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive summarisation query, and the system appropriately provided an answer rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "zev_min_requirements_07",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 113.6,
+      "top_rrf": 0.031754,
+      "retrieved_doc_ids": [
+        "DESNZ_ZEV_MANDATE_2023"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 2765.7,
+      "synthesis_cost_usd": 0.000475,
+      "synthesis_tokens": {
+        "prompt": 2548,
+        "completion": 154
+      },
+      "generated_answer": "To count as a Zero Emission Vehicle (ZEV) under the mandate, a vehicle must meet the following minimum requirement: it must have \"0g CO2/km according to the Worldwide Harmonized Light Vehicles Test Procedure (WLTP).\" This definition includes fuel cell electric vehicles classified as 0g CO2/km, and any vehicle, regardless of drivetrain technology, could qualify as a ZEV if it emits 0 g CO2/km.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 2381.3,
+      "judge_cost_usd": 0.003011,
+      "judge_tokens": {
+        "prompt": 3031,
+        "completion": 164
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer correctly states the core ZEV definition as 0g CO2/km under WLTP and includes fuel-cell vehicles, but it omits the minimum range, battery warranty, and exclusion of other GHGs from the reference.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every claim in the generated answer is directly supported by Chunk 2, with no unsupported additions.",
+        "completeness": 2,
+        "completeness_rationale": "It covers only the emissions-based definition and misses the other key minimum requirements in the reference, especially range and warranty criteria.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 5,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "zev_trajectory_num_08",
+      "query_type": "numeric",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 125.1,
+      "top_rrf": 0.030886,
+      "retrieved_doc_ids": [
+        "DESNZ_ZEV_MANDATE_2023",
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "CCC_PROGRESS_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.3333333333333333,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9197207891481876,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 0.5,
+      "synthesis_latency_ms": 3227.1,
+      "synthesis_cost_usd": 0.00048,
+      "synthesis_tokens": {
+        "prompt": 2102,
+        "completion": 274
+      },
+      "generated_answer": "The annual ZEV uptake targets for new cars and vans from 2024 to 2030 are as follows:\n\nFor cars:\n- 2024: 22%\n- 2025: Not specified\n- 2026: Not specified\n- 2027: Not specified\n- 2028: Not specified\n- 2029: Not specified\n- 2030: 80%\n\nFor vans:\n- 2024: 10%\n- 2025: 16%\n- 2026: 24%\n- 2027: 34%\n- 2028: 46%\n- 2029: 58%\n- 2030: 70%",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1542.6,
+      "judge_cost_usd": 0.002783,
+      "judge_tokens": {
+        "prompt": 2666,
+        "completion": 174
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer gets the 2024 and 2030 targets right and all van targets right, but it omits the intermediate car targets that are present in the reference.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most of the stated figures are supported by the retrieved chunks, though the car targets for 2025-2029 are left unspecified despite being available in the corpus.",
+        "completeness": 3,
+        "completeness_rationale": "It fully covers the van schedule but misses most of the car schedule and the note about 2031-2035 rising to 100% in later legislation.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive numeric query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "zev_payments_num_09",
+      "query_type": "numeric",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 131.3,
+      "top_rrf": 0.032002,
+      "retrieved_doc_ids": [
+        "DESNZ_ZEV_MANDATE_2023"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 1.0,
+      "synthesis_latency_ms": 3720.1,
+      "synthesis_cost_usd": 0.000512,
+      "synthesis_tokens": {
+        "prompt": 2395,
+        "completion": 254
+      },
+      "generated_answer": "The final compliance payment levels under the ZEV mandate are £15,000 per car and £9,000 for vans in 2024, which will rise to £18,000 for the rest of the regulation’s timeframe. For the non-ZEV CO2 standard, the compliance payment remains at £86 per gram (or fraction of a gram) of CO2 above the manufacturer’s target multiplied by the number of non-ZEV cars or vans sold.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1870.6,
+      "judge_cost_usd": 0.002897,
+      "judge_tokens": {
+        "prompt": 2860,
+        "completion": 167
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The generated answer matches the reference on both the ZEV mandate payment levels and the non-ZEV CO2 standard payment formula, including the van timing detail.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every stated figure and condition is directly supported by the retrieved chunks, especially chunks 2, 3, and 4.",
+        "completeness": 5,
+        "completeness_rationale": "It covers all key points from the reference: car and van ZEV payments, the 2024-only van exception, and the non-ZEV CO2 per-gram formula.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a numeric factual query, and the system appropriately answered it without refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_key_fossil_11",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 127.7,
+      "top_rrf": 0.032266,
+      "retrieved_doc_ids": [
+        "BOE_CBES_KEY_ELEMENTS_2021",
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9828920819566879,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.75,
+      "synthesis_latency_ms": 4367.3,
+      "synthesis_cost_usd": 0.000526,
+      "synthesis_tokens": {
+        "prompt": 2356,
+        "completion": 288
+      },
+      "generated_answer": "The CBES transition scenarios assume that fossil fuels will be almost entirely replaced by renewables in the UK primary energy mix by 2050. Specifically, in both the Early Action and Late Action scenarios, it is projected that renewables will account for around 90% of UK energy needs by that time. This phase-out of fossil fuels is associated with significant improvements in energy efficiency and changes in regulation and user preferences. The transition is supported by policies aimed at decarbonising the energy supply and increasing the deployment of low-carbon technologies.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 2335.6,
+      "judge_cost_usd": 0.003019,
+      "judge_tokens": {
+        "prompt": 2831,
+        "completion": 199
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference on the key point that Early and Late Action scenarios nearly eliminate fossil fuels by 2050 and renewables supply about 90% of UK energy needs, though it omits the global-energy comparison and No Additional Action detail.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved chunks, but the mention of decarbonising the energy supply and increasing deployment of low-carbon technologies is a paraphrase that goes beyond the exact quoted phase-out statement.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the Early/Late Action outcome well but misses the reference’s No Additional Action scenario and the global 70%/75% energy-mix figures.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_key_transition_policies_12",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 119.5,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "BOE_CBES_KEY_ELEMENTS_2021",
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.5,
+      "synthesis_latency_ms": 3212.4,
+      "synthesis_cost_usd": 0.000481,
+      "synthesis_tokens": {
+        "prompt": 2057,
+        "completion": 287
+      },
+      "generated_answer": "The CBES scenarios build in specific UK transition policies for buildings and vehicles as follows:\n\n1. **Energy Efficiency of Buildings**: The UK Government aims to ensure that as many homes as possible are improved to Energy Performance Certificate (EPC) band C by 2035, where practical, cost-effective, and affordable. Additionally, the Government aims to increase annual heat pump installation to 600,000 by 2028 as part of its Clean Growth Strategy.\n\n2. **Deployment of Electric Vehicles**: The CBES scenarios incorporate assumptions about the use of internal combustion engine and hybrid vehicles, aligning with the UK Government's targets for reducing emissions from these vehicles. However, specific policies related to electric vehicles are not detailed in the excerpts provided.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1642.2,
+      "judge_cost_usd": 0.002806,
+      "judge_tokens": {
+        "prompt": 2577,
+        "completion": 194
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer correctly captures the EPC band C by 2035 and 600,000 heat pumps by 2028, but it omits the 2030 ICE ban, the 2035 hybrid ban, and the EPC-below-E unmarketable assumption.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved building-policy chunk, but the vehicle-policy statement is vague and the answer adds an unsupported claim that specific EV policies are not detailed in the excerpts.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the main buildings policies but misses key vehicle transition policies and the 2035 unmarketable threshold for domestic properties below EPC band E.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_key_gdp_num_13",
+      "query_type": "numeric",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 110.7,
+      "top_rrf": 0.032258,
+      "retrieved_doc_ids": [
+        "BOE_CBES_KEY_ELEMENTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 4458.3,
+      "synthesis_cost_usd": 0.000641,
+      "synthesis_tokens": {
+        "prompt": 2634,
+        "completion": 409
+      },
+      "generated_answer": "The estimated UK GDP impacts relative to the counterfactual by the end of each scenario are as follows:\n\n1. **Early Action Scenario**: UK GDP is around **1.4% below** the counterfactual.\n   - Citation: \"By 2050, the level of UK GDP is around 1.4% below a (purely hypothetical) counterfactual path in which there are no additional headwinds from climate risks.\" (Excerpt 2)\n\n2. **Late Action Scenario**: The peak GDP impact relative to the counterfactual is around **-4.6%** by the end of the scenario.\n   - Citation: \"For the UK, the peak GDP impact relative to the counterfactual is around -8% in 2033.\" (Excerpt 5)\n\n3. **No Additional Action Scenario**: UK GDP is around **8% below** the counterfactual after 30 years.\n   - Citation: \"After 30 years, the level of UK GDP is around 8% below the level it hypothetically might have been in the absence of climate risks.\" (Excerpt 4)",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 2314.7,
+      "judge_cost_usd": 0.003302,
+      "judge_tokens": {
+        "prompt": 3233,
+        "completion": 195
+      },
+      "judge_scores": {
+        "correctness": 2,
+        "correctness_rationale": "The Early Action figure is correct, but the Late Action answer incorrectly substitutes the peak -8% impact for the end-of-scenario -4.6%, and the No Additional Action figure is rounded to 8% instead of the reference 7.8%.",
+        "faithfulness": 2,
+        "faithfulness_rationale": "Only the Early Action claim is directly supported by the retrieved chunks; the Late Action end-of-scenario value is unsupported and the answer mixes in a different peak-impact statement from the chunks.",
+        "completeness": 3,
+        "completeness_rationale": "The answer covers all three scenarios, but it misses the precise Late Action end-of-scenario value and the exact No Additional Action percentage from the reference.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive numeric query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 2,
+      "faithfulness": 2,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_results_aggregate_losses_14",
+      "query_type": "factual",
+      "probe": "vocab_mismatch",
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 137.2,
+      "top_rrf": 0.031754,
+      "retrieved_doc_ids": [
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.4,
+      "synthesis_latency_ms": 2848.9,
+      "synthesis_cost_usd": 0.000502,
+      "synthesis_tokens": {
+        "prompt": 2317,
+        "completion": 258
+      },
+      "generated_answer": "The Bank of England's climate scenario exercise indicates that climate risks could lead to a persistent and material drag on the profitability of banks and insurers, with loss projections suggesting an annual drag on profits of around 10-15% on average. This could make individual firms and the financial system more vulnerable to future shocks (Excerpt 1). Additionally, banks' projected climate-related credit losses were 30% higher in the Late Action scenario than in the Early Action scenario, with losses in the Late Action scenario projected to exceed £110 billion over the period (Excerpt 5).",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1751.4,
+      "judge_cost_usd": 0.002893,
+      "judge_tokens": {
+        "prompt": 2789,
+        "completion": 178
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer correctly states the 10-15% annual profit drag and the persistent material profitability impact, but it adds the £110 billion Late Action detail that is not part of the reference answer to this question.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved chunks, though the extra £110 billion comparison is an unsupported addition relative to the asked point.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the profitability drag and mentions losses, but it omits the key uncertainty finding that loss-rate estimates on the same corporate counterparties can differ by roughly ten times.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_results_maturity_15",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 106.8,
+      "top_rrf": 0.032018,
+      "retrieved_doc_ids": [
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 3995.1,
+      "synthesis_cost_usd": 0.000608,
+      "synthesis_tokens": {
+        "prompt": 2435,
+        "completion": 404
+      },
+      "generated_answer": "The CBES concluded that UK banks and insurers are making good progress in some aspects of climate risk management, but they still need to do much more to fully understand and manage their exposure to climate risks. The exercise has spurred participating firms to develop their risk management capabilities further, but significant gaps remain, particularly in data collection and analysis. The Bank's assessment indicates that without further improvement in their capabilities, banks and insurers will struggle to accurately reflect climate risks in their business decisions, which is crucial for their long-term financial resilience and for supporting the economy's transition to net zero.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1532.6,
+      "judge_cost_usd": 0.002948,
+      "judge_tokens": {
+        "prompt": 2916,
+        "completion": 169
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference’s core conclusion that firms made progress but still need to do considerably more, including on data and understanding exposures.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Nearly all claims are supported by the retrieved chunks, though the final sentence about long-term financial resilience and supporting the transition to net zero goes beyond the specific asked conclusion.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the main conclusion and the spurred capability development, but omits the explicit point about counterparties’ and customers’ transition plans and the SS3/19 consistency.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This was a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 4,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_measuring_challenges_17",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 149.4,
+      "top_rrf": 0.031319,
+      "retrieved_doc_ids": [
+        "BOE_CBES_RESULTS_2021",
+        "BOE_MEASURING_CLIMATE_RISKS",
+        "BOE_DISCLOSURE_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.3333333333333333,
+      "mrr@5": 0.5,
+      "ndcg@5": 0.6240505200038379,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.5,
+      "synthesis_latency_ms": 6334.4,
+      "synthesis_cost_usd": 0.000653,
+      "synthesis_tokens": {
+        "prompt": 2136,
+        "completion": 555
+      },
+      "generated_answer": "The Bank identifies several data and modelling challenges in scenario-based measurement of climate risk. Firstly, there is a \"lack of standardised data of sufficient quality to underpin the measurement, assessment, and modelling of climate-related risks\" (Excerpt 1). Additionally, banks face difficulties in accurately quantifying the level of risk they are exposed to, as their overall ability to model climate risk is described as being at an early stage (Excerpt 1). Furthermore, the assessment of physical risks is hampered by a \"lack of readily available modelling solutions,\" with few firms assessing risks beyond those from inland floods and tropical cyclones (Excerpt 4). Banks also struggle with incomplete data, often having to make estimates and assumptions for exposures where data are unavailable or missing (Excerpt 4). This leads to challenges in accurately estimating potential losses, particularly due to the absence of up-to-date Energy Performance Certificate (EPC) ratings for much of the UK’s housing stock and the limited availability of sophisticated modelling tools (Excerpt 4). Lastly, the challenge of using climate scenarios is highlighted by the uncertainty in how climate change impacts the frequency and severity of flood events across specific locations, making national averages insufficient for meaningful risk assessments (Excerpt 5).",
+      "generated_citation_count": 6,
+      "judge_latency_ms": 1828.7,
+      "judge_cost_usd": 0.002788,
+      "judge_tokens": {
+        "prompt": 2733,
+        "completion": 164
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference by emphasizing that climate risks are hard to quantify and that scenario-based asset-level analysis is limited by modelling and data constraints.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim is supported by the retrieved chunks, including data quality gaps, incomplete data, limited modelling tools, and uncertainty in local flood-risk impacts.",
+        "completeness": 5,
+        "completeness_rationale": "It covers all key points from the reference, including the inherent difficulty of quantifying climate risk and the limitations of extending macro scenarios to asset-level analysis.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_disclosure_scope_18",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 126.7,
+      "top_rrf": 0.031545,
+      "retrieved_doc_ids": [
+        "BOE_DISCLOSURE_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 6432.9,
+      "synthesis_cost_usd": 0.000502,
+      "synthesis_tokens": {
+        "prompt": 1560,
+        "completion": 446
+      },
+      "generated_answer": "The Bank of England's 2024 climate-related financial disclosure covers its approach to managing climate change risks across its policy functions and operations, specifically detailing its financial exposures. The disclosure includes information on the Bank's own securities holdings, which encompass both the Sterling Bond Portfolio and foreign exchange bonds. Additionally, it mentions that the climate metrics cover assets held on the Bank's balance sheet, as described in Table 3.A, and for the first time, it discloses data on the Term Funding Scheme with additional incentives for small and medium-sized enterprises (TFSME). Furthermore, the Bank's collateralised lending operations are generally excluded from these disclosures, but the new data on TFSME marks a significant addition to the report. The Bank also emphasizes its commitment to reducing emissions from its physical activities and measuring climate-related financial risks to its operations, while ensuring that these efforts do not adversely affect its primary objectives of monetary and financial stability.",
+      "generated_citation_count": 5,
+      "judge_latency_ms": 1770.9,
+      "judge_cost_usd": 0.002361,
+      "judge_tokens": {
+        "prompt": 2110,
+        "completion": 173
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer is broadly consistent with the reference but omits the explicit governance/strategy/risk management/metrics framing and the orderly transition to net zero pillar.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim is supported by the retrieved chunks, including the balance-sheet assets, securities holdings, TFSME disclosure, exclusions, and physical-operations emissions language.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the main exposure categories and emissions reporting, but misses the reference’s emphasis on governance, strategy, risk management, metrics, and the orderly economy-wide transition pillar.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered it without refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "boe_macro_channels_20",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 116.1,
+      "top_rrf": 0.032787,
+      "retrieved_doc_ids": [
+        "BOE_MACRO_IMPLICATIONS",
+        "BOE_DISCLOSURE_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.75,
+      "synthesis_latency_ms": 6074.6,
+      "synthesis_cost_usd": 0.000655,
+      "synthesis_tokens": {
+        "prompt": 2257,
+        "completion": 527
+      },
+      "generated_answer": "The Bank of England identifies several macroeconomic implications of climate change that are relevant for monetary policy. These include:\n\n1. **Shocks to Inflation and Activity**: Climate change is likely to be a source of shocks to inflation and economic activity, which can affect the overall economic landscape in which monetary policy operates. This is significant because it can lead to structural changes in the economy and reshape the longer-term macroeconomic environment (Excerpt 4).\n\n2. **Impact on Key Economic Variables**: Climate change influences key economic variables such as output and inflation, making it crucial for monetary policy makers to consider these effects when setting policy (Excerpt 2).\n\n3. **Transition to a Net-Zero Economy**: The transition to a net-zero economy involves less carbon-intensive investment, which can also have macroeconomic effects that need to be accounted for in monetary policy (Excerpt 2).\n\nThese implications matter for monetary policy because they can affect the conduct of monetary policy both in the short and long term. The Monetary Policy Committee (MPC) must navigate these challenges while maintaining its primary objective of price stability, which is set at an inflation target of 2% (Excerpt 4). Additionally, the MPC's remit has been updated to reflect the government's economic strategy for achieving sustainable growth that is consistent with the transition to a net-zero economy (Excerpt 4).",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 1604.0,
+      "judge_cost_usd": 0.00295,
+      "judge_tokens": {
+        "prompt": 2913,
+        "completion": 170
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference by identifying climate-related shocks to inflation and activity, effects on output/inflation, the net-zero transition, and the MPC’s 2% inflation-target mandate.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim is directly supported by the retrieved chunks, especially the summary and monetary policy considerations sections.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the main macroeconomic channels and why they matter, but omits the specific example of weather-related supply disruptions raising prices and the note that monetary policy cannot itself solve climate change.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "ccc_seventh_pathway_22",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "CCC"
+      ],
+      "retrieval_latency_ms": 143.4,
+      "top_rrf": 0.032018,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "CCC_PROGRESS_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9558295932317544,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 5363.1,
+      "synthesis_cost_usd": 0.000708,
+      "synthesis_tokens": {
+        "prompt": 2577,
+        "completion": 536
+      },
+      "generated_answer": "The CCC's Balanced Pathway is a framework that outlines how emissions in the UK can be reduced to meet the targets set by the Seventh Carbon Budget. It emphasizes the need for rapid emissions reductions across multiple sectors, particularly in surface transport, buildings, and agriculture, while continuing progress in the electricity sector. The Balanced Pathway indicates that by 2040, surface transport emissions must fall by 86% from 2023 levels, and residential buildings emissions by 66%. By 2050, remaining emissions, primarily from agriculture and aviation, are to be offset by carbon removals, achieving a net reduction in total emissions to zero in these sectors. The Seventh Carbon Budget is set at 535 MtCO2e for the period 2038-2042, requiring UK emissions to fall to 87% below 1990 levels, and it encompasses all greenhouse gases, including international aviation and shipping emissions. The Balanced Pathway thus serves as a critical guide for achieving these ambitious targets and ensuring a transition towards net zero emissions by 2050.",
+      "generated_citation_count": 5,
+      "judge_latency_ms": 1963.7,
+      "judge_cost_usd": 0.003324,
+      "judge_tokens": {
+        "prompt": 3148,
+        "completion": 214
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference’s core description of the Balanced Pathway as the emissions-reduction route to Net Zero and correctly links it to the Seventh Carbon Budget, though it adds extra detail not required by the reference.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the retrieved chunks, but the specific phrasing that it is a 'framework' and that it 'ensures a transition' is a mild extrapolation beyond the text.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the main points about the pathway, the budget level, and the net-zero trajectory, but it omits that the pathway is consistent with legislated carbon budgets and Nationally Determined Contributions and that it pairs emissions limits with sector pathways and associated actions while considering economic and social factors.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 4,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "ccc_prog25_transport_25",
+      "query_type": "factual",
+      "probe": "vocab_mismatch",
+      "detected_institutions": [
+        "CCC"
+      ],
+      "retrieval_latency_ms": 157.7,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "CCC_PROGRESS_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9674679834891693,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.3333333333333333,
+      "synthesis_latency_ms": 3972.2,
+      "synthesis_cost_usd": 0.000609,
+      "synthesis_tokens": {
+        "prompt": 2558,
+        "completion": 376
+      },
+      "generated_answer": "According to the CCC's 2025 progress report, surface transport emissions are on track, with car-kilometres per capita increasing by nearly 1% in 2024, although this remains 6% below 2019 levels. Van-kilometres per capita grew by nearly 3% and are now 8% above 2019 levels. The report indicates that the trajectory for surface transport emissions is influenced by the reinstatement of a 2030 phase-out date for new petrol and diesel cars, which has led to small improvements in emissions assessment for this sector. However, the report also notes that the majority of required emissions reductions will come from the electrification of key technologies, including in surface transport, which contributes almost 30% of the emissions reduction required during this period.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1974.3,
+      "judge_cost_usd": 0.003244,
+      "judge_tokens": {
+        "prompt": 3083,
+        "completion": 207
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer captures the sector’s importance and policy context, but it misses the reference’s key point that surface transport emissions fell for a second consecutive year and adds unrelated vehicle-kilometre details not asked for.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most statements are supported by the retrieved chunks, but the claim that surface transport emissions are 'on track' is an inference not directly stated in the chunks and the car/van-kilometre figures are only partially relevant.",
+        "completeness": 3,
+        "completeness_rationale": "It includes the almost 30% contribution and the 2030 phase-out context, but omits the central progress signal that emissions fell for a second consecutive year and the EV adoption/price-parity details from the reference.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "ccc_prog25_split_26",
+      "query_type": "numeric",
+      "probe": null,
+      "detected_institutions": [
+        "CCC"
+      ],
+      "retrieval_latency_ms": 167.0,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "CCC_PROGRESS_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9060254355346823,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 1837.2,
+      "synthesis_cost_usd": 0.000455,
+      "synthesis_tokens": {
+        "prompt": 2428,
+        "completion": 152
+      },
+      "generated_answer": "In the CCC's 2025 progress report, credible plans exist for 38% of the required emissions reductions for the 2030 NDC, reflecting policy areas in which funding, enablers, and clear timelines are all assessed as being in place, or areas in which observed delivery progress gives strong confidence in future outcomes.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 1781.3,
+      "judge_cost_usd": 0.002993,
+      "judge_tokens": {
+        "prompt": 2857,
+        "completion": 189
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer correctly states that 38% of the required emissions reductions are covered by credible plans, matching the reference’s credible-plans figure, but it omits the broader 61% figure that includes plans with some risks attached.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The generated answer is directly supported by the retrieved CCC 2025 chunk, which explicitly says credible plans exist for 38% of the required emissions reductions.",
+        "completeness": 2,
+        "completeness_rationale": "It covers only the credible-plans share and misses the reference’s key context that 61% is covered by credible or somewhat risky plans, along with the remaining risk breakdown.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a straightforward factual/numeric query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 5,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "ccc_prog24_headline_27",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "CCC"
+      ],
+      "retrieval_latency_ms": 108.1,
+      "top_rrf": 0.032258,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "CCC_PROGRESS_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 0.3333333333333333,
+      "ndcg@5": 0.6182885020492784,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 3245.8,
+      "synthesis_cost_usd": 0.00049,
+      "synthesis_tokens": {
+        "prompt": 1976,
+        "completion": 323
+      },
+      "generated_answer": "The CCC's headline assessment of UK progress in its 2024 report to Parliament indicated that there has been a small improvement in the overall assessment of the credibility of Government plans for the 2030 Nationally Determined Contribution (NDC) and Sixth Carbon Budget, primarily due to advancements in the electricity supply sector, along with smaller improvements in surface transport and agriculture sectors. However, the report also highlighted that among the 35 priority recommendations made, good or moderate progress was achieved on 20, while four recommendations saw no progress at all, particularly noting that there was no progress on the recommendation to make electricity cheaper.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1904.7,
+      "judge_cost_usd": 0.002762,
+      "judge_tokens": {
+        "prompt": 2488,
+        "completion": 199
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer captures some CCC progress-report themes, but it describes the 2025 report’s assessment rather than the 2024 headline judgment about the UK being off track for the 2030 target and needing urgent action.",
+        "faithfulness": 2,
+        "faithfulness_rationale": "Most claims are traceable to the retrieved 2025 report chunks, but the response is not grounded in the 2024 report asked about and introduces a different year’s assessment.",
+        "completeness": 2,
+        "completeness_rationale": "It misses the core headline points from the reference: not on track for the 2030 emissions target, only about a third of needed reductions covered by credible plans, most indicators off track, and the call for urgent decisive action.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This was a factual query and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 2,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "iea_fossil_peak_29",
+      "query_type": "factual",
+      "probe": "wording_variant",
+      "detected_institutions": [
+        "IEA"
+      ],
+      "retrieval_latency_ms": 92.8,
+      "top_rrf": 0.029437,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "synthesis_latency_ms": 2240.6,
+      "synthesis_cost_usd": 0.000456,
+      "synthesis_tokens": {
+        "prompt": 2171,
+        "completion": 218
+      },
+      "generated_answer": "The IEA World Energy Outlook 2025 indicates that the peak in coal demand is expected to occur before the end of the current decade, with a flattening in oil use around 2030. However, gas demand is projected to continue growing into the 2030s due to changes in US policies and lower gas prices. In contrast, the Net Zero Emissions (NZE) Scenario anticipates a more rapid deployment of low-emissions technologies, leading to declines in demand for all fossil fuels.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 1999.4,
+      "judge_cost_usd": 0.002779,
+      "judge_tokens": {
+        "prompt": 2643,
+        "completion": 177
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference on coal peaking before decade-end, oil flattening around 2030, gas growing into the 2030s, and all fossil fuels declining in the NZE scenario.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim is directly supported by the retrieved WEO chunk describing STEPS and NZE fossil-fuel demand trends.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the STEPS and NZE points well but omits the reference’s Current Policies Scenario detail that oil and gas keep growing to mid-century while only coal declines before 2030.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "iea_fossil_peak_variant_30",
+      "query_type": "factual",
+      "probe": "wording_variant",
+      "detected_institutions": [
+        "IEA"
+      ],
+      "retrieval_latency_ms": 88.8,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "synthesis_latency_ms": 2309.2,
+      "synthesis_cost_usd": 0.00045,
+      "synthesis_tokens": {
+        "prompt": 2309,
+        "completion": 173
+      },
+      "generated_answer": "The IEA projects that global fossil fuel demand will peak around 2030. In the STEPS, the peak in coal demand is accompanied by a flattening in oil use around 2030, while gas demand continues growing into the 2030s. However, in the STEPS, it is noted that global fossil fuel demand declines by more than 4% to 2035.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 3112.0,
+      "judge_cost_usd": 0.002883,
+      "judge_tokens": {
+        "prompt": 2740,
+        "completion": 184
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer matches the reference on STEPS timing for coal, oil, and gas, but it omits the Current Policies Scenario and NZE Scenario distinctions and slightly overstates a single global peak.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved chunks, though the opening generalization about global fossil fuel demand peaking around 2030 is an extrapolation beyond the specific chunk wording.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the STEPS case well but misses the CPS trajectory and the NZE Scenario’s decline of all fossil fuels, which are key parts of the reference.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "eso_flexibility_32",
+      "query_type": "factual",
+      "probe": null,
+      "detected_institutions": [
+        "ESO"
+      ],
+      "retrieval_latency_ms": 90.5,
+      "top_rrf": 0.032266,
+      "retrieved_doc_ids": [
+        "ESO_BEYOND2030_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "synthesis_latency_ms": 4192.8,
+      "synthesis_cost_usd": 0.000648,
+      "synthesis_tokens": {
+        "prompt": 2690,
+        "completion": 408
+      },
+      "generated_answer": "The ESO's Beyond 2030 report recommends that strategic demand should be located closer to where electricity is produced to minimize congestion on the electricity system. Specifically, it suggests that locating up to 5 GW of flexible demand behind transmission bottlenecks within Scotland could save consumers £5 billion and may avoid the need for some network reinforcements. The report emphasizes that the maximum benefit from adding strategic, flexible demand can be found by placing this demand in the north of the electricity network, where there is a large volume of renewable generation capacity and relatively smaller network capabilities. This strategic placement is crucial for reducing overall network running costs and improving the operation of the electricity system.",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 1837.9,
+      "judge_cost_usd": 0.003212,
+      "judge_tokens": {
+        "prompt": 3179,
+        "completion": 184
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference’s core claim that flexible demand should be strategically sited near generation to reduce network build, including the 5 GW example and the idea of planning it with infrastructure.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim is supported by the retrieved chunks, especially the statements about placing demand closer to production, the 5 GW behind bottlenecks in Scotland, and reduced reinforcement needs.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the main recommendation well but omits the reference’s explicit point about wider societal benefits and the recommendation to plan new infrastructure and flexible-demand siting together rather than in isolation.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a normal factual query and the system appropriately answered it without refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "xdoc_ccc_iea_transport_33",
+      "query_type": "cross_document",
+      "probe": "crossdoc_named",
+      "detected_institutions": [
+        "IEA",
+        "CCC"
+      ],
+      "retrieval_latency_ms": 111.2,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "IEA_WEO_2025",
+        "CCC_SEVENTH_CARBON_BUDGET_2025"
+      ],
+      "n_expected_docs": 2,
+      "recall@5": 1.0,
+      "precision@5": 0.6666666666666666,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "synthesis_latency_ms": 3568.6,
+      "synthesis_cost_usd": 0.000592,
+      "synthesis_tokens": {
+        "prompt": 2520,
+        "completion": 356
+      },
+      "generated_answer": "The CCC's transport targets emphasize the need for significant emissions reductions in the transport sector, particularly through the adoption of electric vehicles (EVs). The CCC notes that \"Progress in surface transport is promising, with emissions savings from electric vehicles (EVs) doubling every two years over recent years. This sector will need to deliver much of the reductions for the remaining years of this decade\" (CCC_PROGRESS_2025, page 22). In contrast, the IEA's global pathway, specifically the Net Zero Emissions by 2050 (NZE) Scenario, outlines a broader strategy for achieving net zero CO2 emissions across the energy sector, which includes transport but is not limited to it. The IEA states that the NZE Scenario \"maps out a pragmatic but ambitious global pathway for the energy sector to achieve net zero CO2 emissions by 2050\" (IEA_WEO_2025, page 105). Thus, while both organizations aim for significant emissions reductions, the CCC focuses specifically on transport emissions through electrification, whereas the IEA presents a comprehensive energy sector approach that includes transport as part of a larger strategy.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 2164.6,
+      "judge_cost_usd": 0.003294,
+      "judge_tokens": {
+        "prompt": 3150,
+        "completion": 207
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer is broadly consistent with the reference on the CCC’s transport emphasis and the IEA’s NZE pathway, but it misses the key contrast with STEPS/Current Policies and the timing of oil demand flattening/growth.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the retrieved CCC and IEA chunks, but the comparison to the IEA’s global fossil-fuel and transport pathway is only partially grounded and omits the specific pathway details in the reference.",
+        "completeness": 2,
+        "completeness_rationale": "It covers CCC transport electrification and the IEA NZE scenario, but leaves out the central reference points about oil demand flattening in STEPS, growth in CPS, and the UK moving faster than the central global pathway.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive query and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "xdoc_ofgem_eso_flex_34",
+      "query_type": "cross_document",
+      "probe": null,
+      "detected_institutions": [
+        "Ofgem",
+        "ESO"
+      ],
+      "retrieval_latency_ms": 93.4,
+      "top_rrf": 0.03125,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "n_expected_docs": 2,
+      "recall@5": 0.5,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "synthesis_latency_ms": 4568.2,
+      "synthesis_cost_usd": 0.000571,
+      "synthesis_tokens": {
+        "prompt": 2178,
+        "completion": 408
+      },
+      "generated_answer": "Ofgem's load control licensing regime is designed to address various network needs identified in the energy sector, particularly in relation to consumer protection and grid stability. The regime aims to promote a thriving, innovative load control market, which is essential for delivering optimal consumer outcomes. It introduces obligations for licensees to adhere to grid stability requirements, which are crucial for protecting the stability of the electricity grid and managing the operational risks associated with unpredictable large-scale load behavior. This is particularly relevant given the current geopolitical climate and the associated risks of malicious cyber-attacks that could impact national security and the economy. Furthermore, the licensing regime includes broad consumer protections to build confidence among consumers engaging in load control, thereby addressing existing and emerging risks in the market.\n\nThe strategic implementation of the load control licensing regime reflects the principles set out by DESNZ, ensuring that the regime is operationalized in a way that meets the identified needs of the network and supports the overall goals of the energy transition.",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 2112.0,
+      "judge_cost_usd": 0.002917,
+      "judge_tokens": {
+        "prompt": 2749,
+        "completion": 190
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer captures Ofgem’s consumer-protection and grid-stability aims, but it misses the ESO Beyond 2030 side about transmission build-out and siting flexible demand for renewables integration and Clean Power 2030.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the Ofgem chunks, though the broad statement about 'network needs identified in the energy sector' and the implied relation to ESO is not directly grounded in the retrieved text.",
+        "completeness": 2,
+        "completeness_rationale": "It covers only the Ofgem regime and omits the key cross-document connection to ESO’s Beyond 2030 report and the complementary consumer-end vs network-end framing.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive query and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "xdoc_boe_iea_scenarios_35",
+      "query_type": "cross_document",
+      "probe": null,
+      "detected_institutions": [
+        "IEA",
+        "BoE"
+      ],
+      "retrieval_latency_ms": 96.5,
+      "top_rrf": 0.032018,
+      "retrieved_doc_ids": [
+        "BOE_CBES_KEY_ELEMENTS_2021",
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 2,
+      "recall@5": 0.5,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.8503449055347546,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "synthesis_latency_ms": 4745.4,
+      "synthesis_cost_usd": 0.000666,
+      "synthesis_tokens": {
+        "prompt": 2498,
+        "completion": 485
+      },
+      "generated_answer": "The Bank of England's Late Action scenario presents a stark economic outlook characterized by significant GDP decline and rising unemployment due to delayed climate action. Specifically, it predicts that UK GDP growth will average close to zero from 2031 until around 2035, with the level of GDP being 4.6% lower than a counterfactual scenario by the end of the period. Additionally, it anticipates a loss of around 1.5 million jobs, comparable to the 1980s recession, and a peak-to-trough fall in UK aggregate house prices of 19% (Excerpt 5). \n\nIn contrast, the IEA's scenario framing emphasizes the importance of early action to mitigate climate risks. The Early Action scenario is described as having a higher probability of success in limiting climate change, with global carbon dioxide emissions reduced to net-zero by around 2050 and global warming limited to 1.8°C (Excerpt 4). This proactive approach is expected to result in less severe economic impacts compared to the Late Action scenario, which is marked by higher risks and economic instability due to the delayed response to climate change (Excerpt 2).",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 2074.6,
+      "judge_cost_usd": 0.003269,
+      "judge_tokens": {
+        "prompt": 3111,
+        "completion": 208
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer captures the BoE Late Action scenario’s delayed disorderly transition and major economic disruption, but it omits the IEA framing details (CPS, STEPS, NZE) and the specific comparison that Late Action broadly aligns with a delayed move toward an NZE-style outcome.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the retrieved BoE chunks, but the IEA-specific comparison to CPS/STEPS/NZE is not grounded in the provided retrieval and appears inferred or fabricated.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the BoE’s late-action disruption well, but misses the key IEA scenario framing and the explicit contrast that only NZE matches the rapid transition assumed by BoE Early Action.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual comparison question, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "xdoc_ccc_boe_budget_36",
+      "query_type": "cross_document",
+      "probe": null,
+      "detected_institutions": [
+        "BoE",
+        "CCC"
+      ],
+      "retrieval_latency_ms": 108.2,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "BOE_MACRO_IMPLICATIONS",
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "BOE_DISCLOSURE_2024"
+      ],
+      "n_expected_docs": 2,
+      "recall@5": 1.0,
+      "precision@5": 0.6666666666666666,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "synthesis_latency_ms": 3049.0,
+      "synthesis_cost_usd": 0.000521,
+      "synthesis_tokens": {
+        "prompt": 2320,
+        "completion": 288
+      },
+      "generated_answer": "The CCC's Seventh Carbon Budget emphasizes the need for significant changes across the UK economy to achieve net-zero emissions by 2050, which aligns with the Bank of England's recognition of the macroeconomic implications of climate change. The Bank of England notes that while monetary policy cannot directly solve climate change, it must consider the macroeconomic effects of climate change and the transition to net-zero, as these could impact monetary policy decisions. Specifically, the Bank has explored how climate change and net-zero policies might affect productivity growth and the overall economic landscape, which is crucial for maintaining price stability during the transition to a green economy.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 2066.3,
+      "judge_cost_usd": 0.002974,
+      "judge_tokens": {
+        "prompt": 2843,
+        "completion": 187
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer captures the broad relationship correctly, but it omits the CCC’s specific 535 MtCO2e 2038-2042 Balanced Pathway framing and the explicit contrast between emissions trajectory/actions and macroeconomic consequences.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "All claims are supported by the retrieved Bank chunks, and the CCC-related statement is a high-level paraphrase consistent with the reference context.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the general linkage between the CCC’s transition pathway and the Bank’s macroeconomic analysis, but misses the key budget target, time period, and the explicit policy-trajectory versus consequences distinction.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive cross-document question, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 5,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "summ_boe_scenarios_37",
+      "query_type": "summarisation",
+      "probe": null,
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 91.8,
+      "top_rrf": 0.031754,
+      "retrieved_doc_ids": [
+        "BOE_CBES_RESULTS_2021",
+        "BOE_CBES_KEY_ELEMENTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 0.5,
+      "ndcg@5": 0.7606395682357036,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 3090.3,
+      "synthesis_cost_usd": 0.000386,
+      "synthesis_tokens": {
+        "prompt": 1395,
+        "completion": 294
+      },
+      "generated_answer": "The Bank of England's 2021 Climate Biennial Exploratory Scenario (CBES) includes three distinct scenarios that explore the financial risks posed by climate change. These scenarios are designed to assess both transition and physical risks over a 30-year horizon. The scenarios are characterized by their focus on direct climate variables, which is a departure from traditional stress tests that primarily consider macrofinancial variables. The exercise aims to develop the capabilities of banks and insurers in modeling climate-related risks and is not intended to inform capital requirements. Instead, it will guide the Financial Policy Committee's approach to system-wide policy issues and the Prudential Regulation Authority's supervisory policy.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1730.0,
+      "judge_cost_usd": 0.002224,
+      "judge_tokens": {
+        "prompt": 1927,
+        "completion": 173
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer is broadly consistent with the reference on the CBES being a three-scenario, 30-year climate exercise, but it omits the actual scenario names and their distinct assumptions and impacts.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most statements are directly supported by the retrieved chunks, though the response adds some contextual details and does not specifically ground the scenario summaries requested.",
+        "completeness": 2,
+        "completeness_rationale": "It misses the core content of the reference: Early Action, Late Action, and No Additional Action with their respective warming, transition, and physical-risk outcomes.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive summarisation query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "neg_sourdough_38",
+      "query_type": "negative",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 78.5,
+      "top_rrf": 0.029418,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "ESO_BEYOND2030_2024",
+        "IEA_WEO_2025"
+      ],
+      "synthesis_latency_ms": 1311.7,
+      "synthesis_cost_usd": 0.000408,
+      "synthesis_tokens": {
+        "prompt": 2565,
+        "completion": 39
+      },
+      "generated_answer": "The retrieved excerpts do not contain any information related to sourdough starter recipes. Therefore, I cannot provide an answer to your question.",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1431.5,
+      "judge_cost_usd": 0.00278,
+      "judge_tokens": {
+        "prompt": 2891,
+        "completion": 136
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The generated answer matches the reference refusal that the corpus lacks sufficient information to answer the query.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The refusal is fully supported by the retrieved chunks, which are unrelated to sourdough starter recipes.",
+        "completeness": 5,
+        "completeness_rationale": "It covers the only key point in the reference: that the corpus does not contain sufficient information to answer.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a negative query, and the system correctly refused instead of fabricating an answer."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "neg_champions_league_39",
+      "query_type": "negative",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 77.5,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025",
+        "CCC_PROGRESS_2025",
+        "DESNZ_ZEV_MANDATE_2023",
+        "CCC_SEVENTH_CARBON_BUDGET_2025"
+      ],
+      "synthesis_latency_ms": 787.0,
+      "synthesis_cost_usd": 0.000268,
+      "synthesis_tokens": {
+        "prompt": 1653,
+        "completion": 33
+      },
+      "generated_answer": "The retrieved excerpts do not contain any information regarding the winner of the 2025 UEFA Champions League final.",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1569.2,
+      "judge_cost_usd": 0.002086,
+      "judge_tokens": {
+        "prompt": 1983,
+        "completion": 133
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference refusal that the corpus lacks sufficient information to identify the winner.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The response is a canonical refusal and does not introduce any unsupported claims beyond stating the retrieved excerpts are insufficient.",
+        "completeness": 5,
+        "completeness_rationale": "It fully covers the reference by indicating that the corpus does not contain enough information to answer the query.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "For a negative query, the system appropriately refused instead of fabricating an answer."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "neg_python_error_40",
+      "query_type": "negative",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 76.5,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "BOE_MEASURING_CLIMATE_RISKS",
+        "ESO_BEYOND2030_2024",
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "IEA_WEO_2025"
+      ],
+      "synthesis_latency_ms": 844.9,
+      "synthesis_cost_usd": 0.000338,
+      "synthesis_tokens": {
+        "prompt": 2088,
+        "completion": 41
+      },
+      "generated_answer": "The retrieved excerpts do not contain any information related to fixing a Python ModuleNotFoundError. Therefore, I cannot provide an answer to your question.",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1697.0,
+      "judge_cost_usd": 0.00244,
+      "judge_tokens": {
+        "prompt": 2420,
+        "completion": 139
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The response matches the reference by indicating that the corpus lacks sufficient information to answer the query.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The answer is a canonical refusal and is fully supported by the absence of relevant information in the retrieved chunks.",
+        "completeness": 5,
+        "completeness_rationale": "It covers the only key point in the reference: that the corpus does not contain sufficient information to answer.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "Because this is a negative query, refusing instead of fabricating a fix is exactly the appropriate behavior."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "neg_fca_sdr_41",
+      "query_type": "negative",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 85.4,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "DESNZ_ZEV_MANDATE_2023",
+        "BOE_CBES_RESULTS_2021",
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "synthesis_latency_ms": 3733.2,
+      "synthesis_cost_usd": 0.00046,
+      "synthesis_tokens": {
+        "prompt": 1766,
+        "completion": 326
+      },
+      "generated_answer": "The FCA's Sustainability Disclosure Requirements are part of the broader framework aimed at enhancing transparency in sustainability practices within the financial sector. However, the full UK Sustainability Disclosure Requirements have been delayed from late 2024 to early 2025, as indicated in the excerpts. The Government has also been working on the implementation of the UK Green Taxonomy, which is related to these requirements (Excerpt 1). \n\nAdditionally, the FCA is involved in developing standards and frameworks for net-zero transition, which include sustainability disclosure standards and requirements put in place by the International Sustainability Standards Board (ISSB). These standards are intended to help financial institutions better understand their exposure to climate risks and their transition plans towards a net-zero economy (Excerpt 3, Excerpt 5). \n\nHowever, the excerpts do not provide specific details on the investment label categories associated with the FCA's Sustainability Disclosure Requirements.",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1753.5,
+      "judge_cost_usd": 0.002462,
+      "judge_tokens": {
+        "prompt": 2239,
+        "completion": 174
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer is broadly consistent with the reference in saying the corpus lacks specific details, but it adds unsupported contextual claims about the FCA framework and ISSB standards.",
+        "faithfulness": 3,
+        "faithfulness_rationale": "Some statements are grounded in the retrieved chunks about delayed UK Sustainability Disclosure Requirements and ISSB-related standards, but the broader FCA framing and transparency claims are not directly supported.",
+        "completeness": 5,
+        "completeness_rationale": "It correctly conveys that the corpus does not contain sufficient information to answer the query and does not miss any required answer content for a negative query.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "For a negative query, the system appropriately declined to provide a definitive answer and indicated the corpus lacked the needed information."
+      },
+      "correctness": 4,
+      "faithfulness": 3,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "neg_eu_csrd_42",
+      "query_type": "negative",
+      "probe": null,
+      "detected_institutions": [],
+      "retrieval_latency_ms": 94.1,
+      "top_rrf": 0.032787,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "BOE_DISCLOSURE_2024",
+        "DESNZ_ZEV_MANDATE_2023",
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "synthesis_latency_ms": 938.6,
+      "synthesis_cost_usd": 0.000328,
+      "synthesis_tokens": {
+        "prompt": 2007,
+        "completion": 45
+      },
+      "generated_answer": "The retrieved excerpts do not provide specific information regarding the disclosure requirements under the EU Corporate Sustainability Reporting Directive. Therefore, I cannot answer the question based on the provided excerpts.",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1554.4,
+      "judge_cost_usd": 0.002402,
+      "judge_tokens": {
+        "prompt": 2339,
+        "completion": 144
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference by stating that the corpus does not contain sufficient information to answer the query.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The response is a canonical refusal and does not introduce any unsupported claims beyond what is warranted by the retrieved chunks.",
+        "completeness": 5,
+        "completeness_rationale": "It fully covers the reference answer’s only required point: that there is insufficient information in the corpus to answer.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "Because this is a negative query and the corpus lacks the needed information, the system appropriately refused to answer."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "neg_ofgem_pricecap_43",
+      "query_type": "negative",
+      "probe": null,
+      "detected_institutions": [
+        "Ofgem"
+      ],
+      "retrieval_latency_ms": 91.5,
+      "top_rrf": 0.031258,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "synthesis_latency_ms": 956.6,
+      "synthesis_cost_usd": 0.000424,
+      "synthesis_tokens": {
+        "prompt": 2686,
+        "completion": 35
+      },
+      "generated_answer": "The excerpts do not provide information regarding Ofgem's energy price cap level for the first quarter of 2027.",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1474.7,
+      "judge_cost_usd": 0.002899,
+      "judge_tokens": {
+        "prompt": 3007,
+        "completion": 143
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference by stating that the corpus does not contain sufficient information to answer the query.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The response is a canonical refusal fully supported by the retrieved chunks, which contain no energy price cap level for Q1 2027.",
+        "completeness": 5,
+        "completeness_rationale": "It covers the only key point in the reference: that the corpus lacks sufficient information to answer.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a negative query, and the system appropriately refused instead of fabricating an answer."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_vocab_appliances_scope",
+      "query_type": "factual",
+      "probe": "vocab_shift",
+      "detected_institutions": [
+        "Ofgem"
+      ],
+      "retrieval_latency_ms": 87.5,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 1888.4,
+      "synthesis_cost_usd": 0.000504,
+      "synthesis_tokens": {
+        "prompt": 2659,
+        "completion": 176
+      },
+      "generated_answer": "The new Ofgem rules apply to specific types of home batteries and heat pumps categorized under Energy Smart Appliances (ESAs). The relevant appliances include:\n- Relevant heat pumps\n- Storage heaters\n- Relevant heat batteries\n- Hot water heat pumps\n- Standalone direct electrical hot water cylinders\n- Hybrid heat pumps\n- Smart battery energy storage systems (BESS)",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1724.8,
+      "judge_cost_usd": 0.003,
+      "judge_tokens": {
+        "prompt": 3088,
+        "completion": 152
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference by identifying smart battery storage and the heat-pump-related appliances covered under the new Ofgem rules.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every listed appliance is directly supported by the retrieved chunk describing the scope of licensable ESAs.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the relevant home batteries and heat pumps, though it omits the broader context that the regime also applies to other ESAs and to Load Controllers/FSPs.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it without refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_vocab_home_insulation_ev_ban",
+      "query_type": "factual",
+      "probe": "vocab_shift",
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 87.1,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "BOE_CBES_KEY_ELEMENTS_2021",
+        "BOE_DISCLOSURE_2024",
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.3333333333333333,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.8,
+      "page_in_range@5": 1.0,
+      "synthesis_latency_ms": 5691.4,
+      "synthesis_cost_usd": 0.000598,
+      "synthesis_tokens": {
+        "prompt": 1642,
+        "completion": 587
+      },
+      "generated_answer": "The Bank of England (BoE) incorporates specific policies regarding home insulation and petrol car bans in its climate-related disclosures. \n\n1. **Home Insulation**: The BoE notes that there is a rollout of heat pumps, which is consistent with the assumptions made by the Climate Change Committee. This rollout \"effectively drives up the cost of decarbonising homes.\" Additionally, the government offers a subsidy scheme to support energy efficiency improvements, which \"reduces the cost of decarbonising homes for households.\"  \n   - Citation: \"There is a rollout of heat pumps, consistent with consistent with the assumption made by the Climate Change Committee. This assumption effectively drives up the cost of decarbonising homes.\" (BOE_CBES_KEY_ELEMENTS_2021, page 47) \n   - Citation: \"The government offers a subsidy scheme to support the implementation of energy efficiency improvements. This assumption reduces the cost of decarbonising homes for households.\" (BOE_CBES_KEY_ELEMENTS_2021, page 47) \n\n2. **Petrol Car Bans**: The BoE states that the UK government announced the end of the sale of new petrol and diesel cars by 2030, and hybrid vehicles by 2035. This policy is part of a broader strategy to encourage a transition to electric vehicles, with substantial government policies to manage this transition.  \n   - Citation: \"On 18 November 2020, the UK government announced the end of the sale of new petrol and diesel cars in the UK by 2030, and hybrid vehicles by 2035.\" (BOE_CBES_RESULTS_2021, page 29) \n   - Citation: \"Government acts promptly to encourage a smooth transition to electric vehicles.\" (BOE_CBES_RESULTS_2021, page 29)",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 1823.3,
+      "judge_cost_usd": 0.002633,
+      "judge_tokens": {
+        "prompt": 2388,
+        "completion": 187
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer correctly captures the petrol/diesel car ban timing and the heat-pump/subsidy assumptions, but it omits the EPC band C by 2035, higher bands by 2050, and the below-EPC-band-E unmarketable assumption.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim in the generated answer is directly supported by the retrieved chunks, with citations closely matching the source text. ",
+        "completeness": 3,
+        "completeness_rationale": "It covers the main home-decarbonisation and car-ban points but misses several key policy assumptions from the reference, especially the EPC targets and unmarketability threshold. ",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 5,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_vocab_bank_learning_cbes",
+      "query_type": "factual",
+      "probe": "vocab_shift",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 85.6,
+      "top_rrf": 0.032266,
+      "retrieved_doc_ids": [
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 2962.8,
+      "synthesis_cost_usd": 0.000508,
+      "synthesis_tokens": {
+        "prompt": 2376,
+        "completion": 252
+      },
+      "generated_answer": "Yes, the banks did improve their understanding of climate exposure after the exercise. The CBES has shown that UK banks and insurers are making good progress in some aspects of their climate risk management, and this exercise has spurred on their efforts further. However, the Bank’s assessment is that UK banks and insurers still need to do much more to understand and manage their exposure to climate risks. The exercise helped to expose data and modelling gaps, and it fostered engagement with large corporate customers to understand their vulnerability to climate risks.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 1712.6,
+      "judge_cost_usd": 0.002859,
+      "judge_tokens": {
+        "prompt": 2846,
+        "completion": 161
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference’s main conclusion that banks made progress but still need to do considerably more to understand and manage climate exposure.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every claim in the generated answer is directly supported by the retrieved chunks, especially chunks 2, 3, and 4.",
+        "completeness": 4,
+        "completeness_rationale": "It covers the key idea of progress plus remaining gaps, but omits the specific point about counterparties’ and customers’ transition plans and the link to SS3/19.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_vocab_oil_gas_stop_growing",
+      "query_type": "factual",
+      "probe": "vocab_shift",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 83.3,
+      "top_rrf": 0.03101,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.6,
+      "synthesis_latency_ms": 2180.1,
+      "synthesis_cost_usd": 0.000457,
+      "synthesis_tokens": {
+        "prompt": 2187,
+        "completion": 215
+      },
+      "generated_answer": "The world is projected to stop needing more oil and gas each year around 2030. In the STEPS scenario, global oil demand reaches a peak of 102 mb/d around 2030 and then gradually falls, returning to around its 2024 level by 2035. This decline is attributed to notable reductions in demand from passenger cars and the power sector, which are offset by increases from petrochemicals, aviation, and other industrial activities (IEA, 2025).",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 1972.7,
+      "judge_cost_usd": 0.002777,
+      "judge_tokens": {
+        "prompt": 2658,
+        "completion": 174
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer correctly captures that oil demand flattens around 2030, but it omits that gas demand keeps growing into the 2030s and does not distinguish the other scenarios in the reference.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved chunks, though the opening generalization about the world stopping needing more oil and gas each year is broader than the evidence provided.",
+        "completeness": 2,
+        "completeness_rationale": "It covers only the STEPS oil outlook and misses the key gas trend plus the Current Policies and NZE scenario distinctions from the reference.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_vocab_hacking_smart_appliances",
+      "query_type": "factual",
+      "probe": "vocab_shift",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 91.3,
+      "top_rrf": 0.028986,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025",
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9828920819566879,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 2503.2,
+      "synthesis_cost_usd": 0.000485,
+      "synthesis_tokens": {
+        "prompt": 2310,
+        "completion": 231
+      },
+      "generated_answer": "All providers need to worry about hacking risks for smart appliances, not just the big ones. The licensing regime is designed to ensure that all organizations adhere to cyber security requirements, particularly those designated as Operators of Essential Services (OES). This includes compliance with cyber security requirements set out in the upcoming amendments to the Network and Information Systems Regulations 2018, which will apply to various types of licensees, including those with load control responsibilities, regardless of their size.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1771.1,
+      "judge_cost_usd": 0.002908,
+      "judge_tokens": {
+        "prompt": 2774,
+        "completion": 184
+      },
+      "judge_scores": {
+        "correctness": 2,
+        "correctness_rationale": "The answer incorrectly says all providers need to worry, whereas the reference distinguishes below-300MW load controllers under licence conditions from above-300MW controllers expected to move into NIS/OES requirements.",
+        "faithfulness": 2,
+        "faithfulness_rationale": "Only the general idea of cyber requirements is supported by the chunks; the claim that all providers are covered regardless of size is not supported and contradicts the retrieved table.",
+        "completeness": 2,
+        "completeness_rationale": "It misses the key size-based split and the specific 300MW threshold, Tier 2 CAF for below 300MW, and Tier 1/NIS treatment for above 300MW.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, so answering rather than refusing was appropriate."
+      },
+      "correctness": 2,
+      "faithfulness": 2,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_colloq_carbon_budget",
+      "query_type": "factual",
+      "probe": "colloquial",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 78.3,
+      "top_rrf": 0.031754,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 4781.8,
+      "synthesis_cost_usd": 0.000641,
+      "synthesis_tokens": {
+        "prompt": 2442,
+        "completion": 458
+      },
+      "generated_answer": "The Seventh Carbon Budget is a legally binding limit on the UK's greenhouse gas emissions for the period from 2038 to 2042, set at 535 MtCO2e, which includes emissions from international aviation and shipping. This budget is considered ambitious but achievable with rapid action. The UK’s Climate Change Act (2008) mandates the government to propose these carbon budgets, which must be agreed upon by Parliament to be enacted into law. The budget aims to guide investors, businesses, households, and the government towards a shared understanding of the path to achieving Net Zero emissions. The majority of emissions reductions during this period are expected to come from sectors other than energy supply, particularly surface transport and buildings, which will need to ramp up their decarbonisation efforts significantly. Additionally, measures to manage demand in high-emitting sectors like aviation will be crucial for meeting the budget's targets. The overall goal is to ensure that the UK can transition effectively towards its Net Zero commitment by 2050.",
+      "generated_citation_count": 4,
+      "judge_latency_ms": 1806.0,
+      "judge_cost_usd": 0.00301,
+      "judge_tokens": {
+        "prompt": 2999,
+        "completion": 169
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference on the Seventh Carbon Budget’s level, time period, inclusion of aviation and shipping, and domestic-action framing, with only extra contextual detail beyond the reference.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every substantive claim is supported by the retrieved chunks, especially the executive summary and priority recommendations, with no clear fabrication.",
+        "completeness": 4,
+        "completeness_rationale": "It covers all core points from the reference but adds broader context rather than explicitly emphasizing that the CCC recommends it as a limit intended to be met through domestic action without international credits.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a normal factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_colloq_ev_half",
+      "query_type": "factual",
+      "probe": "colloquial",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 84.0,
+      "top_rrf": 0.031319,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "CCC_PROGRESS_2025",
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 0.0,
+      "precision@5": 0.0,
+      "mrr@5": 0.0,
+      "ndcg@5": 0.0,
+      "hit@5": 0,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 1756.2,
+      "synthesis_cost_usd": 0.000417,
+      "synthesis_tokens": {
+        "prompt": 2298,
+        "completion": 121
+      },
+      "generated_answer": "Half of new cars are expected to be electric vehicles (EVs) by 2035. In the STEPS scenario, EVs account for around 50% of sales of all vehicle types by 2035, resulting in over 10 mb/d of oil savings.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 1770.0,
+      "judge_cost_usd": 0.002907,
+      "judge_tokens": {
+        "prompt": 2730,
+        "completion": 191
+      },
+      "judge_scores": {
+        "correctness": 2,
+        "correctness_rationale": "The answer gives 2035 as the point when half of new cars are electric, but the reference says more than half of new cars must be zero-emission from 2028 onward and 50% is not the mandate target for cars.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "The statement about 50% by 2035 is supported by a retrieved chunk, but it is about all vehicle types in the STEPS scenario rather than the specific car mandate asked about.",
+        "completeness": 2,
+        "completeness_rationale": "It misses the key mandate trajectory and the correct threshold years (2028 onward, with 100% by 2035), providing only an unrelated scenario estimate.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "The query is factual and the system appropriately answered rather than refusing."
+      },
+      "correctness": 2,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_colloq_bank_climate_findings",
+      "query_type": "factual",
+      "probe": "colloquial",
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 90.5,
+      "top_rrf": 0.032002,
+      "retrieved_doc_ids": [
+        "BOE_CBES_RESULTS_2021"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 5534.3,
+      "synthesis_cost_usd": 0.00069,
+      "synthesis_tokens": {
+        "prompt": 2531,
+        "completion": 517
+      },
+      "generated_answer": "The Bank of England's Climate Biennial Exploratory Scenario (CBES) exercise revealed several key findings regarding how banks and insurers assess and respond to climate risks. The exercise emphasized the need for firms to improve their risk management capabilities and highlighted the importance of evaluating the net-zero transition plans of corporate counterparties. Banks focused on credit risk associated with lending activities, while insurers concentrated on changes in the value of invested assets and insurance claims. The exercise was designed to be a learning experience, helping to develop the capabilities of both the Bank and the participants, and aimed to advance understanding of climate-related risks in the financial system.\n\nFirms reported plans to reduce their exposure to carbon-intensive sectors, with banks projecting significant reductions in sectors such as petroleum and gas extraction, petroleum manufacturing, and mining and quarrying. The exercise also indicated that some corporate sectors, particularly carbon-intensive ones, may face challenges in accessing finance as the transition progresses. Additionally, the exercise highlighted data gaps and uncertainties in climate risk assessments, suggesting that the methodologies used by participants are still developing. Overall, the CBES aimed to drive improvements in climate risk management and support the transition to net-zero emissions.",
+      "generated_citation_count": 5,
+      "judge_latency_ms": 1998.0,
+      "judge_cost_usd": 0.003139,
+      "judge_tokens": {
+        "prompt": 3123,
+        "completion": 177
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer is broadly aligned with the CBES themes but misses the reference’s main quantitative findings about a 10–15% drag on annual profits and the roughly tenfold spread in loss-rate estimates.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most statements are supported by the retrieved chunks, though the response adds some general framing and conclusions that are only indirectly supported rather than explicitly stated.",
+        "completeness": 2,
+        "completeness_rationale": "It covers risk-management lessons and exposure reductions, but omits the two key takeaways in the reference: the average profitability drag and the very large uncertainty bands across firms.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a normal factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_colloq_renewables_2050",
+      "query_type": "factual",
+      "probe": "colloquial",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 82.2,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 0.0,
+      "precision@5": 0.0,
+      "mrr@5": 0.0,
+      "ndcg@5": 0.0,
+      "hit@5": 0,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 4861.1,
+      "synthesis_cost_usd": 0.000548,
+      "synthesis_tokens": {
+        "prompt": 1960,
+        "completion": 423
+      },
+      "generated_answer": "Renewables are expected to replace both coal and gas in the electricity system by 2050. According to the CCC report, \"renewables replacing both coal and, increasingly, gas\" is part of the future progress needed for a net-zero transition (CCC_PROGRESS_2025, page 10). Additionally, the CCC's Seventh Carbon Budget states that \"UK-based renewable energy provides the bulk of generation in a larger, future electricity system\" and that electricity will replace oil and gas across most of the economy (CCC_SEVENTH_CARBON_BUDGET_2025, page 12). \n\nHowever, the IEA's World Energy Outlook indicates that while some advanced economies are on track to phase out unabated coal by 2035, natural gas will continue to be a key contributor to global electricity supply growth through to 2050 (IEA_WEO_2025, page 142). This suggests that while renewables will significantly increase, the complete replacement of gas may not occur by 2050 in all regions, particularly in the United States where gas generation is expected to remain dominant (IEA_WEO_2025, page 142).",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1701.7,
+      "judge_cost_usd": 0.002704,
+      "judge_tokens": {
+        "prompt": 2568,
+        "completion": 173
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer captures the general idea that renewables can replace coal and gas in some scenarios, but it misses the reference’s specific scenario-based percentages and overstates certainty about full replacement by 2050.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the retrieved chunks, though the conclusion about complete replacement by 2050 is an extrapolation beyond what the chunks explicitly state.",
+        "completeness": 2,
+        "completeness_rationale": "It omits the key CBES scenario distinctions and the quantitative shares for the UK and global energy mix, especially the No Additional Action scenario.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 3,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_colloq_targets_progress",
+      "query_type": "factual",
+      "probe": "colloquial",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 82.3,
+      "top_rrf": 0.031025,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2025",
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "CCC_PROGRESS_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.3333333333333333,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9197207891481876,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 6611.9,
+      "synthesis_cost_usd": 0.000734,
+      "synthesis_tokens": {
+        "prompt": 2499,
+        "completion": 598
+      },
+      "generated_answer": "The UK is making progress towards its climate targets, but there are significant challenges and areas where improvement is needed. According to the latest assessment, of the 23 key indicators monitored, eight are assessed as being on track, while four indicators, including EV car sales and heat pump installations, are slightly off track but show strong progress that could bring them back on track if continued. However, four indicators are assessed as being significantly off track, including the ratio of electricity to gas prices for both domestic and industrial consumers (Excerpt 3). \n\nMoreover, tree planting and peatland restoration rates are significantly off track and need to more than double to meet the UK’s targets of 30,000 hectares of new woodland creation per year by 2025 and 32,000 hectares of peatland restoration per year by 2026 (Excerpt 5). The assessment also indicates that only around one third of the emissions reductions required to meet the 2030 target are covered by credible plans, primarily in the electricity supply and surface transport sectors (Excerpt 5). \n\nOverall, while there have been some positive developments, such as the increase in funding for heat pumps and the zero-emission vehicle mandate, inconsistent messaging and policy reversals have hindered progress, necessitating rapid action to get back on track (Excerpt 5).",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1961.3,
+      "judge_cost_usd": 0.003223,
+      "judge_tokens": {
+        "prompt": 3127,
+        "completion": 195
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer is broadly consistent with the reference’s message that the UK is making progress but still faces major risks, though it misses the specific 68%-by-2030 framing and the 61%/39% split.",
+        "faithfulness": 3,
+        "faithfulness_rationale": "Several claims are supported by the retrieved chunks, but the key 61% credible / 39% risky breakdown and the specific emphasis on heat pumps and industrial electrification are not directly grounded in the provided excerpts. ",
+        "completeness": 3,
+        "completeness_rationale": "It covers the general progress-and-challenges picture and some indicator details, but omits the central quantitative assessment and the main risk areas highlighted in the reference. ",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a normal factual query and the system appropriately answered rather than refusing."
+      },
+      "correctness": 4,
+      "faithfulness": 3,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_adv_neg_ofgem_pricecap_winter",
+      "query_type": "negative",
+      "probe": "adversarial_negative",
+      "detected_institutions": [
+        "Ofgem"
+      ],
+      "retrieval_latency_ms": 87.9,
+      "top_rrf": 0.030798,
+      "retrieved_doc_ids": [
+        "OFGEM_SMART_SECURE_2025"
+      ],
+      "synthesis_latency_ms": 1035.8,
+      "synthesis_cost_usd": 0.00038,
+      "synthesis_tokens": {
+        "prompt": 2349,
+        "completion": 46
+      },
+      "generated_answer": "The excerpts provided do not contain any information regarding Ofgem's announcement about the winter 2027 energy price cap. Therefore, I cannot provide an answer to your question.",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1480.7,
+      "judge_cost_usd": 0.002645,
+      "judge_tokens": {
+        "prompt": 2681,
+        "completion": 141
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The response matches the reference by stating that the corpus does not contain sufficient information to answer the query.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "The answer is a canonical refusal and does not introduce any unsupported claims beyond what is in the retrieved chunks.",
+        "completeness": 5,
+        "completeness_rationale": "It fully covers the reference answer by indicating that the corpus lacks sufficient information to answer the question.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a negative query, and the system appropriately refused because the retrieved corpus does not contain the needed information."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_adv_neg_iea_smr_deployment",
+      "query_type": "negative",
+      "probe": "adversarial_negative",
+      "detected_institutions": [
+        "IEA"
+      ],
+      "retrieval_latency_ms": 91.1,
+      "top_rrf": 0.031778,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025"
+      ],
+      "synthesis_latency_ms": 3959.8,
+      "synthesis_cost_usd": 0.000558,
+      "synthesis_tokens": {
+        "prompt": 2290,
+        "completion": 357
+      },
+      "generated_answer": "The International Energy Agency (IEA) indicates that small modular reactors (SMRs) are expected to play a significant role in the future of nuclear power, particularly in the United States. The IEA notes that \"US technology companies already have plans to finance more than 25 gigawatts of small modular reactors, although most of this capacity is not expected to materialise until after 2035\" (IEA, 2025). Additionally, the IEA highlights that several hyper-scalers are expected to commission SMRs to provide power directly to new data centres, leading to a rise in nuclear generation for data centres by about 70 TWh by 2035 (IEA, 2025). Overall, the deployment of nuclear power, including SMRs, is projected to increase significantly, with global nuclear power capacity expected to rise by three-quarters from current levels by 2050 (IEA, 2025).",
+      "generated_citation_count": 3,
+      "judge_latency_ms": 1931.2,
+      "judge_cost_usd": 0.002873,
+      "judge_tokens": {
+        "prompt": 2780,
+        "completion": 175
+      },
+      "judge_scores": {
+        "correctness": 2,
+        "correctness_rationale": "The answer gives a plausible IEA view on SMRs, but it does not match the reference refusal that the corpus lacks sufficient information to answer the query.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are supported by the retrieved IEA chunks, though the answer extrapolates beyond the narrow query by summarizing broader nuclear deployment trends.",
+        "completeness": 2,
+        "completeness_rationale": "It does not provide the reference’s required insufficient-information response and instead adds unrelated deployment details rather than acknowledging the query cannot be answered from the corpus.",
+        "refusal_appropriateness": 1,
+        "refusal_appropriateness_rationale": "This was a negative query that should have been refused, but the system answered confidently instead of saying the corpus does not contain sufficient information."
+      },
+      "correctness": 2,
+      "faithfulness": 4,
+      "completeness": 2,
+      "refusal_appropriateness": 1
+    },
+    {
+      "id": "probe_adv_neg_boe_crypto",
+      "query_type": "negative",
+      "probe": "adversarial_negative",
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 83.6,
+      "top_rrf": 0.028778,
+      "retrieved_doc_ids": [
+        "BOE_MEASURING_CLIMATE_RISKS",
+        "BOE_CBES_RESULTS_2021",
+        "BOE_DISCLOSURE_2024"
+      ],
+      "synthesis_latency_ms": 4051.8,
+      "synthesis_cost_usd": 0.000536,
+      "synthesis_tokens": {
+        "prompt": 2173,
+        "completion": 350
+      },
+      "generated_answer": "The Bank of England (BoE) has recognized the importance of climate-related financial risks in its operations and investment decisions. It states that \"financial institutions are increasingly considering climate-related factors as part of their investment and/or lending decisions\" and emphasizes the need for the financial system to adjust financial flows to support the transition to net zero. The BoE's consideration of climate risks is directly linked to its monetary and financial stability objectives, as it undertakes various financial operations that are influenced by these risks (Excerpt 1). Additionally, the BoE has noted that its sovereign bond holdings are aligned with the 2°C Paris goal but not with the 1.5°C ambition, indicating an awareness of the climate risks associated with its investments (Excerpt 3). Furthermore, the BoE has taken steps to mitigate climate-related financial risks, particularly concerning residential mortgage collateral (Excerpt 5).",
+      "generated_citation_count": 0,
+      "judge_latency_ms": 1705.7,
+      "judge_cost_usd": 0.002705,
+      "judge_tokens": {
+        "prompt": 2646,
+        "completion": 160
+      },
+      "judge_scores": {
+        "correctness": 1,
+        "correctness_rationale": "The reference says the corpus does not contain sufficient information, but the generated answer invents substantive claims about the BoE’s views on climate and crypto assets.",
+        "faithfulness": 2,
+        "faithfulness_rationale": "Some statements are loosely supported by retrieved climate-related chunks, but the answer also adds unsupported specifics and never grounds any claim about crypto assets.",
+        "completeness": 1,
+        "completeness_rationale": "It fails to reflect the canonical refusal and does not address the query’s crypto-assets aspect or the lack of sufficient information.",
+        "refusal_appropriateness": 1,
+        "refusal_appropriateness_rationale": "This is a negative query where the system should have refused, but it instead fabricated an answer."
+      },
+      "correctness": 1,
+      "faithfulness": 2,
+      "completeness": 1,
+      "refusal_appropriateness": 1
+    },
+    {
+      "id": "probe_underspec_heat_pumps",
+      "query_type": "factual",
+      "probe": "underspecified",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 72.7,
+      "top_rrf": 0.032266,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "CCC_PROGRESS_2025"
+      ],
+      "n_expected_docs": 3,
+      "recall@5": 0.3333333333333333,
+      "precision@5": 0.5,
+      "mrr@5": 0.2,
+      "ndcg@5": 0.38685280723454163,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "synthesis_latency_ms": 6430.5,
+      "synthesis_cost_usd": 0.000677,
+      "synthesis_tokens": {
+        "prompt": 2136,
+        "completion": 595
+      },
+      "generated_answer": "Heat pumps are projected to be the dominant solution for replacing fossil fuel heating systems, with 75% of low-carbon heating systems installed by 2040 being heat pumps. Specifically, 94% of these will be air source heat pumps, while ground source heat pumps will account for 0.4% and hybrids 6%. In 2023, 60,000 heat pumps were installed, with projections of nearly 450,000 by 2030 and around 1.5 million by 2035. The UK is currently behind other European countries in heat pump installations, with fewer than 1,000 heat pumps installed per million people each year, compared to nearly 6,000 in the Netherlands in 2022. The growth in heat pump deployment is constrained primarily by consumer demand and installer capacity rather than manufacturing capacity. By 2050, heat pumps are expected to account for a quarter (54 TWh) of the energy demand in the industrial pathway, particularly for lower-temperature heat requirements in various sectors such as paper and food production. Higher-temperature heat pumps are anticipated to become commercially available in the UK between 2028 and 2030, with a conservative efficiency assumption of 255%.",
+      "generated_citation_count": 5,
+      "judge_latency_ms": 6081.2,
+      "judge_cost_usd": 0.00299,
+      "judge_tokens": {
+        "prompt": 2745,
+        "completion": 207
+      },
+      "judge_scores": {
+        "correctness": 4,
+        "correctness_rationale": "The answer is broadly consistent with the reference on heat pumps, but it omits the Ofgem smart-appliance licensing context, the BoE CBES 600,000 annual-installations assumption, and the note that the query is underspecified.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "Most claims are directly supported by the retrieved CCC chunks, though the industrial heat-pump details come from a different chunk than the main residential deployment context and the answer adds a broader synthesis not explicitly tied to a single retrieved passage.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the CCC heat-pump pathway well, but misses two of the three key contexts in the reference and the explicit point that the single-term query is too underspecified for a focused answer.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, so answering rather than refusing was appropriate."
+      },
+      "correctness": 4,
+      "faithfulness": 4,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_underspec_climate_risk",
+      "query_type": "factual",
+      "probe": "underspecified",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 75.5,
+      "top_rrf": 0.016393,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "BOE_MACRO_IMPLICATIONS",
+        "CCC_PROGRESS_2025",
+        "BOE_DISCLOSURE_2024",
+        "BOE_MEASURING_CLIMATE_RISKS"
+      ],
+      "n_expected_docs": 3,
+      "recall@5": 0.6666666666666666,
+      "precision@5": 0.4,
+      "mrr@5": 0.5,
+      "ndcg@5": 0.6240505200038379,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "synthesis_latency_ms": 5007.9,
+      "synthesis_cost_usd": 0.00067,
+      "synthesis_tokens": {
+        "prompt": 2329,
+        "completion": 534
+      },
+      "generated_answer": "To understand climate risk, consider the following key points:\n\n1. **Public Knowledge and Concern**: There is strong public knowledge of climate change and Net Zero, with knowledge of electric vehicles being considerably ahead of heat pumps. Concern about climate change remains high among the public (Excerpt 1, Excerpt 3).\n\n2. **Inevitability of Climate Change**: Further climate change is inevitable, which means that changes in weather and climate extremes will occur and need to be planned for. This necessitates integrating adaptation into emissions reduction strategies to avoid risks to Net Zero targets (Excerpt 1).\n\n3. **Physical Risks**: Climate change poses physical risks that can be event-driven, such as more frequent severe weather events, or result from longer-term shifts in climate patterns, like sea-level rises (Excerpt 4).\n\n4. **Financial Implications**: The transition to a lower-carbon economy may involve extensive changes that can pose financial and reputational risks to organizations. These transition risks can vary based on the nature and speed of the changes (Excerpt 4).\n\n5. **Market Reactions**: Investors may react to climate risks by adjusting their expectations for returns, which can lead to significant impacts on financial markets, particularly in sovereign bonds (Excerpt 5).",
+      "generated_citation_count": 5,
+      "judge_latency_ms": 1915.4,
+      "judge_cost_usd": 0.003158,
+      "judge_tokens": {
+        "prompt": 2950,
+        "completion": 210
+      },
+      "judge_scores": {
+        "correctness": 3,
+        "correctness_rationale": "The answer includes some true climate-risk themes, but it misses the reference’s main point that the query is too broad and omits the specific BoE/CCC framing and scenario-analysis context.",
+        "faithfulness": 3,
+        "faithfulness_rationale": "Several statements are supported by the retrieved chunks, but the public knowledge/concern points are irrelevant to the reference and the broader synthesis about BoE and CCC coverage is not grounded in the chunks.",
+        "completeness": 2,
+        "completeness_rationale": "It covers physical and transition risk at a high level, but it misses the key reference points about CBES scenario analysis, BoE measuring climate-related financial risks, macroeconomic implications, and CCC progress/pathways, as well as the need for clarification.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, so answering rather than refusing is appropriate even though the response should have been more focused."
+      },
+      "correctness": 3,
+      "faithfulness": 3,
+      "completeness": 2,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_table_weo_solar_lcoe",
+      "query_type": "numeric",
+      "probe": "table_only",
+      "detected_institutions": [
+        "IEA"
+      ],
+      "retrieval_latency_ms": 93.2,
+      "top_rrf": 0.032018,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 0.2,
+      "synthesis_latency_ms": 1754.2,
+      "synthesis_cost_usd": 0.00043,
+      "synthesis_tokens": {
+        "prompt": 2338,
+        "completion": 132
+      },
+      "generated_answer": "The IEA projects that costs for solar PV are expected to decline by about 40% from 2024 to 2035. This decline is part of a broader trend where costs for batteries are projected to decrease by 30% and costs for onshore wind by about 10% during the same period.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 2098.7,
+      "judge_cost_usd": 0.002749,
+      "judge_tokens": {
+        "prompt": 2741,
+        "completion": 154
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer matches the reference exactly on the projected 40% decline for solar PV and correctly includes the related battery and onshore wind figures.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every claim in the response is directly supported by the retrieved IEA chunk stating the same percentage declines from 2024 to 2035.",
+        "completeness": 5,
+        "completeness_rationale": "It covers all key points in the reference answer, including solar PV, batteries, and onshore wind decline projections.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive numeric query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_table_boe_tfsme_waci",
+      "query_type": "numeric",
+      "probe": "table_only",
+      "detected_institutions": [
+        "BoE"
+      ],
+      "retrieval_latency_ms": 105.1,
+      "top_rrf": 0.032787,
+      "retrieved_doc_ids": [
+        "BOE_DISCLOSURE_2024"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.4,
+      "synthesis_latency_ms": 1843.6,
+      "synthesis_cost_usd": 0.00038,
+      "synthesis_tokens": {
+        "prompt": 2003,
+        "completion": 132
+      },
+      "generated_answer": "The Scope 1 and 2 WACI for the TFSME in 2024 was 5.0 tCO2/£mn revenue, which increased from 4.2 tCO2/£mn revenue in 2023.",
+      "generated_citation_count": 1,
+      "judge_latency_ms": 2573.4,
+      "judge_cost_usd": 0.002527,
+      "judge_tokens": {
+        "prompt": 2422,
+        "completion": 158
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer exactly matches the reference values and the direction of change for TFSME Scope 1 and 2 WACI.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every claim in the generated answer is directly supported by the retrieved chunks, especially Chunk 1 and Chunk 2.",
+        "completeness": 3,
+        "completeness_rationale": "It covers the WACI change but omits the additional reference detail that TFSME Scope 1 and 2 financed emissions were 0.1 MtCO2e.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a numeric factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 3,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_table_ccc_prog24_buildings_rollback",
+      "query_type": "factual",
+      "probe": "table_only",
+      "detected_institutions": [
+        "CCC"
+      ],
+      "retrieval_latency_ms": 95.3,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "CCC_PROGRESS_2024",
+        "CCC_PROGRESS_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 0.5,
+      "mrr@5": 1.0,
+      "ndcg@5": 0.9558295932317544,
+      "hit@5": 1,
+      "table_fraction@5": 0.4,
+      "page_in_range@5": 0.25,
+      "synthesis_latency_ms": 3243.0,
+      "synthesis_cost_usd": 0.00053,
+      "synthesis_tokens": {
+        "prompt": 2442,
+        "completion": 273
+      },
+      "generated_answer": "The sector that saw a policy rollback, which increased delivery risk against the 2030 Nationally Determined Contribution (NDC), is the buildings sector. Specifically, the following changes occurred:\n- \"20% boiler ban exemption\" worsened the assessment from credible plans, some risks, and significant risks to insufficient plans (Change ID: BU01).\n- \"Delaying oil boiler ban to 2035\" worsened the assessment from significant risks to insufficient plans (Change ID: BU02).\n- \"Scrapping 2028 EPC target for properties in the private-rented sector\" worsened the assessment from significant risks to insufficient plans (Change ID: BU04).",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1815.3,
+      "judge_cost_usd": 0.00298,
+      "judge_tokens": {
+        "prompt": 2918,
+        "completion": 176
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer correctly identifies the buildings sector as the one with policy rollback increasing delivery risk and aligns with the reference’s description of the rollback affecting the 2030 NDC assessment.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Every claim in the response is directly supported by the retrieved CCC chunks, especially the buildings-sector changes listed in Table 4.1.",
+        "completeness": 4,
+        "completeness_rationale": "It names the correct sector and relevant rollback examples, but it does not mention the reference’s point that credible plans exist for around 32% of required emissions reductions and that the rollback offset some improvement.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a factual query and the system appropriately answered it rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 4,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_table_seventh_cb_transport_shift",
+      "query_type": "numeric",
+      "probe": "table_only",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 96.8,
+      "top_rrf": 0.032522,
+      "retrieved_doc_ids": [
+        "CCC_SEVENTH_CARBON_BUDGET_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.0,
+      "page_in_range@5": 0.4,
+      "synthesis_latency_ms": 3381.8,
+      "synthesis_cost_usd": 0.000488,
+      "synthesis_tokens": {
+        "prompt": 2416,
+        "completion": 209
+      },
+      "generated_answer": "The contingency scenario anticipates an additional 3% of car demand to be switched to public transport or active travel by 2035, compared to the baseline. This is in addition to the already projected 7% shift to public transport and active travel by 2035, making a total of 10% when combined with the baseline shift.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 2069.1,
+      "judge_cost_usd": 0.002827,
+      "judge_tokens": {
+        "prompt": 2815,
+        "completion": 159
+      },
+      "judge_scores": {
+        "correctness": 5,
+        "correctness_rationale": "The answer correctly states the contingency adds a further 3% of car demand shifted to public transport or active travel by 2035, matching the reference.",
+        "faithfulness": 5,
+        "faithfulness_rationale": "Both claims are directly supported by the retrieved chunks, which state a further 3% contingency on top of the baseline shift.",
+        "completeness": 5,
+        "completeness_rationale": "It includes the key point from the reference: the contingency is a further 3% shift by 2035 on top of baseline assumptions.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive numeric query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 5,
+      "faithfulness": 5,
+      "completeness": 5,
+      "refusal_appropriateness": 5
+    },
+    {
+      "id": "probe_table_weo_electricity_2035",
+      "query_type": "numeric",
+      "probe": "table_only",
+      "detected_institutions": [],
+      "retrieval_latency_ms": 88.5,
+      "top_rrf": 0.032018,
+      "retrieved_doc_ids": [
+        "IEA_WEO_2025"
+      ],
+      "n_expected_docs": 1,
+      "recall@5": 1.0,
+      "precision@5": 1.0,
+      "mrr@5": 1.0,
+      "ndcg@5": 1.0,
+      "hit@5": 1,
+      "table_fraction@5": 0.2,
+      "page_in_range@5": 0.0,
+      "synthesis_latency_ms": 2499.8,
+      "synthesis_cost_usd": 0.00051,
+      "synthesis_tokens": {
+        "prompt": 2479,
+        "completion": 231
+      },
+      "generated_answer": "The Stated Policies Scenario (STEPS) in the World Energy Outlook 2025 does not provide specific projections for global electricity generation by 2035. Instead, it outlines a framework based on existing and proposed policies without assuming that aspirational targets will be met. The STEPS reflects the prevailing direction of travel for the energy system based on current policy settings, but it does not function as a forecast or provide definitive outcomes for electricity generation.",
+      "generated_citation_count": 2,
+      "judge_latency_ms": 1828.7,
+      "judge_cost_usd": 0.003043,
+      "judge_tokens": {
+        "prompt": 2905,
+        "completion": 192
+      },
+      "judge_scores": {
+        "correctness": 2,
+        "correctness_rationale": "The answer misses the reference’s specific projection of over 44,000 TWh in 2035 and the comparison to the 2024 STEPS, and it incorrectly says no specific projection is provided.",
+        "faithfulness": 4,
+        "faithfulness_rationale": "The response is well grounded in the retrieved chunks’ description of STEPS as an exploratory scenario based on policies and not a forecast, but the claim that it gives no specific projection is unsupported by the retrieved evidence.",
+        "completeness": 1,
+        "completeness_rationale": "It omits the key numeric projection, the year 2035, the ~4% increase versus 2024 STEPS, and the data-centres demand driver.",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "This is a positive factual query, and the system appropriately answered rather than refusing."
+      },
+      "correctness": 2,
+      "faithfulness": 4,
+      "completeness": 1,
+      "refusal_appropriateness": 5
+    }
+  ]
+}

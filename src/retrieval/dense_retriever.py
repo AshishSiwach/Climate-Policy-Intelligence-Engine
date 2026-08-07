@@ -129,8 +129,24 @@ class DenseRetriever:
             self.collection_name,
         )
 
-    def query(self, text: str, top_k: int = 20) -> list[dict]:
+    def query(
+        self,
+        text: str,
+        top_k: int = 20,
+        institutions: list[str] | None = None,
+    ) -> list[dict]:
         """Encode query and return top-k chunks by cosine similarity.
+
+        Parameters
+        ----------
+        text : str
+            Query text.
+        top_k : int
+            Chunks to return.
+        institutions : list[str] | None
+            If non-empty, restrict retrieval to chunks whose ``institution``
+            metadata is in this list (Chroma-native ``where`` filter). ``None``
+            or ``[]`` means no filter. Added Week 5 for metadata filtering.
 
         Each returned dict contains all stored metadata plus:
           - ``dense_score`` (float, cosine similarity 0–1)
@@ -147,9 +163,15 @@ class DenseRetriever:
         k = min(top_k, n_items)
 
         embedding = model.encode([text], convert_to_numpy=True)[0]
+
+        where_filter: dict | None = None
+        if institutions:
+            where_filter = {"institution": {"$in": institutions}}
+
         results = collection.query(
             query_embeddings=[embedding.tolist()],
             n_results=k,
+            where=where_filter,
             include=['documents', 'metadatas', 'distances'],
         )
 

@@ -51,11 +51,28 @@ class HybridRetriever:
         self.dense = dense
         self.rrf_k = rrf_k
 
-    def retrieve(self, query: str, top_k: int = 20) -> list[dict]:
+    def retrieve(
+        self,
+        query: str,
+        top_k: int = 20,
+        institutions: list[str] | None = None,
+    ) -> list[dict]:
         """Retrieve and fuse results from BM25 and dense, return top-k by RRF score.
 
-        Queries each retriever for 2×top_k candidates, fuses with RRF,
-        and returns the top-k unique chunks by combined score.
+        Queries each retriever for 2×top_k candidates, fuses with RRF, and
+        returns the top-k unique chunks by combined score.
+
+        Parameters
+        ----------
+        query : str
+        top_k : int
+        institutions : list[str] | None
+            Optional metadata filter — restrict retrieval to chunks whose
+            ``institution`` field is in this list. Dense uses Chroma's native
+            ``where`` filter; BM25 is post-filtered from a larger candidate pool
+            (5× top_k) so we don't starve the fusion after filtering. If the
+            combined filtered pool is empty, falls back to unfiltered retrieval
+            so the pipeline never returns "nothing" from a spurious detection.
 
         Each returned dict contains all chunk metadata plus:
           - ``rrf_score`` (float)  — combined RRF score
@@ -64,8 +81,31 @@ class HybridRetriever:
         """
         candidate_pool = top_k * 2
 
-        bm25_results = self.bm25.query(query, top_k=candidate_pool)
-        dense_results = self.dense.query(query, top_k=candidate_pool)
+        if institutions:
+            # Fetch larger BM25 pool for post-filter room; Dense uses native filter.
+            bm25_raw = self.bm25.query(query, top_k=candidate_pool * 5)
+            bm25_filtered = [c for c in bm25_raw if c.get("institution") in institutions]
+            dense_filtered = self.dense.query(
+                query, top_k=candidate_pool, institutions=institutions,
+            )
+
+            if not bm25_filtered and not dense_filtered:
+                logger.info(
+                    "Metadata filter matched zero chunks for institutions=%s; "
+                    "falling back to unfiltered retrieval",
+                    institutions,
+                )
+                bm25_results = self.bm25.query(query, top_k=candidate_pool)
+                dense_results = self.dense.query(query, top_k=candidate_pool)
+            else:
+                # Re-rank filtered BM25 to top-N and stitch bm25_rank sequentially.
+                bm25_results = [
+                    {**c, "bm25_rank": i} for i, c in enumerate(bm25_filtered[:candidate_pool], 1)
+                ]
+                dense_results = dense_filtered
+        else:
+            bm25_results = self.bm25.query(query, top_k=candidate_pool)
+            dense_results = self.dense.query(query, top_k=candidate_pool)
 
         # Accumulate RRF scores keyed by stable chunk identifier
         rrf_scores: dict[str, float] = {}

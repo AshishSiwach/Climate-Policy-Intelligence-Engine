@@ -30,6 +30,7 @@ from evaluation.retrieval_metrics import (
     retrieved_doc_ids,
 )
 from retrieval import BM25Retriever, HybridRetriever
+from retrieval.institution_detector import detect_institutions
 
 # NOTE: evaluation.judge is deliberately NOT imported here. It pulls in openai,
 # which on Windows breaks a later `from retrieval import DenseRetriever` (torch
@@ -44,6 +45,10 @@ RESULTS_DIR = Path("data/eval/results")
 
 RETRIEVAL_TOP_K = 5   # what the synthesiser sees; matches main.py default
 KS = (5,)             # single k for judge runs (retrieval metrics already covered @5 and @10)
+
+# Metadata filter mode — flip to False to reproduce the pre-filter baseline
+# (used for A/B measurement of the filter's effect).
+METADATA_FILTER_ENABLED = True
 
 _PROBE_PATTERN = re.compile(r"\[PROBE:\s*(\w+)\]")
 
@@ -90,9 +95,13 @@ def _score_pair(pair: dict, hybrid, synth, judge) -> dict:
     }
 
     # 1. Retrieval
+    institutions = detect_institutions(pair["question"]) if METADATA_FILTER_ENABLED else []
+    row["detected_institutions"] = institutions
     t0 = time.time()
     try:
-        chunks = hybrid.retrieve(pair["question"], top_k=RETRIEVAL_TOP_K)
+        chunks = hybrid.retrieve(
+            pair["question"], top_k=RETRIEVAL_TOP_K, institutions=institutions,
+        )
     except Exception as e:
         logger.exception("Retrieval failed for %s", pair["id"])
         row["error"] = f"retrieval: {type(e).__name__}: {e}"
@@ -238,6 +247,7 @@ def run(output_path: Path | None = None) -> Path:
             "retrieval_top_k": RETRIEVAL_TOP_K,
             "synthesis_model": synth.model,
             "judge_model": judge.model,
+            "metadata_filter_enabled": METADATA_FILTER_ENABLED,
         },
         "cost_summary": {
             "synthesis_total_usd": round(total_synth_cost, 6),

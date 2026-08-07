@@ -31,6 +31,7 @@ from dotenv import load_dotenv
 
 from monitoring import QueryLogger, build_query_record
 from retrieval import BM25Retriever, HybridRetriever
+from retrieval.institution_detector import detect_institutions
 from synthesis import AnalystBrief, Synthesiser
 
 # DenseRetriever imported lazily inside build_pipeline() — its dep
@@ -43,6 +44,11 @@ logger = logging.getLogger("cpie.main")
 BM25_PATH = Path("data/processed/bm25_index.pkl")
 CHROMA_DIR = Path("data/processed/chroma_db")
 LOG_PATH = Path("logs/queries.jsonl")
+
+# Metadata filtering (Week 5, promoted from v2). Detects named institutions
+# in the query and pre-filters retrieval to those institutions before RRF.
+# Directly fixes cross-doc coverage misses on institution-named queries (2c).
+METADATA_FILTER_ENABLED = True
 
 # --- v1 input guardrails (see CLAUDE.md Locked Decisions) -----------------
 MAX_QUERY_CHARS = 500          # cost-blow-up defense
@@ -156,8 +162,12 @@ def run_query(
     chunks: list[dict] = []
 
     try:
+        institutions = detect_institutions(query) if METADATA_FILTER_ENABLED else []
+        if institutions:
+            logger.info("Metadata filter active — institutions detected: %s", institutions)
+
         t0 = time.time()
-        chunks = hybrid.retrieve(query, top_k=top_k)
+        chunks = hybrid.retrieve(query, top_k=top_k, institutions=institutions)
         retrieval_latency_ms = (time.time() - t0) * 1000
 
         synthesis_result = synth.synthesise(query, chunks)

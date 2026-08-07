@@ -179,3 +179,108 @@ def test_hybrid_locked_rrf_k_default():
     dense = MagicMock()
     hybrid = HybridRetriever(bm25=bm25, dense=dense)
     assert hybrid.rrf_k == 60
+
+
+# ---------------------------------------------------------------------------
+# HybridRetriever — metadata filter (Week 5, promoted from v2)
+# ---------------------------------------------------------------------------
+
+def _make_chunks(specs):
+    """Helper: turn [(doc_id, chunk_idx, institution, text)] into chunk dicts."""
+    return [
+        {"doc_id": did, "chunk_index": ci, "institution": inst, "text": text}
+        for did, ci, inst, text in specs
+    ]
+
+
+def test_hybrid_filters_dense_via_native_where():
+    """When institutions is non-empty, dense.query must receive institutions kwarg."""
+    chunks = _make_chunks([
+        ("A", 0, "Ofgem", "ofgem load control"),
+        ("B", 0, "IEA",   "iea global fossil"),
+    ])
+    bm25 = BM25Retriever()
+    bm25.build(chunks)
+
+    dense_mock = MagicMock()
+    dense_mock.query.return_value = [
+        {**chunks[0], "dense_score": 0.9, "dense_rank": 1},
+    ]
+
+    hybrid = HybridRetriever(bm25=bm25, dense=dense_mock, rrf_k=60)
+    hybrid.retrieve("Ofgem load control", top_k=5, institutions=["Ofgem"])
+
+    # dense.query must have been called with institutions=['Ofgem']
+    _, kwargs = dense_mock.query.call_args
+    assert kwargs.get("institutions") == ["Ofgem"]
+
+
+def test_hybrid_post_filters_bm25_by_institution():
+    """BM25 chunks not matching the filter must be dropped from fusion."""
+    chunks = _make_chunks([
+        ("A", 0, "Ofgem", "ofgem load control licensing"),
+        ("B", 0, "IEA",   "iea peak fossil demand"),
+        ("C", 0, "CCC",   "ccc progress report"),
+    ])
+    bm25 = BM25Retriever()
+    bm25.build(chunks)
+
+    dense_mock = MagicMock()
+    dense_mock.query.return_value = []   # dense returns nothing, force reliance on BM25
+
+    hybrid = HybridRetriever(bm25=bm25, dense=dense_mock, rrf_k=60)
+    # Query matches all three doc texts (single common token would); filter to Ofgem+IEA
+    results = hybrid.retrieve("load control fossil ccc", top_k=5, institutions=["Ofgem", "IEA"])
+
+    returned_institutions = {r["institution"] for r in results}
+    assert "CCC" not in returned_institutions, (
+        "CCC chunks must be dropped by the metadata filter even though the BM25 query matched them"
+    )
+    assert returned_institutions.issubset({"Ofgem", "IEA"})
+
+
+def test_hybrid_falls_back_to_full_corpus_on_zero_filter_matches():
+    """If the filter matches nothing, retrieval must fall back to unfiltered results."""
+    chunks = _make_chunks([
+        ("A", 0, "Ofgem", "ofgem load control"),
+        ("B", 0, "IEA",   "iea projections"),
+    ])
+    bm25 = BM25Retriever()
+    bm25.build(chunks)
+
+    # Dense mock: when called with institutions=['DESNZ'] → return empty (filter matches nothing)
+    #             when called WITHOUT institutions → return the Ofgem chunk (fallback)
+    def dense_query(query, top_k=20, institutions=None):
+        if institutions:
+            return []
+        return [{**chunks[0], "dense_score": 0.9, "dense_rank": 1}]
+
+    dense_mock = MagicMock()
+    dense_mock.query.side_effect = dense_query
+
+    hybrid = HybridRetriever(bm25=bm25, dense=dense_mock, rrf_k=60)
+    # Query mentions DESNZ but our test corpus has no DESNZ chunks → filter matches zero
+    results = hybrid.retrieve("DESNZ non-existent topic", top_k=5, institutions=["DESNZ"])
+
+    # Must have fallen back — dense called twice (filter attempt + fallback)
+    assert dense_mock.query.call_count == 2
+    assert len(results) >= 1, "fallback path should return unfiltered results, not empty"
+
+
+def test_hybrid_no_institutions_kwarg_matches_v1_behaviour(sample_chunks):
+    """institutions=None (or omitted) must NOT pass institutions to dense.query."""
+    bm25 = BM25Retriever()
+    bm25.build(sample_chunks)
+
+    dense_mock = MagicMock()
+    dense_mock.query.return_value = [
+        {**sample_chunks[0], "dense_score": 0.9, "dense_rank": 1}
+    ]
+
+    hybrid = HybridRetriever(bm25=bm25, dense=dense_mock, rrf_k=60)
+    hybrid.retrieve("Ofgem", top_k=5)   # no institutions kwarg
+
+    _, kwargs = dense_mock.query.call_args
+    assert "institutions" not in kwargs, (
+        "v1 no-filter path must not pass institutions to dense.query"
+    )

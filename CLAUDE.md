@@ -501,6 +501,43 @@ Run 5 real queries manually, inspect output quality before committing:
 - v2 re-introduction conditions: (a) rewriter prompt that produces *lexically different* variants (HyDE-style hypothetical answers, or explicit synonym expansion) rather than paraphrases that preserve keywords; (b) per-query-type activation (only fire on underspecified/vocab_mismatch — depends on query classifier); (c) n ≥ 100 GT to distinguish per-probe gains from noise.
 - See `docs/week5_failure_analysis.md § 3` for full A/B numbers and per-query cross-doc regression breakdown.
 
+**Step 3a — Prompt versioning + A/B — DONE (Week 5)**
+- Shipped `PROMPT_REGISTRY` (dict keyed by version) + `PROMPT_VERSION` constant + per-query `prompt_version` field in logs and eval output. Small platform lift; earns its keep even independent of the A/B result.
+- Authored 2 targeted variants alongside v1 baseline:
+  - **v2_crossdoc**: v1 + explicit "compare and contrast" instruction for multi-source retrievals. Targeted cross-doc Completeness.
+  - **v2_numeric**: v1 + explicit "verbatim value extraction + page citation" instruction. Targeted numeric-query miss pattern.
+- Ran 3 judge_runner passes on the 52-query GT (~$0.50 total, ~15 min).
+- **Results (52 queries):**
+  - v1 baseline:     Correctness 4.02  Faithfulness 4.37  Completeness 3.15
+  - v2_crossdoc:     Correctness 4.10  Faithfulness 4.31  Completeness 3.39  (agg mixed; cross_document target regressed −0.25)
+  - **v2_numeric:    Correctness 4.14  Faithfulness 4.37  Completeness 3.33  (best aggregate Correctness of any Week 5 config; zero regressions on any aggregate metric)**
+- **Ship decision:** `PROMPT_VERSION = "v2_numeric"` — cleanest aggregate improvement, no regression, no cost/latency delta. The "extract verbatim" instruction turned out to be a generally-good prompt improvement, not just numeric-specific.
+- **Kept v2_crossdoc in the registry as a v2 candidate** (per-query-type activation): pair with a query classifier so v2_crossdoc fires only on `cross_document` queries. Same reranker precedent — measured, not shipped as default, kept for future selective activation.
+- See `docs/week5_failure_analysis.md § 3a` for full A/B numbers.
+
+**Step 3b — Model comparison at eval time** *(last v1 quality lever)*
+- *Current state: Week 2 model_selection.md compared gpt-4o-mini vs Claude Haiku (both small). Never tested a larger-tier model. Real gap in the "measured evidence" story.*
+- *Target state: 52-query judge run repeated on 1–2 larger models; cost/quality tradeoff documented; ship decision made explicit.*
+- Configure `synthesiser.py` (and `judge_runner.py` override) to allow the synthesis model to be flipped via a constant. Same eval, different model.
+- **Candidate model ladder (updated after user note — gpt-4o is now legacy premium pricing):**
+
+| Model | Input $/1M | Output $/1M | Cost per full 52-q eval | vs current | Notes |
+|---|---:|---:|---:|---:|---|
+| **gpt-4o-mini** (current) | 0.15 | 0.60 | ~$0.03 | 1× | v1 default |
+| **gpt-5.4-mini** | 0.75 | 4.50 | ~$0.17 | ~5× | **Primary candidate — newer generation, cheaper than legacy gpt-4o. Already used as our judge.** |
+| **gpt-4o** (legacy) | 2.50 | 10.00 | ~$0.50 | ~16× | Only if gpt-5.4-mini disappoints and we want to isolate old-gen big vs new-gen mini |
+| **claude-sonnet-5** (optional) | — | — | ~$0.50 | ~16× | Different vendor; if API key present |
+
+- **Test order:** gpt-5.4-mini FIRST. It's the natural upgrade — newer generation, 5× cost (not 16×), we already trust it enough to use as judge. If it wins meaningfully, we're done. Only test gpt-4o if gpt-5.4-mini disappoints (to distinguish "prompt is the bottleneck" from "model tier is the bottleneck").
+- **Ship decision framework** — the eval measures *quality per query*; ship decision is a *deploy budget* question:
+  - If gpt-5.4-mini wins by ≥ +0.3 aggregate Correctness AND deploy budget allows (~$10/month at 100 queries/day) → **ship gpt-5.4-mini as v1**
+  - If gain is smaller (~+0.1–0.2) → keep gpt-4o-mini as v1, promote "model upgrade" to v2 with the empirical delta locked in
+  - If no gain → document the null result; keep gpt-4o-mini as v1
+- Deliverable: comparison table in `docs/week5_failure_analysis.md § 3b` and updated `model_selection.md` reflecting the real tier comparison (not just tier-matched Haiku from Week 2).
+- Commit: `chore: model comparison at eval time — {ship decision}`
+
+**Note on judge choice** — we can't judge gpt-5.4-mini's answers with gpt-5.4-mini (same-model judge bias). If Step 3b runs a gpt-5.4-mini synthesis eval, use a *different* stronger judge (Claude Sonnet 5 or gpt-4o) to preserve the "stronger judge" convention. Trade-off: judge cost goes up ~5×. Only matters for the model comparison step; regular judge_runner continues on gpt-5.4-mini.
+
 **Step 4 — PostgreSQL + Grafana monitoring stack** *(course-aligned, replaces Logfire)*
 - *Current state: query logs accumulating in `logs/queries.jsonl`, no observability layer.*
 - *Target state: PostgreSQL captures live query records + user feedback; Grafana renders ≥5 dashboards.*
@@ -655,6 +692,7 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 | Universal heading injection | v1 injects section headings for CCC/IEA/ESO (section strategy) and Tier 2 table pages only. BoE prose docs and DESNZ have no section context on their chunks. v2: extend heading injection to every chunk in every document, or move to hierarchical trail (`[Chapter 3 > Transport > Cars & vans]`). Run A/B with retrieval metrics to confirm gain before committing. | Medium |
 | ~~Reranker re-evaluation~~ | **DONE Week 5 Step 2e.** 47-query × 4-config ablation. Reranker adds 5.2× retrieval latency for zero aggregate Correctness gain vs. Hybrid. Kept preserved for possible per-type activation (see next row). | Done |
 | Per-query-type reranker activation | Week 5 2e found Rerank wins on **numeric** queries only: +1.0 Correctness (n=4, small sample but striking gap). Activate reranker selectively when a query classifier flags the query as numeric/table-lookup. Depends on the "Query classification" item above. | Medium |
+| Per-query-type prompt activation | Week 5 3a authored `v2_crossdoc` (compare/contrast instruction for multi-source retrievals). Aggregate Completeness +0.23 and Refusal_appr +0.15 vs v1, but cross_document target Correctness regressed −0.25 at n=4. Prompt is preserved in `PROMPT_REGISTRY` — activate selectively when a query classifier flags a query as `cross_document`. Same mechanism as per-type reranker activation; both depend on the "Query classification" item above. | Medium |
 | Retriever-agreement gate | Replaces the deleted RRF-threshold short-circuit. Fire when top-1 chunk has `bm25_rank > 5` AND `dense_rank > 5` (both retrievers considered it unimportant) — an actual corpus-relevance signal, not the retriever-disagreement signal RRF top-1 accidentally measures. Needs its own calibration data. See `docs/week5_failure_analysis.md § Step 2b`. | Medium |
 | Judge Correctness rubric revision | Week 5 2b uncovered a judge artefact: canonical refusals on positive queries get Correctness ≈ 4 (no claims = no wrong claims). Explicitly penalise refusals on positives in the rubric so aggregate Correctness reflects true user experience. Currently masked by using Completeness + Refusal_appr as the honest signals. | Low |
 | Prompt versioning | Version prompts (v1/v2/v3) and log which version generated each response. Required for A/B testing. Add when you have multiple prompt variants to test. | Medium |

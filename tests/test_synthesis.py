@@ -28,6 +28,8 @@ from synthesis.output_schema import (
 )
 from synthesis.synthesiser import (
     OUT_OF_CORPUS_ANSWER,
+    PROMPT_REGISTRY,
+    PROMPT_VERSION,
     Synthesiser,
     _verify_citations,
 )
@@ -188,3 +190,67 @@ def test_synthesise_normal_path_returns_verified_citations(sample_chunks):
         "publication_date should be enriched from the matched Ofgem chunk"
     )
     assert result["cost_usd"] > 0
+
+
+# ---------------------------------------------------------------------------
+# Prompt versioning (Week 5 Step 3a)
+# ---------------------------------------------------------------------------
+
+def test_prompt_registry_contains_v1_and_variants():
+    """PROMPT_REGISTRY must include v1 baseline + the 2 v2 variants."""
+    assert "v1" in PROMPT_REGISTRY
+    assert "v2_crossdoc" in PROMPT_REGISTRY
+    assert "v2_numeric" in PROMPT_REGISTRY
+
+
+def test_default_prompt_version_is_v2_numeric():
+    """v2_numeric shipped as default after the Step 3a A/B (best aggregate
+    Correctness, zero regressions). Guardrail against silent version drift."""
+    assert PROMPT_VERSION == "v2_numeric"
+
+
+def test_synthesiser_default_uses_shipped_prompt():
+    synth = Synthesiser(api_key="test-key-not-used")
+    assert synth.prompt_version == PROMPT_VERSION
+    assert synth.system_prompt == PROMPT_REGISTRY[PROMPT_VERSION]
+
+
+def test_synthesiser_accepts_alternate_prompt_version():
+    synth = Synthesiser(api_key="test-key-not-used", prompt_version="v2_crossdoc")
+    assert synth.prompt_version == "v2_crossdoc"
+    assert synth.system_prompt == PROMPT_REGISTRY["v2_crossdoc"]
+
+
+def test_synthesiser_rejects_unknown_prompt_version():
+    with pytest.raises(ValueError, match="Unknown prompt_version"):
+        Synthesiser(api_key="test-key-not-used", prompt_version="v99_nonexistent")
+
+
+def test_synthesise_result_includes_prompt_version_on_empty_chunks():
+    """Empty-chunks guard path must still tag prompt_version — needed for log slicing."""
+    synth = Synthesiser(api_key="test-key-not-used", prompt_version="v2_numeric")
+    with patch.object(synth._client.beta.chat.completions, "parse"):
+        result = synth.synthesise("anything", [])
+    assert result["prompt_version"] == "v2_numeric"
+
+
+def test_synthesise_uses_the_configured_prompt_at_call_time(sample_chunks):
+    """The LLM call must receive the version-specific system prompt, not v1 unconditionally."""
+    synth = Synthesiser(api_key="test-key-not-used", prompt_version="v2_crossdoc")
+
+    llm_response = LLMResponse(answer="ok", citations=[], contradictions=[])
+    normal_message = MagicMock()
+    normal_message.refusal = None
+    normal_message.parsed = llm_response
+    fake_response = MagicMock()
+    fake_response.choices = [MagicMock(message=normal_message)]
+    fake_response.usage = MagicMock(prompt_tokens=100, completion_tokens=10)
+
+    with patch.object(synth._client.beta.chat.completions, "parse", return_value=fake_response) as mock_parse:
+        result = synth.synthesise("q", sample_chunks)
+
+    # First positional call has kwargs, including messages=[system, user]
+    call_kwargs = mock_parse.call_args.kwargs
+    system_msg = next(m for m in call_kwargs["messages"] if m["role"] == "system")
+    assert system_msg["content"] == PROMPT_REGISTRY["v2_crossdoc"]
+    assert result["prompt_version"] == "v2_crossdoc"

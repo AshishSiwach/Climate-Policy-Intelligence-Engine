@@ -67,6 +67,7 @@ def build_query_record(
             round(synthesis_result["latency_ms"], 1) if synthesis_result else 0.0
         ),
         "model_used": model_used,
+        "prompt_version": synthesis_result.get("prompt_version") if synthesis_result else None,
         "prompt_tokens": synthesis_result["prompt_tokens"] if synthesis_result else 0,
         "completion_tokens": synthesis_result["completion_tokens"] if synthesis_result else 0,
         "cost_usd": synthesis_result["cost_usd"] if synthesis_result else 0.0,

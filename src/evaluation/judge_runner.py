@@ -50,6 +50,10 @@ KS = (5,)             # single k for judge runs (retrieval metrics already cover
 # (used for A/B measurement of the filter's effect).
 METADATA_FILTER_ENABLED = True
 
+# Prompt version — flip to run A/B across prompt variants defined in
+# synthesis.synthesiser.PROMPT_REGISTRY. None = use the module default (v1).
+PROMPT_VERSION_OVERRIDE: str | None = None
+
 _PROBE_PATTERN = re.compile(r"\[PROBE:\s*(\w+)\]")
 
 
@@ -75,7 +79,9 @@ def _build_pipeline():
 
     # Synthesiser import must happen AFTER DenseRetriever, same Windows quirk.
     from synthesis import Synthesiser
-    synth = Synthesiser()
+    from synthesis.synthesiser import PROMPT_VERSION as _DEFAULT_PROMPT_VERSION
+    version = PROMPT_VERSION_OVERRIDE or _DEFAULT_PROMPT_VERSION
+    synth = Synthesiser(prompt_version=version)
     return hybrid, synth
 
 
@@ -139,6 +145,7 @@ def _score_pair(pair: dict, hybrid, synth, judge) -> dict:
     }
     row["generated_answer"] = brief.answer
     row["generated_citation_count"] = len(brief.citations)
+    row["prompt_version"] = synth_result.get("prompt_version")
 
     # 4. Judge
     try:
@@ -252,6 +259,7 @@ def run(output_path: Path | None = None) -> Path:
             "synthesis_model": synth.model,
             "judge_model": judge.model,
             "metadata_filter_enabled": METADATA_FILTER_ENABLED,
+            "prompt_version": synth.prompt_version,
         },
         "cost_summary": {
             "synthesis_total_usd": round(total_synth_cost, 6),
@@ -268,7 +276,7 @@ def run(output_path: Path | None = None) -> Path:
     if output_path is None:
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-        output_path = RESULTS_DIR / f"judge_scores_{ts}.json"
+        output_path = RESULTS_DIR / f"judge_scores_{ts}_prompt-{synth.prompt_version}.json"
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)

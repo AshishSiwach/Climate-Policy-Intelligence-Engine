@@ -50,7 +50,7 @@ Use the CRAG naming explicitly in README and interview conversations — it's th
 | Monitoring storage | **PostgreSQL** (Week 5) — replaces JSONL for live queries. Every query writes a row to `query_logs` table. Matches LLM Zoomcamp Module 5. |
 | Monitoring dashboards | **Grafana** (Week 5) reading from PostgreSQL, min 5 dashboards for full monitoring rubric marks. Streamlit user-feedback widget (thumbs up/down) writes to PostgreSQL too. Matches Module 5. |
 | Log analytics | **dlt → DuckDB → marimo** (Week 6) — offline pipeline pulls PostgreSQL logs into DuckDB for exploration in marimo notebooks. Matches the dlt workshop directly. |
-| Query rewriting | **Enabled Week 5** — LLM generates 2–3 query rewrites (synonym expansion); retrieval takes union of top-k across rewrites before RRF. Behind a config flag so eval can A/B against baseline. Earns rubric best-practices point. |
+| Query rewriting | **Measured and removed Week 5** — LLM-generated paraphrases regressed cross-doc Correctness −0.75 (target metric) and hurt Recall@5 by 5pts at 3× latency. Reasons + v2 conditions in `docs/week5_failure_analysis.md § 3` and Week 5 Step 3 notes below. |
 | UI | Streamlit chat app (Week 5) — same app hosts the feedback widget |
 | Containerisation | Docker + docker-compose — includes services for app, PostgreSQL, Grafana |
 | Build tooling | Makefile targets: install, run, test, eval, build, docker-build, docker-run |
@@ -493,16 +493,13 @@ Run 5 real queries manually, inspect output quality before committing:
 - **Addition 4 — DEFERRED (v2).** Tier 2 heading injection A/B. Metric slice from Addition 1 will signal regressions.
 - **Findings:** all 5 table-only probes get Recall@5 = 1.0. WEO probes surface table chunks (3× and 1× in top-5); BoE / CCC / Seventh CB probes retrieve prose because the target values live in prose narrative rather than table cells (`find_tables()` fill-ratio filter excludes narrative tables; CCC RAG traffic-lights don't extract as text). See `docs/week5_failure_analysis.md § 2g`.
 
-**Step 3 — Query rewriting** *(rubric best-practices point)*
-- *Current state: raw user query goes directly to hybrid retrieval.*
-- *Target state: LLM generates 2–3 rewrites; retrieval fuses results across all variants.*
-- Build `src/synthesis/query_rewriter.py`:
-  - `rewrite(query) -> list[str]` — one LLM call, GPT-4o mini, returns 2–3 synonym/rephrased variants
-  - Cache rewrites by normalised original query to avoid re-cost on repeats
-- Update `main.py` retrieval flow: retrieve top-k for each variant, union, RRF-fuse across the full candidate pool
-- Behind config flag `retrieval.query_rewriting_enabled` (default: on) so ablation in Step 2 can measure impact against baseline
-- **Measure it** — re-run eval runner with and without rewriting; report Δ hit-rate and Δ LLM-as-judge score
-- Commit: `feat: query rewriting`
+**Step 3 — Query rewriting — MEASURED AND DELETED (Week 5)**
+- Built (`src/synthesis/query_rewriter.py`, GPT-4o mini, temp=0, in-process cache) then A/B-measured against the metadata-filter baseline on the 52-query judge run (`judge_scores_20260808T075024Z.json`).
+- **Result on the target failure mode (cross-doc) — REGRESSED −0.75 Correctness.** Rewrites produced semantic-preserving paraphrases that concentrated RRF votes on the same chunks, hurting retrieval diversity. Aggregate Correctness flat (−0.02); Recall@5 dropped 0.907 → 0.857; retrieval latency 3× (193ms → 585ms).
+- Real gains only on tiny-n probe slices (vocab_mismatch n=2 +0.5; underspecified n=2 +0.5; adversarial_negative n=3 +1.0). Can't distinguish from noise at that scale.
+- **Decision: full removal.** Same discipline applied to reranker (Step 2e) and confidence (Step 2d) — when the target fails to improve, do not ship the mechanism. Deleted `query_rewriter.py`, `additional_variants` from `HybridRetriever`, `QUERY_REWRITING_ENABLED` flag, rewriter tests. No dead code path preserved.
+- v2 re-introduction conditions: (a) rewriter prompt that produces *lexically different* variants (HyDE-style hypothetical answers, or explicit synonym expansion) rather than paraphrases that preserve keywords; (b) per-query-type activation (only fire on underspecified/vocab_mismatch — depends on query classifier); (c) n ≥ 100 GT to distinguish per-probe gains from noise.
+- See `docs/week5_failure_analysis.md § 3` for full A/B numbers and per-query cross-doc regression breakdown.
 
 **Step 4 — PostgreSQL + Grafana monitoring stack** *(course-aligned, replaces Logfire)*
 - *Current state: query logs accumulating in `logs/queries.jsonl`, no observability layer.*
@@ -630,7 +627,7 @@ After the 6-week CPIE build is done, do one gap analysis pass:
 | Orchestration | dlt → DuckDB for ingestion + dlt → DuckDB → marimo for log analytics | No gap |
 | Evaluation | LLM-as-judge + eval runner + retrieval metrics | No gap |
 | Monitoring | PostgreSQL + Grafana + Streamlit feedback widget (course-aligned) | No gap |
-| Best practices | Hybrid search + query rewriting (rerank re-evaluated Week 5) | No gap |
+| Best practices | Hybrid search + metadata filtering (rerank + query rewriting both measured and dropped Week 5 — see failure_analysis) | No gap |
 
 **Submission deadline:** Project Attempt 1 — Mon 28 Jul 2026. Project Attempt 2 (buffer) — Tue 11 Aug 2026.
 
@@ -674,7 +671,7 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 | Grafana alert thresholds | Alerts on: refusal rate > 20%, cost per query > $0.002, daily cost > $2. Currently dashboards only, no alerting. | Medium |
 | Random production LLM-as-judge audit | Sample 1% of real production queries and re-score with LLM-as-judge. Detects drift in answer quality between eval runs. Complements ground-truth eval which is static. | Medium |
 | Vigilance testing (inject known-wrong) | Inject 1-in-100 known-wrong-answer scenarios into analyst view (marked as such after they've responded). Measures whether analysts are still verifying vs drifting into complacency. Defends against the "almost-right problem" — 90% correct becomes trusted, 10% wrong slips through. | Low |
-| ~~Query rewriting~~ | Promoted to v1 — Week 5 Step 3 implements synonym expansion. HyDE remains a v2 upgrade if synonym expansion isn't enough. | Done in v1 |
+| Query rewriting (redesigned) | Week 5 Step 3 tried GPT-4o mini paraphrase-style rewriting; measured on 52-query judge run; cross-doc REGRESSED −0.75 Correctness, Recall@5 dropped 5pts, 3× retrieval latency. Full removal per CPIE ship discipline. v2 re-introduction requires: (a) rewriter that produces lexically-different variants (HyDE-style hypothetical answers, or explicit synonym expansion — NOT paraphrase), (b) per-query-type activation (only fire on underspecified / vocab_mismatch — depends on query classifier), (c) n ≥ 100 GT to distinguish per-probe gains from noise. See `docs/week5_failure_analysis.md § 3`. | High |
 | Streaming synthesis output | Perceived latency drops from ~7s to ~800ms first token. Stream `answer` field to terminal / UI while buffering `citations` + `contradictions` for post-stream Pydantic validation. Referenced throughout CLAUDE.md as the fix for GPT-4o mini latency; deferred to v2 to ship v1 E2E first. | High |
 | FastAPI endpoint alongside CLI | Wrap `run_query` in a `/query` POST endpoint. Auto-generated OpenAPI docs. Enables Streamlit UI to call HTTP instead of importing the pipeline directly, and demonstrates API-design competence. | High |
 | CI/CD (GitHub Actions) | Run `pytest` + `ruff check` on every push. Enforces test passes before merge. Green build badge in README. | High |

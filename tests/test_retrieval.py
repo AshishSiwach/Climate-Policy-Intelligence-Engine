@@ -284,3 +284,5 @@ def test_hybrid_no_institutions_kwarg_matches_v1_behaviour(sample_chunks):
     assert "institutions" not in kwargs, (
         "v1 no-filter path must not pass institutions to dense.query"
     )
+
+

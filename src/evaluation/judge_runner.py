@@ -94,9 +94,10 @@ def _score_pair(pair: dict, hybrid, synth, judge) -> dict:
         "probe": _extract_probe(pair.get("notes")),
     }
 
-    # 1. Retrieval
+    # 1. Retrieval — institution filter (Step 2f)
     institutions = detect_institutions(pair["question"]) if METADATA_FILTER_ENABLED else []
     row["detected_institutions"] = institutions
+
     t0 = time.time()
     try:
         chunks = hybrid.retrieve(
@@ -220,7 +221,10 @@ def run(output_path: Path | None = None) -> Path:
     from evaluation.judge import LLMJudge
 
     judge = LLMJudge()
-    logger.info("Pipeline + judge ready. Judge model = %s", judge.model)
+    logger.info(
+        "Pipeline + judge ready. Judge=%s  metadata_filter=%s",
+        judge.model, METADATA_FILTER_ENABLED,
+    )
 
     t_run = time.time()
     per_query: list[dict] = []

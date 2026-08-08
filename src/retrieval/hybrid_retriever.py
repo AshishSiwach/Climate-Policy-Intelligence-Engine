@@ -4,6 +4,10 @@ Hybrid retriever: BM25 + dense fusion via Reciprocal Rank Fusion (RRF).
 Locked decisions (Week 2 audit):
   - RRF k = 60  (Cormack et al. 2009 default; conservative for small corpus)
   - top_k = 20  candidates passed to reranker
+
+Later extension:
+  - Week 5 Step 2f: metadata filter (`institutions=[...]`) — Chroma native
+    where filter for dense + BM25 post-filter with fallback.
 """
 
 from __future__ import annotations

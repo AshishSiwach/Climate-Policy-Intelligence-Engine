@@ -37,7 +37,7 @@ from synthesis.output_schema import AnalystBrief, Citation, LLMCitation, LLMResp
 
 logger = logging.getLogger(__name__)
 
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-5.4-mini"   # SHIPPED Week 5 Step 3b — see docstring below and model_selection.md
 TEMPERATURE = 0.0
 MAX_TOKENS = 800
 
@@ -213,7 +213,9 @@ class Synthesiser:
         response = self._client.beta.chat.completions.parse(
             model=self.model,
             temperature=self.temperature,
-            max_tokens=self.max_tokens,
+            # `max_completion_tokens` is required by gpt-5.x; older models
+            # (gpt-4o, gpt-4o-mini) accept it as an alias for max_tokens.
+            max_completion_tokens=self.max_tokens,
             response_format=LLMResponse,
             messages=[
                 {"role": "system", "content": self.system_prompt},
@@ -347,9 +349,12 @@ def _normalise(text: str) -> str:
 # Cost estimation
 # ---------------------------------------------------------------------------
 
-# GPT-4o mini pricing per 1M tokens (as of 2026)
+# Model pricing per 1M tokens (as of 2026). Add new models as we test them.
 _PRICING = {
-    "gpt-4o-mini": (0.15, 0.60),   # (input, output) per 1M tokens
+    "gpt-4o-mini":  (0.15, 0.60),   # (input, output) per 1M tokens
+    "gpt-4o":       (2.50, 10.00),  # legacy premium
+    "gpt-5.4-mini": (0.75, 4.50),   # Step 3b candidate
+    "gpt-5.4":      (2.50, 15.00),  # judge-tier for stronger-judge convention
 }
 
 

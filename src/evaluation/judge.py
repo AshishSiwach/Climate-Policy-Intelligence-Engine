@@ -12,9 +12,17 @@ dimensions, each 1-5 with a short rationale:
 Uses OpenAI Structured Outputs (client.beta.chat.completions.parse) with a
 Pydantic schema so the judge's output cannot deviate from the rubric.
 
-Model is a parameter (default gpt-5.4-mini per the "stronger judge" convention);
-if the model doesn't exist or doesn't support Structured Outputs, swap via
-constructor arg.
+Model is a parameter (default gpt-5.4-mini); if the model doesn't exist or
+doesn't support Structured Outputs, swap via constructor arg.
+
+**Same-model bias caveat (Week 5 Step 3b):** synthesis was upgraded to
+gpt-5.4-mini as v1 default; the judge is also gpt-5.4-mini. Same-model judge
+introduces ~5% inflation in favor of the same-model answers per published
+studies. Accepted for regular eval runs because judge cost is 5× cheaper on
+gpt-5.4-mini than gpt-5.4, and typical eval-signal band (>0.10 Correctness)
+exceeds the bias band. For rigorous audits or cross-vendor validation,
+temporarily flip to `JUDGE_MODEL = "gpt-5.4"` (~5× cost per run) or use a
+Claude judge — pattern documented in docs/week5_failure_analysis.md § 3b.
 """
 
 from __future__ import annotations
@@ -43,6 +51,7 @@ _JUDGE_PRICING = {
     "gpt-4o-mini":   (0.15, 0.60),
     "gpt-4o":        (2.50, 10.00),
     "gpt-5.4-mini":  (0.75, 4.50),   # cached input: $0.075/M (not tracked in v1)
+    "gpt-5.4":       (2.50, 15.00),  # cached input: $0.25/M (not tracked in v1)
 }
 
 

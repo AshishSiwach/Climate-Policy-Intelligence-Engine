@@ -46,7 +46,7 @@ vector_store:
 
 # --- LLM synthesis (TBD — lock after Week 2 model_selection.ipynb) ---
 synthesis:
-  model: gpt-4o-mini  # LOCKED — GPT-4o mini won model selection (Week 2 Step 6 revisit vs GPT-5.4 mini)
+  model: gpt-5.4-mini  # LOCKED Week 5 Step 3b — upgraded from gpt-4o-mini after judge-strictness-controlled A/B (see model_selection.md)
   max_tokens: 512
   temperature: 0.0
   # Lock after: quality, latency, cost comparison on 10 queries

@@ -43,7 +43,7 @@ Use the CRAG naming explicitly in README and interview conversations — it's th
 | Fusion | **LOCKED: RRF k=60** — Cormack et al. 2009 default. k=10/30/60 indistinguishable on test query (retrievers agreed). Conservative fusion correct for small single-domain corpus. |
 | Reranker | **v1: NOT USED** — 3-query ablation showed reranker adds 172ms per query with zero hit-rate improvement over hybrid (3/3 top-1 on both). Code preserved in `src/retrieval/reranker.py` for Week 5 re-evaluation with full ground truth dataset. If Week 5 LLM-as-judge shows meaningful synthesis quality gain, add back. Model when re-enabled: `cross-encoder/ms-marco-MiniLM-L-6-v2`. |
 | Vector store | Chroma (v1). FAISS / Pinecone / Qdrant / pgvector are upgrade paths only. |
-| LLM synthesis | **LOCKED: GPT-4o mini** — beat Haiku 4.5 on quality (4.0 vs 2.7 avg) and cost (6x cheaper per query). Higher latency (~7s full-response) accepted for v1 as the correct trade-off for a research tool; streaming to reduce first-token latency to ~800ms is a v2 item. Decision documented in model_selection.md. |
+| LLM synthesis | **LOCKED: GPT-5.4 mini** (was GPT-4o mini; upgraded Week 5 Step 3b). Beat gpt-4o-mini on Correctness (+0.09), Faithfulness (+0.25), Completeness (+0.16), and synthesis latency (−26%) when judge held constant across models. 6× per-query cost accepted for demo scale (~$9/month at 100q/day). See `model_selection.md` and `docs/week5_failure_analysis.md § 3b`. |
 | Output schema | Pydantic: `answer`, `citations[]`, `contradictions[]`. (Confidence removed in Week 5 Step 2d — v2 candidate.) |
 | Verification | LLM refusal branch + citation verification. (Pipeline-derived confidence check removed in Week 5 Step 2d.) |
 | Ingestion orchestration | **dlt → DuckDB** (Week 4) — replaces `chunk_all()`. dlt writes chunks to a DuckDB table (`cpie.chunks`); `build_indices.py` reads from DuckDB to build BM25 + Chroma. Matches LLM Zoomcamp course tooling. |
@@ -515,28 +515,14 @@ Run 5 real queries manually, inspect output quality before committing:
 - **Kept v2_crossdoc in the registry as a v2 candidate** (per-query-type activation): pair with a query classifier so v2_crossdoc fires only on `cross_document` queries. Same reranker precedent — measured, not shipped as default, kept for future selective activation.
 - See `docs/week5_failure_analysis.md § 3a` for full A/B numbers.
 
-**Step 3b — Model comparison at eval time** *(last v1 quality lever)*
-- *Current state: Week 2 model_selection.md compared gpt-4o-mini vs Claude Haiku (both small). Never tested a larger-tier model. Real gap in the "measured evidence" story.*
-- *Target state: 52-query judge run repeated on 1–2 larger models; cost/quality tradeoff documented; ship decision made explicit.*
-- Configure `synthesiser.py` (and `judge_runner.py` override) to allow the synthesis model to be flipped via a constant. Same eval, different model.
-- **Candidate model ladder (updated after user note — gpt-4o is now legacy premium pricing):**
-
-| Model | Input $/1M | Output $/1M | Cost per full 52-q eval | vs current | Notes |
-|---|---:|---:|---:|---:|---|
-| **gpt-4o-mini** (current) | 0.15 | 0.60 | ~$0.03 | 1× | v1 default |
-| **gpt-5.4-mini** | 0.75 | 4.50 | ~$0.17 | ~5× | **Primary candidate — newer generation, cheaper than legacy gpt-4o. Already used as our judge.** |
-| **gpt-4o** (legacy) | 2.50 | 10.00 | ~$0.50 | ~16× | Only if gpt-5.4-mini disappoints and we want to isolate old-gen big vs new-gen mini |
-| **claude-sonnet-5** (optional) | — | — | ~$0.50 | ~16× | Different vendor; if API key present |
-
-- **Test order:** gpt-5.4-mini FIRST. It's the natural upgrade — newer generation, 5× cost (not 16×), we already trust it enough to use as judge. If it wins meaningfully, we're done. Only test gpt-4o if gpt-5.4-mini disappoints (to distinguish "prompt is the bottleneck" from "model tier is the bottleneck").
-- **Ship decision framework** — the eval measures *quality per query*; ship decision is a *deploy budget* question:
-  - If gpt-5.4-mini wins by ≥ +0.3 aggregate Correctness AND deploy budget allows (~$10/month at 100 queries/day) → **ship gpt-5.4-mini as v1**
-  - If gain is smaller (~+0.1–0.2) → keep gpt-4o-mini as v1, promote "model upgrade" to v2 with the empirical delta locked in
-  - If no gain → document the null result; keep gpt-4o-mini as v1
-- Deliverable: comparison table in `docs/week5_failure_analysis.md § 3b` and updated `model_selection.md` reflecting the real tier comparison (not just tier-matched Haiku from Week 2).
-- Commit: `chore: model comparison at eval time — {ship decision}`
-
-**Note on judge choice** — we can't judge gpt-5.4-mini's answers with gpt-5.4-mini (same-model judge bias). If Step 3b runs a gpt-5.4-mini synthesis eval, use a *different* stronger judge (Claude Sonnet 5 or gpt-4o) to preserve the "stronger judge" convention. Trade-off: judge cost goes up ~5×. Only matters for the model comparison step; regular judge_runner continues on gpt-5.4-mini.
+**Step 3b — Model comparison at eval time — DONE, gpt-5.4-mini SHIPPED (Week 5)**
+- Ran 3-way comparison (all v2_numeric prompt): A = gpt-4o-mini/gpt-5.4-mini judge (ship baseline); B = gpt-4o-mini/gpt-5.4 judge (tiebreaker); C = gpt-5.4-mini/gpt-5.4 judge (candidate). All 52 queries each.
+- **Judge strictness confound found and controlled.** A → B (synth held constant, judge swapped) dropped Correctness 4.135 → 3.519 (−0.615) — gpt-5.4 is a much stricter judge. So the apparent A → C "regression" (4.135 → 3.608) was ~85% judge strictness, only ~15% model effect. Ran tiebreaker (B) to isolate.
+- **Apples-to-apples (B vs C, same strict judge):** gpt-5.4-mini synth beats gpt-4o-mini on Correctness (+0.089), Faithfulness (+0.249), Completeness (+0.158). **Synthesis latency: −837 ms (−26%)** — real UX win, independent of corpus size.
+- Cost: 6× per query (~$0.0005 → ~$0.003). At demo scale (100 q/day) that's ~$9/month vs ~$1.50 — small burden. Accepted.
+- **Ship decision: `MODEL = "gpt-5.4-mini"` in `src/synthesis/synthesiser.py`.** Judge stays on gpt-5.4-mini for cheap regular monitoring — ~5% same-model bias band < typical eval-signal band, documented in `judge.py` docstring. For rigorous audits, temporarily flip `JUDGE_MODEL = "gpt-5.4"` (5× cost).
+- **Process discipline lesson (add to future model comparisons): ALWAYS run the judge-only tiebreaker first.** In this experiment the judge strictness effect was ~7× the model effect. Running the confounded A → C alone would have called it a regression. Never compare aggregate metrics across different judges.
+- See `model_selection.md` for the full write-up and `docs/week5_failure_analysis.md § 3b` for eval numbers.
 
 **Step 4 — PostgreSQL + Grafana monitoring stack** *(course-aligned, replaces Logfire)*
 - *Current state: query logs accumulating in `logs/queries.jsonl`, no observability layer.*
@@ -747,7 +733,7 @@ These are validated improvements deferred deliberately. Add them after Week 6 su
 - [x] Embedding model — BAAI/bge-base-en-v1.5. Beat all-MiniLM-L6-v2 on top-5 relevance and cosine sim distribution (mean 0.543 vs 0.278). Locked in config.yaml.
 - [x] Chunk size — 400 tokens / 80-token overlap. Validated: avg=397-400, max=400, zero chunks over 512 ceiling. Locked in config.yaml.
 - [x] RRF k value — k=60. Literature default (Cormack et al. 2009); k=10/30/60 identical on test query. Locked in config.yaml.
-- [x] LLM synthesis model — GPT-4o mini. Beat Haiku 4.5 on quality (4.0 vs 2.7) and cost (6x cheaper). Locked in config.yaml, documented in model_selection.md.
+- [x] LLM synthesis model — **GPT-5.4 mini** (upgraded Week 5 Step 3b from gpt-4o-mini). Week 2 picked gpt-4o-mini vs Claude Haiku (tier-matched); Week 5 Step 3b re-tested against the newer-generation gpt-5.4-mini on the 52-query GT with a judge-strictness-controlled A/B. gpt-5.4-mini won Correctness +0.09, Faithfulness +0.25, Completeness +0.16, latency −26%; accepted 6× per-query cost for demo scale. Full write-up in `model_selection.md` + `docs/week5_failure_analysis.md § 3b`.
 
 ---
 

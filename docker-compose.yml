@@ -1,0 +1,50 @@
+# CPIE — v1 monitoring stack (Week 5 Step 4)
+#
+# Services:
+#   postgres  — query log + user feedback storage (Step 4a)
+#   grafana   — added in Step 4c
+#   app       — Streamlit + CLI, added in Week 6 (Docker packaging)
+#
+# Bring up just Postgres for development:
+#   docker compose up -d postgres
+#
+# Bring down + keep data:
+#   docker compose down
+#
+# Bring down + WIPE data (re-runs init.sql on next up):
+#   docker compose down -v
+#
+# Credentials come from .env in this directory. See .env.example for the
+# template. Default dev password is committed there — DO NOT reuse in prod.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cpie_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-cpie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cpie_dev_only}
+      POSTGRES_DB:       ${POSTGRES_DB:-cpie}
+    ports:
+      # Host-side port exposed for local dev + Grafana on host. In prod
+      # deploy, drop this line and route Grafana via docker network only.
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      # Named volume for durable data across container restarts.
+      - cpie_pgdata:/var/lib/postgresql/data
+      # Init script — runs ONCE on first startup (empty volume). To re-run
+      # after schema changes: docker compose down -v && docker compose up -d.
+      - ./monitoring/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      # pg_isready — postgres's own readiness probe. Compose won't consider
+      # the service healthy until this passes; other services can depends_on
+      # this with condition: service_healthy.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cpie} -d ${POSTGRES_DB:-cpie}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cpie_pgdata:
+    name: cpie_pgdata

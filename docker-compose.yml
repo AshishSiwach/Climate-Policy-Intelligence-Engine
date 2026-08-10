@@ -45,6 +45,42 @@ services:
       timeout: 5s
       retries: 10
 
+  grafana:
+    image: grafana/grafana-oss:11.3.0
+    container_name: cpie_grafana
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy   # don't start Grafana until Postgres is up
+    environment:
+      # Default admin creds — Grafana forces a password change on first UI
+      # login, so this is only the initial credential. Override via .env for
+      # public deploys.
+      GF_SECURITY_ADMIN_USER:     ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # Anonymous view — off for now; flip to true if you want the dashboards
+      # publicly viewable without login (e.g. for a demo).
+      GF_AUTH_ANONYMOUS_ENABLED:  "false"
+      # Silence Grafana's phone-home update check in dev.
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      # Pass Postgres creds into Grafana's env so the provisioning YAML can
+      # reference ${env}-style expansions.
+      POSTGRES_USER:     ${POSTGRES_USER:-cpie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cpie_dev_only}
+      POSTGRES_DB:       ${POSTGRES_DB:-cpie}
+    ports:
+      - "${GRAFANA_HOST_PORT:-3000}:3000"
+    volumes:
+      # Provisioning YAMLs — Grafana reads on startup, no manual clicks.
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      # Dashboard JSON — mounted read-only; the provisioning YAML points here.
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      # Named volume for the Grafana DB (users, api keys, alert history).
+      - cpie_grafana_data:/var/lib/grafana
+
 volumes:
   cpie_pgdata:
     name: cpie_pgdata
+  cpie_grafana_data:
+    name: cpie_grafana_data

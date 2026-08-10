@@ -1,0 +1,27 @@
+# Grafana datasource provisioning — auto-connects to the Postgres monitoring DB
+# on Grafana startup. No manual "Add data source" clicks needed.
+#
+# Mounted at /etc/grafana/provisioning/datasources/postgres.yml (read-only)
+# via docker-compose.yml.
+
+apiVersion: 1
+
+datasources:
+  - name: cpie-postgres
+    uid: cpie-postgres   # stable — dashboards reference this uid
+    type: postgres
+    # Use the docker-compose service DNS name (`postgres`), not localhost —
+    # Grafana connects on the compose-internal network.
+    url: postgres:5432
+    database: ${POSTGRES_DB}
+    user: ${POSTGRES_USER}
+    # secureJsonData is Grafana's encrypted store for secrets. Env-expanded
+    # from the value passed to the container in docker-compose.yml.
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: disable          # dev only — TLS not configured in-cluster
+      postgresVersion: 1600     # PostgreSQL 16.x → 1600 (major*100 + minor)
+      timescaledb: false
+    isDefault: true             # this datasource is the default in every new panel
+    editable: false             # provisioned datasources are read-only in the UI

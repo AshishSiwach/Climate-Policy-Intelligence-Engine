@@ -1,0 +1,161 @@
+{
+  "id": null,
+  "uid": "cpie-monitoring",
+  "title": "CPIE Monitoring",
+  "tags": ["cpie", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Query volume over time",
+      "description": "Count of queries per hour, from cpie.query_logs.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT date_trunc('hour', ts) AS time, COUNT(*) AS queries FROM cpie.query_logs WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "lineWidth": 1 } }
+      },
+      "options": { "legend": { "displayMode": "hidden" } }
+    },
+
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Refusal rate over time (% of queries)",
+      "description": "Fraction of queries where the pipeline returned the canonical refusal (is_refusal=TRUE). Bucketed hourly.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT date_trunc('hour', ts) AS time, 100.0 * SUM(CASE WHEN is_refusal THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0) AS refusal_pct FROM cpie.query_logs WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100 }
+      }
+    },
+
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Latency percentiles (ms) — synthesis + retrieval",
+      "description": "p50 / p95 / p99 of synthesis and retrieval latency per hour. Watch p95 for regression signal.",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT date_trunc('hour', ts) AS time, percentile_cont(0.5)  WITHIN GROUP (ORDER BY synthesis_latency_ms) AS synth_p50, percentile_cont(0.95) WITHIN GROUP (ORDER BY synthesis_latency_ms) AS synth_p95, percentile_cont(0.5)  WITHIN GROUP (ORDER BY retrieval_latency_ms) AS retrieval_p50, percentile_cont(0.95) WITHIN GROUP (ORDER BY retrieval_latency_ms) AS retrieval_p95 FROM cpie.query_logs WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      }
+    },
+
+    {
+      "id": 4,
+      "type": "barchart",
+      "title": "Top-cited docs (last 24h)",
+      "description": "How often each doc_id appears in cited_doc_ids. Counts repeated citations (one query citing the same doc 3× counts 3).",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT doc, COUNT(*) AS citations FROM (SELECT jsonb_array_elements_text(cited_doc_ids) AS doc FROM cpie.query_logs WHERE $__timeFilter(ts)) t GROUP BY doc ORDER BY citations DESC LIMIT 10",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "options": { "orientation": "horizontal", "xTickLabelRotation": 0 }
+    },
+
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Cumulative cost (last 24h)",
+      "description": "SUM(cost_usd) in the selected window. USD.",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT SUM(cost_usd) AS total_cost FROM cpie.query_logs WHERE $__timeFilter(ts)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "currencyUSD", "decimals": 4 }
+      },
+      "options": { "colorMode": "value", "graphMode": "none" }
+    },
+
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Cost per day ($)",
+      "description": "Daily API spend from SUM(cost_usd) GROUP BY day.",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT date_trunc('day', ts) AS time, SUM(cost_usd)::float AS cost FROM cpie.query_logs WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "currencyUSD", "decimals": 4, "custom": { "drawStyle": "bars" } }
+      }
+    },
+
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "User feedback ratio (thumbs up / total votes)",
+      "description": "From cpie.user_feedback (Streamlit widget in Step 4d). Empty until humans start voting.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT date_trunc('hour', created_at) AS time, 100.0 * SUM(CASE WHEN feedback = 1 THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0) AS thumbs_up_pct FROM cpie.user_feedback WHERE $__timeFilter(created_at) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100 }
+      }
+    },
+
+    {
+      "id": 8,
+      "type": "table",
+      "title": "Recent failures (last 24h)",
+      "description": "Every query with a non-null failure_reason. Empty on the happy path.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT ts, failure_reason, LEFT(query, 80) AS query_snippet, model_used FROM cpie.query_logs WHERE failure_reason IS NOT NULL AND $__timeFilter(ts) ORDER BY ts DESC LIMIT 20",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

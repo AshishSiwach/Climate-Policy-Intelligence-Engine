@@ -1,0 +1,19 @@
+# Grafana dashboard provider — tells Grafana where to load dashboard JSON files.
+# Every *.json in the dashboards/ folder is imported on startup.
+#
+# Mounted at /etc/grafana/provisioning/dashboards/dashboards.yml (read-only).
+
+apiVersion: 1
+
+providers:
+  - name: cpie-dashboards
+    orgId: 1
+    folder: CPIE
+    type: file
+    disableDeletion: false      # user can delete dashboards in UI (but they'll come back on restart)
+    updateIntervalSeconds: 30   # poll for JSON changes every 30s during dev
+    allowUiUpdates: true        # allow "save" in UI even for provisioned dashboards
+                                # (changes are lost on container restart — this is intentional)
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

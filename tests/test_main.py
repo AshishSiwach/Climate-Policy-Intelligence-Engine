@@ -24,6 +24,15 @@ from main import (
 from monitoring import QueryLogger
 
 
+# Autouse — every test in this file gets Postgres mocked out. Without this,
+# each run_query() call inside a test would try to open a real Postgres
+# connection pool and hang on healthcheck. The dual-write to db is Step 4b;
+# tests never need a real DB to verify guardrail + pipeline behaviour.
+@pytest.fixture(autouse=True)
+def _mock_pg(monkeypatch):
+    monkeypatch.setattr("main.db_insert_query_record", lambda record: None)
+
+
 # ---------------------------------------------------------------------------
 # _daily_cost_so_far — cost accumulator
 # ---------------------------------------------------------------------------
@@ -180,6 +189,104 @@ def test_cost_circuit_breaker_below_limit_allows_query(sample_chunks, tmp_log_pa
     run_query("Ofgem", hybrid, synth, qlogger, log_path=tmp_log_path)
     hybrid.retrieve.assert_called_once()
     synth.synthesise.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Postgres dual-write (Week 5 Step 4b)
+# ---------------------------------------------------------------------------
+
+def test_dual_write_postgres_receives_record(sample_chunks, tmp_log_path, monkeypatch):
+    """After a successful pipeline run, db_insert_query_record must be called
+    with the same record shape that JSONL received (contains query_id + answer +
+    cited_doc_ids + is_refusal + detected_institutions)."""
+    calls: list[dict] = []
+    monkeypatch.setattr("main.db_insert_query_record", lambda record: calls.append(record))
+
+    hybrid = MagicMock()
+    hybrid.retrieve = MagicMock(return_value=sample_chunks)
+    synth = MagicMock()
+    synth.model = "gpt-5.4-mini"
+    fake_brief = MagicMock()
+    fake_brief.answer = "Ofgem proposes a load control licensing regime."
+    fake_brief.citations = []
+    fake_brief.contradictions = []
+    fake_brief.model_dump = lambda: {"answer": fake_brief.answer,
+                                     "citations": [], "contradictions": []}
+    synth.synthesise = MagicMock(return_value={
+        "brief": fake_brief, "latency_ms": 100.0,
+        "prompt_tokens": 500, "completion_tokens": 50, "cost_usd": 0.0003,
+        "prompt_version": "v2_numeric",
+    })
+
+    qlogger = QueryLogger(log_path=tmp_log_path)
+    result = run_query("What does Ofgem propose?", hybrid, synth, qlogger, log_path=tmp_log_path)
+
+    assert len(calls) == 1, "Postgres writer should have been called exactly once"
+    record = calls[0]
+    # All the Step 4b-added fields present
+    assert "query_id" in record and record["query_id"] == result["query_id"]
+    assert record["answer"] == fake_brief.answer
+    assert record["is_refusal"] is False
+    assert record["cited_doc_ids"] == []
+    assert "detected_institutions" in record
+
+
+def test_dual_write_refusal_answer_flagged(sample_chunks, tmp_log_path, monkeypatch):
+    """When the LLM returns the canonical refusal, is_refusal must be True in
+    the record that Postgres receives."""
+    calls: list[dict] = []
+    monkeypatch.setattr("main.db_insert_query_record", lambda record: calls.append(record))
+
+    hybrid = MagicMock()
+    hybrid.retrieve = MagicMock(return_value=sample_chunks)
+    synth = MagicMock()
+    synth.model = "gpt-5.4-mini"
+    fake_brief = MagicMock()
+    fake_brief.answer = "The corpus does not contain sufficient information to answer this query."
+    fake_brief.citations = []
+    fake_brief.contradictions = []
+    fake_brief.model_dump = lambda: {"answer": fake_brief.answer,
+                                     "citations": [], "contradictions": []}
+    synth.synthesise = MagicMock(return_value={
+        "brief": fake_brief, "latency_ms": 0.0,
+        "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0,
+    })
+
+    qlogger = QueryLogger(log_path=tmp_log_path)
+    run_query("out of scope", hybrid, synth, qlogger, log_path=tmp_log_path)
+
+    assert calls[0]["is_refusal"] is True
+
+
+def test_dual_write_never_raises_on_postgres_failure(sample_chunks, tmp_log_path, monkeypatch):
+    """Postgres blowing up must NOT propagate out of run_query. The
+    _safe_db_write wrapper catches everything the inner db.py doesn't."""
+    def blowup(record): raise RuntimeError("postgres down")
+    monkeypatch.setattr("main.db_insert_query_record", blowup)
+
+    hybrid = MagicMock()
+    hybrid.retrieve = MagicMock(return_value=sample_chunks)
+    synth = MagicMock()
+    synth.model = "gpt-5.4-mini"
+    fake_brief = MagicMock()
+    fake_brief.answer = "ok"
+    fake_brief.citations = []
+    fake_brief.contradictions = []
+    fake_brief.model_dump = lambda: {"answer": "ok", "citations": [], "contradictions": []}
+    synth.synthesise = MagicMock(return_value={
+        "brief": fake_brief, "latency_ms": 50.0,
+        "prompt_tokens": 100, "completion_tokens": 20, "cost_usd": 0.0001,
+    })
+
+    qlogger = QueryLogger(log_path=tmp_log_path)
+    # Must NOT raise despite the Postgres writer blowing up.
+    result = run_query("q", hybrid, synth, qlogger, log_path=tmp_log_path)
+
+    # Brief returned normally — pipeline was not interrupted by the DB failure
+    assert result["answer"] == "ok"
+    # JSONL still written (primary sink is not gated on Postgres)
+    assert tmp_log_path.exists()
+    assert tmp_log_path.read_text(encoding="utf-8").strip() != ""
 
 
 # ---------------------------------------------------------------------------

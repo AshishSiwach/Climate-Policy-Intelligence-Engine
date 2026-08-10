@@ -24,12 +24,14 @@ import argparse
 import json
 import logging
 import time
+import uuid
 from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from monitoring import QueryLogger, build_query_record
+from monitoring.db import insert_query_record as db_insert_query_record
 from retrieval import BM25Retriever, HybridRetriever
 from retrieval.institution_detector import detect_institutions
 from synthesis import AnalystBrief, Synthesiser
@@ -67,6 +69,21 @@ COST_LIMIT_MSG = (
 def _canonical_refusal(msg: str) -> AnalystBrief:
     """Uniform refusal shape so guardrail-triggered responses look like every other brief."""
     return AnalystBrief(answer=msg, citations=[], contradictions=[])
+
+
+def _safe_db_write(record: dict) -> None:
+    """
+    Postgres dual-write wrapper. Belt-and-suspenders on db.insert_query_record
+    which is already never-raise internally — this outer try/except catches the
+    exotic failure modes that don't route through db.py's own try/except (e.g.
+    monkeypatched-blowup in tests, module-import errors, pool construction
+    exceptions before the DB call itself begins). Pipeline continues on any DB
+    failure — JSONL is the primary sink, Postgres is secondary.
+    """
+    try:
+        db_insert_query_record(record)
+    except Exception as e:
+        logger.warning("Postgres dual-write skipped due to: %s", e)
 
 
 def _daily_cost_so_far(log_path: Path) -> float:
@@ -121,11 +138,18 @@ def run_query(
       - query length limit (cost blow-up defense)
       - daily cost circuit breaker (spend cap)
     Both refusals still write a log record (with distinct failure_reason).
+
+    Every record is dual-written: JSONL (primary, always) + Postgres
+    (secondary, never-raise). Same record dict feeds both sinks.
     """
+    # Generate the query_id up front so it appears in JSONL, Postgres, and
+    # (in 4d) the Streamlit UI feedback widget — all reference the same ID.
+    query_id = str(uuid.uuid4())
+
     # Guardrail 1 — query length limit
     if len(query) > MAX_QUERY_CHARS:
         brief = _canonical_refusal(QUERY_TOO_LONG_MSG)
-        qlogger.log(build_query_record(
+        record = build_query_record(
             query=query[:MAX_QUERY_CHARS] + "...(truncated for log)",
             retrieved_chunks=[],
             retrieval_latency_ms=0.0,
@@ -135,14 +159,17 @@ def run_query(
             },
             model_used=synth.model,
             failure_reason=f"guardrail: query_too_long ({len(query)} chars)",
-        ))
+            query_id=query_id,
+        )
+        qlogger.log(record)
+        _safe_db_write(record)
         return brief.model_dump()
 
     # Guardrail 2 — daily cost circuit breaker
     daily_cost = _daily_cost_so_far(log_path)
     if daily_cost >= DAILY_COST_LIMIT_USD:
         brief = _canonical_refusal(COST_LIMIT_MSG)
-        qlogger.log(build_query_record(
+        record = build_query_record(
             query=query,
             retrieved_chunks=[],
             retrieval_latency_ms=0.0,
@@ -152,7 +179,10 @@ def run_query(
             },
             model_used=synth.model,
             failure_reason=f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)",
-        ))
+            query_id=query_id,
+        )
+        qlogger.log(record)
+        _safe_db_write(record)
         return brief.model_dump()
 
     # Normal pipeline
@@ -160,6 +190,7 @@ def run_query(
     synthesis_result = None
     retrieval_latency_ms = 0.0
     chunks: list[dict] = []
+    institutions: list[str] = []
 
     try:
         institutions = detect_institutions(query) if METADATA_FILTER_ENABLED else []
@@ -182,13 +213,18 @@ def run_query(
         synthesis_result=synthesis_result,
         model_used=synth.model,
         failure_reason=failure_reason,
+        query_id=query_id,
+        detected_institutions=institutions,
     )
-    qlogger.log(record)
+    qlogger.log(record)                # primary sink — always fires
+    _safe_db_write(record)             # secondary sink — never-raise on DB down
 
     if synthesis_result is None:
-        return {"error": failure_reason}
+        return {"error": failure_reason, "query_id": query_id}
 
-    return synthesis_result["brief"].model_dump()
+    result = synthesis_result["brief"].model_dump()
+    result["query_id"] = query_id       # so Streamlit / callers can attach feedback
+    return result
 
 
 def main() -> None:

@@ -163,7 +163,7 @@ def run_query(
         )
         qlogger.log(record)
         _safe_db_write(record)
-        return brief.model_dump()
+        return {**brief.model_dump(), "query_id": query_id}
 
     # Guardrail 2 — daily cost circuit breaker
     daily_cost = _daily_cost_so_far(log_path)
@@ -183,7 +183,7 @@ def run_query(
         )
         qlogger.log(record)
         _safe_db_write(record)
-        return brief.model_dump()
+        return {**brief.model_dump(), "query_id": query_id}
 
     # Normal pipeline
     failure_reason: str | None = None

@@ -94,6 +94,7 @@ def test_query_length_guardrail_refuses_and_skips_pipeline(tmp_log_path):
     result = run_query(long_query, hybrid, synth, qlogger, log_path=tmp_log_path)
 
     assert result["answer"] == QUERY_TOO_LONG_MSG
+    assert "query_id" in result, "guardrail return must carry query_id for Streamlit feedback"
     hybrid.retrieve.assert_not_called()
     synth.synthesise.assert_not_called()
 
@@ -150,6 +151,7 @@ def test_cost_circuit_breaker_refuses_when_budget_exhausted(tmp_log_path):
     result = run_query("short query", hybrid, synth, qlogger, log_path=tmp_log_path)
 
     assert result["answer"] == COST_LIMIT_MSG
+    assert "query_id" in result, "guardrail return must carry query_id for Streamlit feedback"
     hybrid.retrieve.assert_not_called()
     synth.synthesise.assert_not_called()
 

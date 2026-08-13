@@ -79,6 +79,29 @@ services:
       # Named volume for the Grafana DB (users, api keys, alert history).
       - cpie_grafana_data:/var/lib/grafana
 
+  app:
+    build: .
+    container_name: cpie_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      OPENAI_API_KEY:    ${OPENAI_API_KEY}
+      POSTGRES_HOST:     postgres          # docker-internal service name
+      POSTGRES_PORT:     ${POSTGRES_PORT:-5432}
+      POSTGRES_USER:     ${POSTGRES_USER:-cpie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cpie_dev_only}
+      POSTGRES_DB:       ${POSTGRES_DB:-cpie}
+    volumes:
+      # Mount corpus PDFs and processed indices — run ingestion locally first,
+      # then the container reads from data/processed/ at startup.
+      - ./data/raw:/app/data/raw:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./logs:/app/logs
+    ports:
+      - "${APP_HOST_PORT:-8501}:8501"
+
 volumes:
   cpie_pgdata:
     name: cpie_pgdata

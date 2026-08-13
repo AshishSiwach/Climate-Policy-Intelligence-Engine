@@ -1,0 +1,30 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Secrets — never bake into the image
+.env
+
+# Large data directories — mount as volumes at runtime
+data/raw/
+data/processed/
+logs/
+
+# Dev / notebook artefacts
+notebooks/
+.ipynb_checkpoints/
+
+# Git
+.git/
+.gitignore
+
+# Docs — not needed at runtime
+docs/
+
+# OS
+.DS_Store
+Thumbs.db

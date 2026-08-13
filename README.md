@@ -37,41 +37,48 @@ multiple sources simultaneously.
 User Query
     │
     ▼
-[Institution Detector] ─── detects Ofgem / FCA / IEA / BoE / CCC in query
-    │                       pre-filters retrieval to named institutions
+[Institution Detector] ── detects Ofgem / FCA / IEA / BoE / CCC in query
+    │                      pre-filters retrieval to named institutions
     │
-    ├────────────────────────┐
-    ▼                        ▼
-[BM25 Retriever]    [Dense Retriever]
-(rank-bm25)         BAAI/bge-base-en-v1.5 → Chroma
-    │                        │
-    └────────────────────────┘
-                 │
-                 ▼
-         [RRF Fusion k=60]   ← Hybrid: keyword + semantic
-                 │
-                 ▼
-           Top-5 Chunks
-                 │
-                 ▼
-    [Synthesiser — GPT-5.4-mini]
-    Structured Outputs (Pydantic)
-    CRAG correction layer:
-      • LLM does not refuse → return AnalystBrief
-      • LLM refuses or empty retrieval → canonical refusal
-                 │
-                 ▼
-    [Citation Verifier]  ← every cited passage checked against retrieved chunks
-                 │
-                 ▼
-         AnalystBrief
-    {answer, citations[], contradictions[]}
-                 │
-       ┌─────────┴─────────┐
-       ▼                   ▼
- [JSONL Logger]    [Postgres Writer]
- (fallback sink)   (Grafana dashboards
-                    + Streamlit feedback)
+    ├───────────────────────┐
+    ▼                       ▼
+[BM25 Retriever]   [Dense Retriever]
+(rank-bm25)        BAAI/bge-base-en-v1.5 → Chroma
+    │                       │
+    └───────────────────────┘
+                │
+                ▼
+        [RRF Fusion k=60]  ← keyword + semantic hybrid
+                │
+                ▼
+          Top-5 Chunks
+                │
+        empty retrieval? ──YES──────────────────────┐
+                │NO                                  │
+                ▼                                    │
+   [Synthesiser — GPT-5.4-mini]                     │
+   Structured Outputs (Pydantic)                     │
+                │                                    │
+        LLM refuses? ──YES──────────────────────────►│
+                │NO                                  │
+                ▼                                    ▼
+   [Citation Verifier]                    [Canonical Refusal]
+   ┌──────────────────────────┐           "corpus does not contain
+   │  for each citation:      │◄──┐        sufficient information"
+   │    passage in chunks?    │   │ loop
+   │      YES → keep          │───┘
+   │      NO  → drop          │
+   └──────────────────────────┘
+                │
+                ▼
+        AnalystBrief
+   {answer, citations[], contradictions[]}
+                │
+      ┌─────────┴─────────┐
+      ▼                   ▼
+[JSONL Logger]    [Postgres Writer]
+(fallback sink)   (Grafana dashboards
+                   + Streamlit feedback)
 ```
 
 **Ingestion (one-time, local):**

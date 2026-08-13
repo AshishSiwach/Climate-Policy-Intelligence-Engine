@@ -8,9 +8,7 @@ chunking:
   default_overlap: 80            # tokens
   max_chunk_size: 512            # hard ceiling — reranker degrades above this
   min_chunk_size: 50             # floor — discard fragments below this
-  # v1 strategy: sliding window across all documents. Simple, standard baseline.
-  # v2 experiments (document-aware, heading trails) will be measured against this
-  # once ground truth dataset exists (Week 5).
+  # Sliding window across all documents — simple, standard baseline.
 
 # --- Embedding model (LOCKED Week 2) ---
 embedding:
@@ -42,7 +40,7 @@ retrieval:
 vector_store:
   provider: chroma
   persist_directory: data/processed/chroma_db
-  collection_name: cpie_v1
+  collection_name: cpie
 
 # --- LLM synthesis (TBD — lock after Week 2 model_selection.ipynb) ---
 synthesis:
@@ -52,8 +50,8 @@ synthesis:
   # Lock after: quality, latency, cost comparison on 10 queries
 
 # --- Output schema ---
-# Confidence removed from v1 in Week 5 Step 2d — see docs/week5_failure_analysis.md.
-# v2 candidate: re-introduce once pipeline-derived signals are strong enough
+# Confidence removed after calibration (Week 5 Step 2d) — see docs/week5_failure_analysis.md.
+# Future work: re-introduce once pipeline-derived signals are strong enough
 # (semantic_sim + doc_aware_margin, n>=100 ground truth, AUC >= 0.75).
 output:
   include_contradictions: true

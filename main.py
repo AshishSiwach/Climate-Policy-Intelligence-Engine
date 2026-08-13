@@ -5,8 +5,8 @@ Usage:
   uv run python main.py "<query>"
   uv run python main.py --top-k 8 "<query>"
 
-Runs the full v1 pipeline:
-  query → BM25 + Dense → RRF fusion → top-5 → GPT-4o mini synthesis → JSON brief
+Runs the full pipeline:
+  query → BM25 + Dense → RRF fusion → top-5 → GPT-5.4-mini synthesis → JSON brief
 
 Logs one record per query to logs/queries.jsonl (started day one per CLAUDE.md).
 """
@@ -47,12 +47,12 @@ BM25_PATH = Path("data/processed/bm25_index.pkl")
 CHROMA_DIR = Path("data/processed/chroma_db")
 LOG_PATH = Path("logs/queries.jsonl")
 
-# Metadata filtering (Week 5, promoted from v2). Detects named institutions
+# Metadata filtering (Week 5). Detects named institutions
 # in the query and pre-filters retrieval to those institutions before RRF.
 # Directly fixes cross-doc coverage misses on institution-named queries (2c).
 METADATA_FILTER_ENABLED = True
 
-# --- v1 input guardrails (see CLAUDE.md Locked Decisions) -----------------
+# --- Input guardrails (see CLAUDE.md Locked Decisions) --------------------
 MAX_QUERY_CHARS = 500          # cost-blow-up defense
 DAILY_COST_LIMIT_USD = 5.00    # daily API-spend circuit breaker
 
@@ -87,7 +87,7 @@ def _safe_db_write(record: dict) -> None:
 
 
 def _daily_cost_so_far(log_path: Path) -> float:
-    """Sum today's `cost_usd` values from the JSONL log. Cheap enough for v1 traffic."""
+    """Sum today's `cost_usd` values from the JSONL log."""
     if not log_path.exists():
         return 0.0
     today = date.today().isoformat()
@@ -134,7 +134,7 @@ def run_query(
 ) -> dict:
     """Run the full pipeline for one query, log the record, return the brief as dict.
 
-    Applies v1 input guardrails BEFORE hitting retrieval/synthesis:
+    Applies input guardrails BEFORE hitting retrieval/synthesis:
       - query length limit (cost blow-up defense)
       - daily cost circuit breaker (spend cap)
     Both refusals still write a log record (with distinct failure_reason).

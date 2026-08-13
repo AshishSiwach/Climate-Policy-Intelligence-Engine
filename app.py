@@ -9,11 +9,11 @@ Run:
     streamlit run app.py              # host-side; Dockerised in Week 6 Step 1
 
 Notes:
-  - No confidence badge in v1 (per CLAUDE.md Locked Decision — pipeline-derived
-    confidence removed in Week 5 Step 2d after signals proved too weak). Every
-    answer carries a standing "verify against sources" caveat instead.
-  - No auth in v1 — anonymous single-user chat. Multi-tenant / session_id
-    tracking is a v2 concern (not in scope).
+  - No confidence badge (pipeline-derived confidence removed in Week 5 Step 2d
+    after signals proved too weak). Every answer carries a standing "verify
+    against sources" caveat instead.
+  - No auth — anonymous single-user chat. Multi-tenant / session_id
+    tracking is not in scope.
   - Postgres feedback write is never-raise (via db.py's own try/except + our
     outer safety wrap) — Postgres down won't break the chat.
 """
@@ -132,7 +132,7 @@ def _render_brief(brief: dict, msg_index: int) -> None:
                     f"{c.get('summary', '')}"
                 )
                 st.caption(
-                    "Contradiction detection is experimental in v1 — treat as a hint, not a verdict."
+                    "Contradiction detection is experimental — treat as a hint, not a verdict."
                 )
 
     st.caption(CAVEAT)

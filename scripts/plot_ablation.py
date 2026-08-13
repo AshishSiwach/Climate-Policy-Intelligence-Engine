@@ -29,7 +29,7 @@ import numpy as np
 CONFIG_COLORS = {
     "bm25":          "#999999",   # neutral gray — weakest
     "dense":         "#56B4E9",   # light blue
-    "hybrid":        "#009E73",   # green — v1 winner
+    "hybrid":        "#009E73",   # green — winner
     "hybrid_rerank": "#E69F00",   # orange — attention
 }
 CONFIG_LABELS = {

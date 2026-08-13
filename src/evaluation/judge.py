@@ -16,7 +16,7 @@ Model is a parameter (default gpt-5.4-mini); if the model doesn't exist or
 doesn't support Structured Outputs, swap via constructor arg.
 
 **Same-model bias caveat (Week 5 Step 3b):** synthesis was upgraded to
-gpt-5.4-mini as v1 default; the judge is also gpt-5.4-mini. Same-model judge
+gpt-5.4-mini as the default; the judge is also gpt-5.4-mini. Same-model judge
 introduces ~5% inflation in favor of the same-model answers per published
 studies. Accepted for regular eval runs because judge cost is 5× cheaper on
 gpt-5.4-mini than gpt-5.4, and typical eval-signal band (>0.10 Correctness)
@@ -45,13 +45,13 @@ JUDGE_TIMEOUT_SEC = 30.0
 JUDGE_MAX_RETRIES = 2
 
 # Per-1M-token prices as (input, output). Cached-input pricing exists but the
-# chat-completions Usage object doesn't return cached-token breakdowns in v1;
+# chat-completions Usage object doesn't return cached-token breakdowns yet;
 # we count all input at the uncached rate — treat cost as an upper bound.
 _JUDGE_PRICING = {
     "gpt-4o-mini":   (0.15, 0.60),
     "gpt-4o":        (2.50, 10.00),
-    "gpt-5.4-mini":  (0.75, 4.50),   # cached input: $0.075/M (not tracked in v1)
-    "gpt-5.4":       (2.50, 15.00),  # cached input: $0.25/M (not tracked in v1)
+    "gpt-5.4-mini":  (0.75, 4.50),   # cached input: $0.075/M (not tracked)
+    "gpt-5.4":       (2.50, 15.00),  # cached input: $0.25/M (not tracked)
 }
 
 

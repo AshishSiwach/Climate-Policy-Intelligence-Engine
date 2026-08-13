@@ -13,7 +13,7 @@
 - Compared against Claude Haiku 4.5. GPT-4o mini won 4.0 vs 2.7 avg quality on 10 pilot queries, 6× cheaper.
 
 ### Week 5 Step 3b (revisited)
-- **Winner:** GPT-5.4 mini — **SHIPPED as v1 default**
+- **Winner:** GPT-5.4 mini — **SHIPPED as the default**
 - The Week 2 comparison was tier-matched (both small models). Never tested against a newer-generation mini. Real gap in the "measured evidence" story; closed here.
 
 ---
@@ -22,8 +22,8 @@
 
 ### Setup
 - **Corpus:** 12 audited PDFs, 3402 chunks (production DuckDB index)
-- **Retrieval:** Hybrid RRF k=60 + metadata filter (v1 default post-Step 2f) → top-5 chunks
-- **Prompt:** v2_numeric (v1 default post-Step 3a)
+- **Retrieval:** Hybrid RRF k=60 + metadata filter (default post-Step 2f) → top-5 chunks
+- **Prompt:** v2_numeric (default post-Step 3a)
 - **Ground truth:** 52 queries (43 baseline + 4 vocab_shift + 5 colloquial + 3 adversarial_negative + 2 underspecified + 5 table_only)
 - **Judge:** LLM-as-judge (per `src/evaluation/judge.py`)
 - **Metrics:** Correctness, Faithfulness, Completeness, Refusal_appropriateness (all 1–5) + retrieval metrics + synthesis latency
@@ -74,7 +74,7 @@ The honest apples-to-apples is **B vs C** — same (strict) judge held constant.
 
 ## Ship decision
 
-**Ship gpt-5.4-mini as v1 synthesis default.**
+**Ship gpt-5.4-mini as the synthesis default.**
 
 Reasons:
 - On the honest apples-to-apples (same judge held constant): better on Correctness (+0.089), Faithfulness (+0.249), Completeness (+0.158)

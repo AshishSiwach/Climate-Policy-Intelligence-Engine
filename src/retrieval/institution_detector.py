@@ -5,7 +5,7 @@ Scans the query for mentions of the 6 institutions in DOC_REGISTRY and returns
 the ones detected. Used by HybridRetriever to pre-filter the corpus to just
 the named institutions when the query explicitly mentions them.
 
-Added Week 5 Step (metadata filtering, promoted from v2) after cross-doc
+Added Week 5 Step after cross-doc
 top-k coverage analysis (Step 2c) showed that 4 of 6 multi-source queries
 name their expected institutions explicitly, but retrieval still misses the
 second source even at k=20 because the missed doc is semantically far from

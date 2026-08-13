@@ -125,7 +125,7 @@ def main() -> None:
     print("Interpretation guide:")
     print("  - Equal top-5 hit rate → simpler config wins (drop the extra layer)")
     print("  - Rerank changes top-1 → reranker is earning its ~200ms")
-    print("  - Rerank doesn't change ordering → drop rerank for v1, revisit Week 5 with ground truth")
+    print("  - Rerank doesn't change ordering → drop rerank, revisit with ground truth if needed")
 
 
 if __name__ == "__main__":

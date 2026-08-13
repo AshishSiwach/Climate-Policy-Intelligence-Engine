@@ -1,4 +1,4 @@
-# CPIE — v1 monitoring stack (Week 5 Step 4)
+# CPIE — monitoring stack (Week 5 Step 4)
 #
 # Services:
 #   postgres  — query log + user feedback storage (Step 4a)

@@ -8,10 +8,10 @@ Two Citation classes on purpose:
                 with publication_date pulled from the retrieved chunk's
                 metadata. Prevents the LLM from fabricating dates.
 
-Confidence: removed from v1 in Week 5 Step 2d. Calibration on 47 queries
-showed the pipeline-derived signals had at best AUC 0.668 for predicting
+Confidence: removed after calibration (Week 5 Step 2d). On 47 queries
+the pipeline-derived signals had at best AUC 0.668 for predicting
 correctness (95% CI overlapping random). Shipping a weak signal as a user
-promise was worse than shipping nothing. v2 roadmap: re-introduce once
+promise was worse than shipping nothing. Future work: re-introduce once
 signals are strong (semantic_sim + doc_aware_margin candidates, n>=100
 ground-truth data, AUC >= 0.75). See docs/week5_failure_analysis.md § 2d.
 """
@@ -38,7 +38,7 @@ class Citation(BaseModel):
 
 
 class Contradiction(BaseModel):
-    """Experimental in v1 — LLM self-report of conflicting claims across sources."""
+    """Experimental — LLM self-report of conflicting claims across sources."""
     doc_a: str
     doc_b: str
     summary: str

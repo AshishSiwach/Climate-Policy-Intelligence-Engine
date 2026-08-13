@@ -10,8 +10,7 @@ Layout:
           └── table:  chunks               (primary key: chunk_id)
 
 Write disposition: merge on chunk_id — re-running the pipeline updates changed
-rows and inserts new ones. Free incremental ingestion (v2 roadmap item promoted
-to v1 by this change).
+rows and inserts new ones. Incremental ingestion works for free.
 
 Run:
     uv run python scripts/ingest.py

@@ -8,7 +8,7 @@ per-config comparison.
 Configurations:
     bm25            — BM25 only, top_k=5
     dense           — Dense (Chroma / BAAI/bge-base-en-v1.5) only, top_k=5
-    hybrid          — BM25 + Dense → RRF (k=60), top_k=5    [current v1]
+    hybrid          — BM25 + Dense → RRF (k=60), top_k=5    [default]
     hybrid_rerank   — hybrid top-20 → cross-encoder rerank → top-5
 
 Everything downstream (synthesis, judge) is held constant across configs so

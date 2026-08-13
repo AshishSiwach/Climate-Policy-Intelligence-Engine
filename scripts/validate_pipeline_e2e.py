@@ -1,14 +1,14 @@
 """
-Week 3 Step 3 — v1 hybrid retrieval pipeline validation.
+Week 3 Step 3 — hybrid retrieval pipeline validation.
 
-Runs the 3 CLAUDE.md pilot queries through the v1 pipeline
+Runs the 3 CLAUDE.md pilot queries through the pipeline
 (built by scripts/build_indices.py) end-to-end:
 
-  BM25 + Dense → RRF fusion → top-5   (no reranker in v1)
+  BM25 + Dense → RRF fusion → top-5   (no reranker)
 
-Reranker was dropped from v1 after ablation showed no hit-rate gain on the 3
-pilot queries. See CLAUDE.md v2 roadmap: reranker re-evaluated in Week 5 with
-full ground truth dataset + LLM-as-judge.
+Reranker was dropped after ablation showed no hit-rate gain on the 3
+pilot queries. Re-evaluated in Week 5 with full ground truth dataset
++ LLM-as-judge — same conclusion (5.2× latency, zero gain).
 
 Run:
   uv run python scripts/validate_pipeline_e2e.py

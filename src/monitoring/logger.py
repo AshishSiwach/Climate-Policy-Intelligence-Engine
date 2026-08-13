@@ -18,7 +18,7 @@ Fields logged:
 
 (Confidence + confidence_signals removed in Week 5 Step 2d — the signals
 had at best AUC 0.668 for predicting correctness; shipping a weak signal
-was worse than shipping nothing. v2 candidate.)
+was worse than shipping nothing.)
 """
 
 import json

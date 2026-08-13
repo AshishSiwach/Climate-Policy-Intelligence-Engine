@@ -56,7 +56,7 @@ class DenseRetriever:
     def __init__(
         self,
         persist_dir: str | Path = 'data/processed/chroma_db',
-        collection_name: str = 'cpie_v1',
+        collection_name: str = 'cpie',
         device: str | None = None,
     ) -> None:
         self.persist_dir = str(persist_dir)

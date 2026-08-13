@@ -14,12 +14,12 @@ Key design decisions (see CLAUDE.md):
     showed it blocked more legitimate positives than negatives it caught —
     LLM correctly refused all pile-up negatives on its own). See
     docs/week5_failure_analysis.md § Step 2b. A retriever-agreement gate
-    is a v2 candidate.
-  - Confidence: removed from v1 in Week 5 Step 2d. On 47 ground-truth
-    queries the v1 pipeline-derived signals had at best AUC 0.668 for
+    is future work.
+  - Confidence: removed after calibration (Week 5 Step 2d). On 47 ground-
+    truth queries the pipeline-derived signals had at best AUC 0.668 for
     predicting correctness (95% CI overlapping random); three of the four
     signals were noise or anti-correlated. Shipping a weak signal as a
-    user promise was worse than shipping nothing. v2 roadmap: re-introduce
+    user promise was worse than shipping nothing. Future work: re-introduce
     once signals are strong (semantic_sim + doc_aware_margin candidates,
     n>=100 data, AUC >= 0.75). See docs/week5_failure_analysis.md § 2d.
 """
@@ -65,10 +65,10 @@ OUT_OF_CORPUS_ANSWER = (
 #                   Refusal_appr +0.15 vs v1, but the intended target
 #                   (cross_document Correctness, n=4) regressed −0.25 and
 #                   Faithfulness dropped −0.06 on aggregate. Kept in the
-#                   registry as a candidate for v2 per-query-type prompt
+#                   registry as a candidate for per-query-type prompt
 #                   activation (fire this prompt only when a query classifier
 #                   flags the query as cross_document).
-#   - v2_numeric  — SHIPPED AS v1 DEFAULT. Best aggregate Correctness of any
+#   - v2_numeric  — SHIPPED AS DEFAULT. Best aggregate Correctness of any
 #                   Week 5 config (+0.115 vs v1, 4.135/5.0) with zero
 #                   regressions on any aggregate metric. The "extract verbatim
 #                   from chunks" instruction turned out to be a generally-good

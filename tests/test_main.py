@@ -1,5 +1,5 @@
 """
-Unit tests for v1 guardrails in main.run_query — query length limit and
+Unit tests for guardrails in main.run_query — query length limit and
 daily cost circuit breaker. Both must refuse the query WITHOUT calling
 the LLM and still write a log record with a distinct failure_reason.
 """

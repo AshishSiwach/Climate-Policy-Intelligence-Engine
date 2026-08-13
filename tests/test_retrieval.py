@@ -182,7 +182,7 @@ def test_hybrid_locked_rrf_k_default():
 
 
 # ---------------------------------------------------------------------------
-# HybridRetriever — metadata filter (Week 5, promoted from v2)
+# HybridRetriever — metadata filter (Week 5)
 # ---------------------------------------------------------------------------
 
 def _make_chunks(specs):
@@ -282,7 +282,7 @@ def test_hybrid_no_institutions_kwarg_matches_v1_behaviour(sample_chunks):
 
     _, kwargs = dense_mock.query.call_args
     assert "institutions" not in kwargs, (
-        "v1 no-filter path must not pass institutions to dense.query"
+        "no-filter path must not pass institutions to dense.query"
     )
 
 

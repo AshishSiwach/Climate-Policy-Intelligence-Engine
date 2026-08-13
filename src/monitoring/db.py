@@ -11,7 +11,7 @@ Two read helpers (mostly for smoke tests and 4a verification):
 
 Design decisions:
   - psycopg v3 with a module-level ConnectionPool (lazy-init on first use).
-    Cheap for our v1 query volume; scales fine to Grafana + Streamlit sharing
+    Cheap for our query volume; scales fine to Grafana + Streamlit sharing
     the same pool. min_size=1 avoids startup cost when nothing is querying.
   - JSONL logger stays as the primary sink; Postgres is a secondary,
     dashboard-oriented store. If Postgres is down, the pipeline continues —

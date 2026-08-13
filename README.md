@@ -200,7 +200,7 @@ synthesis:
   → return canonical refusal brief (`"The corpus does not contain sufficient
   information…"`)
 
-Both paths are logged distinctly. Deferred to v2: retriever-agreement gate
+Both paths are logged distinctly. Not yet implemented: retriever-agreement gate
 (replaces the deleted RRF-threshold short-circuit) and confidence layer
 (removed after Week 5 calibration showed AUC 0.668 — too weak to promise to
 users).
@@ -213,7 +213,7 @@ RRF k=60 (Cormack et al. 2009) fuses ranked lists without score normalisation.
 Embedding model chosen after Week 2 ablation: mean cosine 0.543 vs 0.278 for
 all-MiniLM-L6-v2.
 
-### Institution metadata filter (promoted from v2)
+### Institution metadata filter
 
 The query text is scanned for named institutions (Ofgem, FCA, IEA, BoE, CCC,
 DESNZ, ESO) before retrieval. Matching institutions pre-filter both the Chroma
@@ -226,17 +226,17 @@ Three prompt variants authored (v1, v2\_crossdoc, v2\_numeric) and tested
 against the 52-query ground truth. `v2_numeric` shipped as default: adds a
 "verbatim value extraction + page citation" instruction that improved aggregate
 Correctness without regressing any metric. `v2_crossdoc` preserved in the
-registry for per-query-type activation (v2 roadmap).
+registry for per-query-type activation (future roadmap item).
 
 ### Reranker and query rewriting — measured and dropped
 
 Both were built and A/B-measured against the eval dataset:
 - **Reranker** (`cross-encoder/ms-marco-MiniLM-L-6-v2`): 5.2× retrieval
   latency, zero aggregate Correctness gain over hybrid. Per-query-type
-  activation on numeric queries is a v2 candidate.
+  activation on numeric queries is a future candidate.
 - **Query rewriting** (GPT-4o mini paraphrase): cross-doc Correctness −0.75,
   Recall@5 −5pp, 3× latency. Semantically-preserving paraphrases concentrated
-  RRF votes on the same chunks, hurting diversity. v2 re-introduction requires
+  RRF votes on the same chunks, hurting diversity. Re-introduction requires
   HyDE-style rewrites.
 
 Evidence in `docs/week5_failure_analysis.md`.
@@ -247,19 +247,19 @@ Evidence in `docs/week5_failure_analysis.md`.
 
 - **No user-uploaded documents.** Corpus is fixed at 12 curated public PDFs.
   Accepting user content requires corpus-side prompt-injection scanning and
-  per-user isolation (v3 scope).
-- **No confidence signal in v1.** Pipeline-derived confidence was removed after
+  per-user isolation.
+- **No confidence signal.** Pipeline-derived confidence was removed after
   Week 5 calibration (best AUC 0.668, overlapping random). Every answer carries
   a standing "verify against sources" caveat instead.
 - **CCC Progress traffic-light indicators** do not extract as text from PDF
   (PyMuPDF limitation). The surrounding prose restates the assessment and
   carries the retrieval signal.
-- **Single-turn RAG.** v1 is one retrieval pass + one LLM call. Query
-  decomposition, agentic loops, and iterative retrieval are v2.
+- **Single-turn RAG.** One retrieval pass + one LLM call. Query decomposition,
+  agentic loops, and iterative retrieval are future work.
 - **Contradiction detection is experimental.** The `contradictions[]` field is
   LLM self-report, not cross-doc claim verification. Treat as a hint.
 - **Streamlit app is not authenticated.** Anonymous single-user demo. Multi-tenant
-  session tracking is a v2 concern.
+  session tracking is future work.
 
 ---
 

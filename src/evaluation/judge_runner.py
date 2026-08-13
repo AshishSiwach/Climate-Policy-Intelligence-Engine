@@ -51,7 +51,7 @@ KS = (5,)             # single k for judge runs (retrieval metrics already cover
 METADATA_FILTER_ENABLED = True
 
 # Prompt version — flip to run A/B across prompt variants defined in
-# synthesis.synthesiser.PROMPT_REGISTRY. None = use the module default (v1).
+# synthesis.synthesiser.PROMPT_REGISTRY. None = use the module default.
 PROMPT_VERSION_OVERRIDE: str | None = None
 
 _PROBE_PATTERN = re.compile(r"\[PROBE:\s*(\w+)\]")

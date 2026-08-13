@@ -5,7 +5,7 @@ LLM refusal branch, and the empty-chunks guard.
 Removed in Week 5:
   - RRF-threshold short-circuit tests (Step 2b — mechanism deleted)
   - Confidence + confidence_signals tests (Step 2d — pipeline-derived
-    confidence removed from v1; AUC 0.668 was too weak for a user promise)
+    confidence removed; AUC 0.668 was too weak for a user promise)
 
 Both removals are documented in docs/week5_failure_analysis.md.
 

@@ -39,6 +39,8 @@ from monitoring.db import insert_query_record as db_insert_query_record
 from retrieval import BM25Retriever, HybridRetriever
 from retrieval.institution_detector import detect_institutions
 from synthesis import AnalystBrief, Synthesiser
+from synthesis.query_classifier import classify_query
+from synthesis.synthesiser import OUT_OF_CORPUS_ANSWER
 
 # DenseRetriever imported lazily inside build_pipeline() — its dep
 # (sentence_transformers/torch) is heavy and crashes some Windows setups
@@ -55,6 +57,12 @@ LOG_PATH = Path("logs/queries.jsonl")
 # in the query and pre-filters retrieval to those institutions before RRF.
 # Directly fixes cross-doc coverage misses on institution-named queries (2c).
 METADATA_FILTER_ENABLED = True
+
+# Pre-retrieval domain gate (see src/synthesis/query_classifier.py).
+# Classifies the query with GPT-4o-mini (~$0.00003) before spending retrieval
+# + synthesis tokens (~$0.003). Out-of-domain queries are refused immediately.
+# Fails-open: any classifier error passes the query through to the normal pipeline.
+QUERY_CLASSIFIER_ENABLED = True
 
 # --- Input guardrails (see CLAUDE.md Locked Decisions) --------------------
 MAX_QUERY_CHARS = 500  # cost-blow-up defense
@@ -188,6 +196,32 @@ def run_query(
         qlogger.log(record)
         _safe_db_write(record)
         return {**brief.model_dump(), "query_id": query_id}
+
+    # Guardrail 3 — pre-retrieval domain gate
+    # Classifies the query cheaply (GPT-4o-mini, ~$0.00003) before spending
+    # retrieval + synthesis tokens (~$0.003). Fails-open on any API error.
+    if QUERY_CLASSIFIER_ENABLED:
+        classification = classify_query(query)
+        if not classification.in_domain:
+            brief = _canonical_refusal(OUT_OF_CORPUS_ANSWER)
+            record = build_query_record(
+                query=query,
+                retrieved_chunks=[],
+                retrieval_latency_ms=0.0,
+                synthesis_result={
+                    "brief": brief,
+                    "latency_ms": 0.0,
+                    "prompt_tokens": 0,
+                    "completion_tokens": 0,
+                    "cost_usd": 0.0,
+                },
+                model_used=synth.model,
+                failure_reason=f"guardrail: out_of_domain ({classification.reason})",
+                query_id=query_id,
+            )
+            qlogger.log(record)
+            _safe_db_write(record)
+            return {**brief.model_dump(), "query_id": query_id}
 
     # Normal pipeline
     failure_reason: str | None = None

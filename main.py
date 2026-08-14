@@ -113,6 +113,10 @@ def build_pipeline() -> tuple[HybridRetriever, Synthesiser]:
 
     bm25 = BM25Retriever.load(BM25_PATH)
     dense = DenseRetriever(persist_dir=CHROMA_DIR)
+    # Force model + Chroma load now so the first query doesn't silently pay
+    # the ~15s cost. In app.py this runs inside @st.cache_resource, so the
+    # "Loading indices + embedding model" spinner stays up during this call.
+    dense.warm_up()
     hybrid = HybridRetriever(bm25=bm25, dense=dense, rrf_k=60)
     synth = Synthesiser()
     return hybrid, synth

@@ -186,6 +186,17 @@ class DenseRetriever:
             )
         return output
 
+    def warm_up(self) -> None:
+        """Force-load the embedding model and Chroma collection.
+
+        DenseRetriever lazy-loads both to keep test imports cheap. Call this
+        once during pipeline setup so the first real query doesn't silently
+        pay the ~15s model-load cost. app.py's @st.cache_resource spinner
+        stays visible while this runs, giving the user honest feedback.
+        """
+        self._get_model()
+        self._get_collection()
+
     def delete_collection(self) -> None:
         """Drop the Chroma collection. Useful for test teardown."""
         if self._client is None:

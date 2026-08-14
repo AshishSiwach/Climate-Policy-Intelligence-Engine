@@ -104,9 +104,9 @@ def _daily_cost_so_far(log_path: Path) -> float:
 def build_pipeline() -> tuple[HybridRetriever, Synthesiser]:
     """Load indices + retriever + synthesiser. One-time setup per CLI invocation."""
     if not BM25_PATH.exists():
-        raise SystemExit(f"BM25 index not found at {BM25_PATH}. Run: uv run python scripts/build_indices.py")
+        raise FileNotFoundError(f"BM25 index not found at {BM25_PATH}. Run: uv run python scripts/build_indices.py")
     if not CHROMA_DIR.exists():
-        raise SystemExit(f"Chroma index not found at {CHROMA_DIR}. Run: uv run python scripts/build_indices.py")
+        raise FileNotFoundError(f"Chroma index not found at {CHROMA_DIR}. Run: uv run python scripts/build_indices.py")
 
     # Lazy import — see module-level note.
     from retrieval import DenseRetriever

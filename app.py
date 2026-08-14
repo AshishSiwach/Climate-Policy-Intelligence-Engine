@@ -200,13 +200,20 @@ with st.sidebar:
         st.rerun()
 
 
-# Pipeline load — cached per process; spinner is shown in the main content area
-# so the user gets clear feedback during the ~15 s first-run model load.
-with st.spinner(
-    "⏳ Loading CPIE pipeline — BM25 index + BAAI/bge-base-en-v1.5 embedding model "
-    "(one-time setup, ~15 s on first run)…"
-):
-    hybrid, synth, qlogger = _load_pipeline()
+# Pipeline load — cached per process.
+# Use st.empty() + st.info() so the loading state is a visible blue box in the
+# main content area (st.spinner shows only a tiny top-right indicator in 1.5x).
+_startup_box = st.empty()
+if "pipeline_ready" not in st.session_state:
+    _startup_box.info(
+        "⏳ **Initializing CPIE pipeline…**  \n"
+        "Loading BM25 index + BAAI/bge-base-en-v1.5 embedding model.  \n"
+        "**First run takes ~15 s.** Subsequent starts are instant (model stays cached).",
+        icon="⏳",
+    )
+hybrid, synth, qlogger = _load_pipeline()
+st.session_state["pipeline_ready"] = True
+_startup_box.empty()  # clear the box once the pipeline is ready
 
 
 # ── Render past messages ─────────────────────────────────────────────

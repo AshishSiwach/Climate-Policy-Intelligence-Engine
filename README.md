@@ -196,6 +196,10 @@ the online evaluation metrics described in Stage 4.
   <img src="docs/diagrams/arch_05_monitoring.svg" alt="Stage 5 — Monitoring" width="680">
 </p>
 
+<p align="center">
+  <img src="docs/images/Grafana_dashboard_snapshot.png" alt="Grafana monitoring dashboard" width="860">
+</p>
+
 Grafana dashboards (auto-provisioned, no manual setup):
 
 | Panel | What it shows |

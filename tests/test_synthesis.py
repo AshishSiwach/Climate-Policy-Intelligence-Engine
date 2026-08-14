@@ -22,7 +22,6 @@ from pydantic import ValidationError
 from synthesis.output_schema import (
     AnalystBrief,
     Citation,
-    Contradiction,
     LLMCitation,
     LLMResponse,
 )
@@ -34,10 +33,10 @@ from synthesis.synthesiser import (
     _verify_citations,
 )
 
-
 # ---------------------------------------------------------------------------
 # Pydantic schema validation
 # ---------------------------------------------------------------------------
+
 
 def test_citation_page_must_be_ge_1():
     with pytest.raises(ValidationError):
@@ -65,6 +64,7 @@ def test_llm_response_uses_llm_citation_not_citation():
 # ---------------------------------------------------------------------------
 # _verify_citations — the fact-check layer
 # ---------------------------------------------------------------------------
+
 
 def test_verify_citations_keeps_matching(sample_chunks):
     """A citation whose passage appears in a retrieved chunk survives."""
@@ -108,9 +108,7 @@ def test_verify_citations_injects_publication_date(sample_chunks):
     )
     verified = _verify_citations([llm_citation], sample_chunks)
     assert len(verified) == 1
-    assert verified[0].publication_date == "2021", (
-        "publication_date should be pulled from the matched BoE chunk"
-    )
+    assert verified[0].publication_date == "2021", "publication_date should be pulled from the matched BoE chunk"
 
 
 def test_verify_citations_empty_input_returns_empty():
@@ -120,6 +118,7 @@ def test_verify_citations_empty_input_returns_empty():
 # ---------------------------------------------------------------------------
 # Synthesiser — empty-chunks guard and LLM-refusal branch, no live API
 # ---------------------------------------------------------------------------
+
 
 def _stub_synthesiser() -> Synthesiser:
     """Instantiate Synthesiser without needing a real API key."""
@@ -195,6 +194,7 @@ def test_synthesise_normal_path_returns_verified_citations(sample_chunks):
 # ---------------------------------------------------------------------------
 # Prompt versioning (Week 5 Step 3a)
 # ---------------------------------------------------------------------------
+
 
 def test_prompt_registry_contains_v1_and_variants():
     """PROMPT_REGISTRY must include v1 baseline + the 2 v2 variants."""

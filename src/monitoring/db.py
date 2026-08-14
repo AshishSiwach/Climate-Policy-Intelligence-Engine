@@ -40,17 +40,18 @@ logger = logging.getLogger(__name__)
 # Defaults intentionally match docker-compose.yml so
 # `docker compose up postgres` + module import works with no env setup.
 _DEFAULTS = {
-    "POSTGRES_HOST":     "localhost",
-    "POSTGRES_PORT":     "5432",
-    "POSTGRES_USER":     "cpie",
+    "POSTGRES_HOST": "localhost",
+    "POSTGRES_PORT": "5432",
+    "POSTGRES_USER": "cpie",
     "POSTGRES_PASSWORD": "cpie_dev_only",
-    "POSTGRES_DB":       "cpie",
+    "POSTGRES_DB": "cpie",
 }
 
 
 def _dsn() -> str:
     def env(k: str) -> str:
         return os.environ.get(k, _DEFAULTS[k])
+
     return (
         f"host={env('POSTGRES_HOST')} port={env('POSTGRES_PORT')} "
         f"user={env('POSTGRES_USER')} password={env('POSTGRES_PASSWORD')} "
@@ -69,6 +70,7 @@ def _get_pool():
         # Deferred import — psycopg_pool pulls in psycopg + libpq. Only load
         # when the pipeline actually calls the DB.
         from psycopg_pool import ConnectionPool
+
         _pool = ConnectionPool(_dsn(), min_size=1, max_size=5, open=True)
     return _pool
 
@@ -147,27 +149,33 @@ def _normalise_record(record: dict) -> dict:
     out.setdefault("ts", record.get("timestamp"))
     out.setdefault("query", record.get("query", ""))
 
-    for k in ("retrieved_doc_ids", "retrieved_pages", "rrf_scores",
-              "detected_institutions", "cited_doc_ids"):
+    for k in (
+        "retrieved_doc_ids",
+        "retrieved_pages",
+        "rrf_scores",
+        "detected_institutions",
+        "cited_doc_ids",
+    ):
         v = out.get(k)
         out[k] = json.dumps(v if v is not None else [])
 
-    out.setdefault("retrieval_latency_ms",  0.0)
-    out.setdefault("synthesis_latency_ms",  0.0)
-    out.setdefault("prompt_tokens",         0)
-    out.setdefault("completion_tokens",     0)
-    out.setdefault("citation_count",        0)
-    out.setdefault("contradiction_count",   0)
-    out.setdefault("cost_usd",              0.0)
-    out.setdefault("model_used",            None)
-    out.setdefault("prompt_version",        None)
-    out.setdefault("answer",                None)
-    out.setdefault("is_refusal",            False)
-    out.setdefault("failure_reason",        None)
+    out.setdefault("retrieval_latency_ms", 0.0)
+    out.setdefault("synthesis_latency_ms", 0.0)
+    out.setdefault("prompt_tokens", 0)
+    out.setdefault("completion_tokens", 0)
+    out.setdefault("citation_count", 0)
+    out.setdefault("contradiction_count", 0)
+    out.setdefault("cost_usd", 0.0)
+    out.setdefault("model_used", None)
+    out.setdefault("prompt_version", None)
+    out.setdefault("answer", None)
+    out.setdefault("is_refusal", False)
+    out.setdefault("failure_reason", None)
     return out
 
 
 # ─── user_feedback writer ───────────────────────────────────────────────
+
 
 def insert_feedback(
     query_id: str | uuid.UUID,
@@ -199,6 +207,7 @@ def insert_feedback(
 
 
 # ─── Read helpers (tests + 4a smoke verification) ───────────────────────
+
 
 def fetch_recent_queries(limit: int = 10) -> list[dict]:
     """

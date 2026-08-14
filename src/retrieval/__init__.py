@@ -22,8 +22,10 @@ __all__ = ["BM25Retriever", "DenseRetriever", "HybridRetriever", "Reranker"]
 def __getattr__(name: str):
     if name == "DenseRetriever":
         from retrieval.dense_retriever import DenseRetriever
+
         return DenseRetriever
     if name == "Reranker":
         from retrieval.reranker import Reranker
+
         return Reranker
     raise AttributeError(f"module 'retrieval' has no attribute {name!r}")

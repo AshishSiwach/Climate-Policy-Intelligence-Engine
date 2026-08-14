@@ -36,28 +36,24 @@ BM25_PATH = Path("data/processed/bm25_index.pkl")
 CHROMA_DIR = Path("data/processed/chroma_db")
 RESULTS_DIR = Path("data/eval/results")
 
-RETRIEVAL_TOP_K = 10   # max k we compute metrics at; pipeline default is 5
-KS = (5, 10)           # cutoffs for metric computation
+RETRIEVAL_TOP_K = 10  # max k we compute metrics at; pipeline default is 5
+KS = (5, 10)  # cutoffs for metric computation
 
 _PROBE_PATTERN = re.compile(r"\[PROBE:\s*(\w+)\]")
 
 
 def _load_ground_truth() -> list[dict]:
     if not GROUND_TRUTH_PATH.exists():
-        raise SystemExit(
-            f"Ground truth not found at {GROUND_TRUTH_PATH}. "
-            "Run scripts/migrate_ground_truth.py first."
-        )
+        raise SystemExit(f"Ground truth not found at {GROUND_TRUTH_PATH}. Run scripts/migrate_ground_truth.py first.")
     with open(GROUND_TRUTH_PATH, encoding="utf-8") as f:
         return json.load(f)
 
 
 def _build_hybrid() -> HybridRetriever:
-    from retrieval import DenseRetriever   # lazy — heavy import
+    from retrieval import DenseRetriever  # lazy — heavy import
+
     if not BM25_PATH.exists() or not CHROMA_DIR.exists():
-        raise SystemExit(
-            "Indices missing. Run: uv run python scripts/build_indices.py"
-        )
+        raise SystemExit("Indices missing. Run: uv run python scripts/build_indices.py")
     bm25 = BM25Retriever.load(BM25_PATH)
     dense = DenseRetriever(persist_dir=CHROMA_DIR)
     return HybridRetriever(bm25=bm25, dense=dense, rrf_k=60)
@@ -136,10 +132,7 @@ def _aggregate_by_slice(
         if val is None:
             continue
         groups.setdefault(str(val), []).append(r)
-    return {
-        group: {**aggregate_metrics(rows), "n": len(rows)}
-        for group, rows in groups.items()
-    }
+    return {group: {**aggregate_metrics(rows), "n": len(rows)} for group, rows in groups.items()}
 
 
 def _negatives_summary(per_query: list[dict]) -> dict:
@@ -180,11 +173,13 @@ def run(output_path: Path | None = None) -> Path:
             per_query.append(result)
         except Exception as e:
             logger.exception("Failed to score pair %s", pair.get("id"))
-            per_query.append({
-                "id": pair.get("id"),
-                "query_type": pair.get("query_type"),
-                "error": f"{type(e).__name__}: {e}",
-            })
+            per_query.append(
+                {
+                    "id": pair.get("id"),
+                    "query_type": pair.get("query_type"),
+                    "error": f"{type(e).__name__}: {e}",
+                }
+            )
         if i % 10 == 0:
             logger.info("Scored %d/%d", i, len(ground_truth))
 

@@ -32,7 +32,7 @@ DOC_REGISTRY = {
         "tier2_inject": False,
     },
     "Smart-Secure-Electricity-Systems-Implementing-the-load-control-licensing-regime-consultation.pdf": {
-        "doc_id": "OFGEM_SMART_SECURE_2025",   # renamed from _2024; actual publication 10 Dec 2025
+        "doc_id": "OFGEM_SMART_SECURE_2025",  # renamed from _2024; actual publication 10 Dec 2025
         "institution": "Ofgem",
         "doc_type": "consultation",
         "jurisdiction": "UK",
@@ -86,7 +86,7 @@ DOC_REGISTRY = {
         "tier2_inject": True,
     },
     "results-of-the-2021-climate-biennial-exploratory-scenario.pdf": {
-        "doc_id": "BOE_CBES_RESULTS_2021",   # "2021" = CBES exercise year (kept); actual publication 24 May 2022
+        "doc_id": "BOE_CBES_RESULTS_2021",  # "2021" = CBES exercise year (kept); actual publication 24 May 2022
         "institution": "BoE",
         "doc_type": "report",
         "jurisdiction": "UK",
@@ -104,7 +104,7 @@ DOC_REGISTRY = {
         "tier2_inject": False,
     },
     "measuring-climate-related-financial-risks-using-scenario-analysis.pdf": {
-        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",   # actual publication 17 Apr 2024
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",  # actual publication 17 Apr 2024
         "institution": "BoE",
         "doc_type": "report",
         "jurisdiction": "UK",
@@ -113,7 +113,7 @@ DOC_REGISTRY = {
         "tier2_inject": False,
     },
     "zev-mandate-consultation-summary-of-responses-and-joint-government-response.pdf": {
-        "doc_id": "DESNZ_ZEV_MANDATE_2023",   # renamed from _2024; actual publication Sep 2023
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",  # renamed from _2024; actual publication Sep 2023
         "institution": "DESNZ",
         "doc_type": "consultation",
         "jurisdiction": "UK",
@@ -122,7 +122,7 @@ DOC_REGISTRY = {
         "tier2_inject": False,
     },
     "climate-change-possible-macroeconomic-implications.pdf": {
-        "doc_id": "BOE_MACRO_IMPLICATIONS",   # actual publication 21 Oct 2022 (Quarterly Bulletin 2022 Q4)
+        "doc_id": "BOE_MACRO_IMPLICATIONS",  # actual publication 21 Oct 2022 (Quarterly Bulletin 2022 Q4)
         "institution": "BoE",
         "doc_type": "working_paper",
         "jurisdiction": "UK",
@@ -137,24 +137,22 @@ DOC_REGISTRY = {
 # ---------------------------------------------------------------------------
 
 _ESO_NAV_PATTERN = re.compile(
-    r'\b(Navigation|Download a pdf|Text Links|Return to contents)\b',
+    r"\b(Navigation|Download a pdf|Text Links|Return to contents)\b",
     re.IGNORECASE,
 )
-_ESO_SOCIAL_PATTERN = re.compile(r'@\S+|linkedin\.com\S*|twitter\.com\S*', re.IGNORECASE)
+_ESO_SOCIAL_PATTERN = re.compile(r"@\S+|linkedin\.com\S*|twitter\.com\S*", re.IGNORECASE)
 
 _OFGEM_HEADER_PATTERN = re.compile(
-    r'Consultation\s+Smart\s+Secure\s+Electricity\s+Systems[^\n]*\n?',
+    r"Consultation\s+Smart\s+Secure\s+Electricity\s+Systems[^\n]*\n?",
     re.IGNORECASE,
 )
-_OFGEM_OFFICIAL_PATTERN = re.compile(r'\bOFFICIAL\s+OFFICIAL\b', re.IGNORECASE)
+_OFGEM_OFFICIAL_PATTERN = re.compile(r"\bOFFICIAL\s+OFFICIAL\b", re.IGNORECASE)
 
 # ---------------------------------------------------------------------------
 # Tier 2 — heading detection
 # ---------------------------------------------------------------------------
 
-_HEADING_PATTERN = re.compile(
-    r'(\d+[\.\d]*\s+[A-Z][^\n]{5,60}|Table\s+\d+[\.\d]*[^\n]{5,60})'
-)
+_HEADING_PATTERN = re.compile(r"(\d+[\.\d]*\s+[A-Z][^\n]{5,60}|Table\s+\d+[\.\d]*[^\n]{5,60})")
 
 _FILL_RATIO_THRESHOLD = 0.70  # discard table detections where >70% of cells are empty
 
@@ -172,15 +170,16 @@ def _is_real_table(table) -> bool:
 # Public API
 # ---------------------------------------------------------------------------
 
+
 def clean_text(text: str, doc_id: str) -> str:
     """Apply Tier 1 stripping rules for ESO and Ofgem documents."""
     if "ESO" in doc_id:
-        text = _ESO_NAV_PATTERN.sub(' ', text)
-        text = _ESO_SOCIAL_PATTERN.sub(' ', text)
+        text = _ESO_NAV_PATTERN.sub(" ", text)
+        text = _ESO_SOCIAL_PATTERN.sub(" ", text)
     if "OFGEM" in doc_id:
-        text = _OFGEM_HEADER_PATTERN.sub(' ', text)
-        text = _OFGEM_OFFICIAL_PATTERN.sub(' ', text)
-    return re.sub(r'\s{3,}', '  ', text).strip()
+        text = _OFGEM_HEADER_PATTERN.sub(" ", text)
+        text = _OFGEM_OFFICIAL_PATTERN.sub(" ", text)
+    return re.sub(r"\s{3,}", "  ", text).strip()
 
 
 def detect_table_page(page: fitz.Page) -> bool:
@@ -232,17 +231,19 @@ def load_pdf(path: str | Path) -> list[dict]:
         if meta["tier2_inject"] and is_table:
             heading_prefix = inject_heading(doc, page_idx)
 
-        pages.append({
-            "text": text,
-            "doc_id": doc_id,
-            "institution": meta["institution"],
-            "doc_type": meta["doc_type"],
-            "jurisdiction": meta["jurisdiction"],
-            "publication_date": meta["publication_date"],
-            "page_number": page_idx + 1,
-            "chunk_type": chunk_type,
-            "heading_prefix": heading_prefix,
-        })
+        pages.append(
+            {
+                "text": text,
+                "doc_id": doc_id,
+                "institution": meta["institution"],
+                "doc_type": meta["doc_type"],
+                "jurisdiction": meta["jurisdiction"],
+                "publication_date": meta["publication_date"],
+                "page_number": page_idx + 1,
+                "chunk_type": chunk_type,
+                "heading_prefix": heading_prefix,
+            }
+        )
 
     doc.close()
     logger.info("Loaded %s: %d pages", doc_id, len(pages))

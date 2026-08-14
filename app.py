@@ -21,7 +21,7 @@ Notes:
 # torch must load its BLAS DLLs BEFORE numpy/rank_bm25/openai on Windows —
 # same fix as main.py. Streamlit reruns the module top-to-bottom on interaction,
 # but torch will only actually initialise once per process.
-import torch  # noqa: F401
+import torch  # noqa: F401  # isort: skip
 
 import logging
 import time
@@ -56,6 +56,7 @@ st.set_page_config(
 # Pipeline — cached across reruns
 # ────────────────────────────────────────────────────────────────────────
 
+
 @st.cache_resource(show_spinner="Loading indices + embedding model (once per session)…")
 def _load_pipeline():
     """Load Chroma + BM25 + Synthesiser exactly once per Streamlit process.
@@ -80,7 +81,7 @@ def _load_pipeline():
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-MAX_CHAT_HISTORY = 40   # bound memory; older messages fall off
+MAX_CHAT_HISTORY = 40  # bound memory; older messages fall off
 
 
 def _trim_history() -> None:
@@ -127,13 +128,8 @@ def _render_brief(brief: dict, msg_index: int) -> None:
     if contradictions:
         with st.expander(f"⚠️ Contradictions flagged ({len(contradictions)})", expanded=False):
             for c in contradictions:
-                st.markdown(
-                    f"- **{c.get('doc_a', '?')}** vs **{c.get('doc_b', '?')}**: "
-                    f"{c.get('summary', '')}"
-                )
-                st.caption(
-                    "Contradiction detection is experimental — treat as a hint, not a verdict."
-                )
+                st.markdown(f"- **{c.get('doc_a', '?')}** vs **{c.get('doc_b', '?')}**: {c.get('summary', '')}")
+                st.caption("Contradiction detection is experimental — treat as a hint, not a verdict.")
 
     st.caption(CAVEAT)
 
@@ -166,8 +162,7 @@ def _record_feedback(query_id: str, verdict: int, msg_index: int) -> None:
     """Write feedback to Postgres via db.insert_feedback, then mark voted in state."""
     try:
         fb_id = insert_feedback(query_id, verdict)
-        logger.info("Feedback recorded: query_id=%s verdict=%+d feedback_id=%s",
-                    query_id, verdict, fb_id)
+        logger.info("Feedback recorded: query_id=%s verdict=%+d feedback_id=%s", query_id, verdict, fb_id)
     except Exception as e:
         logger.warning("Feedback write skipped: %s", e)
     # Mark voted regardless — user shouldn't be spamming double clicks
@@ -239,11 +234,13 @@ if prompt:
 
         # Push into history BEFORE rendering so the feedback widget can
         # look itself up by msg_index.
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": brief,
-            "voted": False,
-        })
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": brief,
+                "voted": False,
+            }
+        )
         _trim_history()
 
         _render_brief(brief, msg_index=len(st.session_state.messages) - 1)

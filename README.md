@@ -143,7 +143,7 @@ before running the system on them.
 
 Out-of-corpus negatives correctly handled: **77.8%** (7/9).
 
-Evaluation scripts: `src/evaluation/eval_runner.py`, `src/evaluation/judge.py`.
+Evaluation scripts: `src/evaluation/retrieval_eval_runner.py` (retrieval metrics), `src/evaluation/judge_runner.py` (LLM-as-judge).
 Ground truth: `data/eval/ground_truth.json`. Results: `data/eval/results/`.
 
 #### Online evaluation (live traffic)
@@ -235,9 +235,11 @@ cp .env.example .env
 # Open .env and set OPENAI_API_KEY=sk-...
 ```
 
-### Step 3 — Ingest PDFs and run
+### Step 3 — Download corpus, ingest, and run
 
-Copy the 12 corpus PDFs into `data/raw/`, then:
+```bash
+make data       # downloads 12 PDFs to data/raw/ (note: IEA WEO 2025 needs manual download — script prints instructions)
+```
 
 ```bash
 # Start monitoring stack (Postgres + Grafana)

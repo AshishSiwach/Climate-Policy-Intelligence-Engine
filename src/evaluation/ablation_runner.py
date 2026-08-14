@@ -47,7 +47,7 @@ BM25_PATH = Path("data/processed/bm25_index.pkl")
 CHROMA_DIR = Path("data/processed/chroma_db")
 RESULTS_DIR = Path("data/eval/results")
 
-RETRIEVAL_TOP_K = 5      # what the synthesiser sees; matches main.py default
+RETRIEVAL_TOP_K = 5  # what the synthesiser sees; matches main.py default
 RERANK_CANDIDATE_K = 20  # hybrid produces 20 candidates for reranker
 KS = (5,)
 
@@ -59,10 +59,12 @@ _PROBE_PATTERN = re.compile(r"\[PROBE:\s*(\w+)\]")
 # name that holds the "top-1 score" for that retriever family.
 # ---------------------------------------------------------------------------
 
+
 def _build_configs():
     """Load indices once, wrap each config as a callable + score-field spec."""
     # Deferred imports for Windows torch DLL-load order (see judge_runner).
     from retrieval import DenseRetriever
+
     if not BM25_PATH.exists() or not CHROMA_DIR.exists():
         raise SystemExit("Indices missing. Run: uv run python scripts/build_indices.py")
 
@@ -71,6 +73,7 @@ def _build_configs():
     hybrid = HybridRetriever(bm25=bm25, dense=dense, rrf_k=60)
 
     from retrieval.reranker import Reranker
+
     reranker = Reranker(top_k=RETRIEVAL_TOP_K)
 
     def bm25_retrieve(query: str) -> list[dict]:
@@ -87,9 +90,9 @@ def _build_configs():
         return reranker.rerank(query, candidates)
 
     return {
-        "bm25":          {"retrieve": bm25_retrieve,          "top_score_field": "bm25_score"},
-        "dense":         {"retrieve": dense_retrieve,         "top_score_field": "dense_score"},
-        "hybrid":        {"retrieve": hybrid_retrieve,        "top_score_field": "rrf_score"},
+        "bm25": {"retrieve": bm25_retrieve, "top_score_field": "bm25_score"},
+        "dense": {"retrieve": dense_retrieve, "top_score_field": "dense_score"},
+        "hybrid": {"retrieve": hybrid_retrieve, "top_score_field": "rrf_score"},
         "hybrid_rerank": {"retrieve": hybrid_rerank_retrieve, "top_score_field": "rerank_score"},
     }
 
@@ -97,6 +100,7 @@ def _build_configs():
 # ---------------------------------------------------------------------------
 # Per-query scoring — mirrors judge_runner._score_pair, config-aware.
 # ---------------------------------------------------------------------------
+
 
 def _extract_probe(notes: str | None) -> str | None:
     if not notes:
@@ -121,11 +125,7 @@ def _score_pair(pair: dict, retrieve, top_score_field: str, synth, judge) -> dic
         row["error"] = f"retrieval: {type(e).__name__}: {e}"
         return row
     row["retrieval_latency_ms"] = round((time.time() - t0) * 1000, 1)
-    row["top_score"] = (
-        round(float(chunks[0][top_score_field]), 6)
-        if chunks and top_score_field in chunks[0]
-        else 0.0
-    )
+    row["top_score"] = round(float(chunks[0][top_score_field]), 6) if chunks and top_score_field in chunks[0] else 0.0
     row["retrieved_doc_ids"] = list(dict.fromkeys(c["doc_id"] for c in chunks))
     row["retrieved_chunk_types"] = [c.get("chunk_type", "prose") for c in chunks]
 
@@ -188,12 +188,10 @@ def _score_pair(pair: dict, retrieve, top_score_field: str, synth, judge) -> dic
 # Aggregation
 # ---------------------------------------------------------------------------
 
+
 def _load_ground_truth() -> list[dict]:
     if not GROUND_TRUTH_PATH.exists():
-        raise SystemExit(
-            f"Ground truth not found at {GROUND_TRUTH_PATH}. "
-            "Run scripts/migrate_ground_truth.py first."
-        )
+        raise SystemExit(f"Ground truth not found at {GROUND_TRUTH_PATH}. Run scripts/migrate_ground_truth.py first.")
     with open(GROUND_TRUTH_PATH, encoding="utf-8") as f:
         return json.load(f)
 
@@ -205,10 +203,7 @@ def _aggregate_by_slice(per_query: list[dict], slice_key: str) -> dict[str, dict
         if val is None:
             continue
         groups.setdefault(str(val), []).append(r)
-    return {
-        group: {**aggregate_metrics(rows), "n": len(rows)}
-        for group, rows in groups.items()
-    }
+    return {group: {**aggregate_metrics(rows), "n": len(rows)} for group, rows in groups.items()}
 
 
 def _negatives_summary(per_query: list[dict]) -> dict:
@@ -251,6 +246,7 @@ def _aggregate_config(per_query: list[dict]) -> dict:
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def run(output_path: Path | None = None) -> Path:
     load_dotenv()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -262,8 +258,10 @@ def run(output_path: Path | None = None) -> Path:
 
     # Synthesiser + Judge — held constant across configs
     from synthesis import Synthesiser
+
     synth = Synthesiser()
     from evaluation.judge import LLMJudge
+
     judge = LLMJudge()
     logger.info("Synthesiser=%s  Judge=%s", synth.model, judge.model)
 
@@ -277,12 +275,9 @@ def run(output_path: Path | None = None) -> Path:
         t_cfg = time.time()
         per_query: list[dict] = []
         for i, pair in enumerate(ground_truth, 1):
-            per_query.append(
-                _score_pair(pair, cfg["retrieve"], cfg["top_score_field"], synth, judge)
-            )
+            per_query.append(_score_pair(pair, cfg["retrieve"], cfg["top_score_field"], synth, judge))
             if i % 5 == 0:
-                logger.info("  %s: %d/%d (%.0fs elapsed)",
-                            name, i, len(ground_truth), time.time() - t_cfg)
+                logger.info("  %s: %d/%d (%.0fs elapsed)", name, i, len(ground_truth), time.time() - t_cfg)
 
         per_config[name] = _aggregate_config(per_query)
         per_config[name]["config_wall_time_sec"] = round(time.time() - t_cfg, 1)
@@ -291,12 +286,10 @@ def run(output_path: Path | None = None) -> Path:
     total_wall_time_sec = time.time() - t_run_all
 
     total_synth_cost = sum(
-        sum(r.get("synthesis_cost_usd", 0.0) or 0.0 for r in cfg["per_query"])
-        for cfg in per_config.values()
+        sum(r.get("synthesis_cost_usd", 0.0) or 0.0 for r in cfg["per_query"]) for cfg in per_config.values()
     )
     total_judge_cost = sum(
-        sum(r.get("judge_cost_usd", 0.0) or 0.0 for r in cfg["per_query"])
-        for cfg in per_config.values()
+        sum(r.get("judge_cost_usd", 0.0) or 0.0 for r in cfg["per_query"]) for cfg in per_config.values()
     )
 
     results = {
@@ -339,8 +332,7 @@ def run(output_path: Path | None = None) -> Path:
 
     # Comparison table
     metrics = ("correctness", "faithfulness", "completeness", "refusal_appropriateness")
-    print(f"{'config':16s} " + " ".join(f"{m[:9]:>10s}" for m in metrics) +
-          f" {'ret_ms':>8s} {'neg_ok':>8s}")
+    print(f"{'config':16s} " + " ".join(f"{m[:9]:>10s}" for m in metrics) + f" {'ret_ms':>8s} {'neg_ok':>8s}")
     for name, cfg in per_config.items():
         row = f"{name:16s} "
         for m in metrics:

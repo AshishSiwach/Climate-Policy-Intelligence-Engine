@@ -27,7 +27,6 @@ from dotenv import load_dotenv
 from evaluation.retrieval_metrics import (
     aggregate_metrics,
     evaluate_query,
-    retrieved_doc_ids,
 )
 from retrieval import BM25Retriever, HybridRetriever
 from retrieval.institution_detector import detect_institutions
@@ -43,8 +42,8 @@ BM25_PATH = Path("data/processed/bm25_index.pkl")
 CHROMA_DIR = Path("data/processed/chroma_db")
 RESULTS_DIR = Path("data/eval/results")
 
-RETRIEVAL_TOP_K = 5   # what the synthesiser sees; matches main.py default
-KS = (5,)             # single k for judge runs (retrieval metrics already covered @5 and @10)
+RETRIEVAL_TOP_K = 5  # what the synthesiser sees; matches main.py default
+KS = (5,)  # single k for judge runs (retrieval metrics already covered @5 and @10)
 
 # Metadata filter mode — flip to False to reproduce the pre-filter baseline
 # (used for A/B measurement of the filter's effect).
@@ -59,10 +58,7 @@ _PROBE_PATTERN = re.compile(r"\[PROBE:\s*(\w+)\]")
 
 def _load_ground_truth() -> list[dict]:
     if not GROUND_TRUTH_PATH.exists():
-        raise SystemExit(
-            f"Ground truth not found at {GROUND_TRUTH_PATH}. "
-            "Run scripts/migrate_ground_truth.py first."
-        )
+        raise SystemExit(f"Ground truth not found at {GROUND_TRUTH_PATH}. Run scripts/migrate_ground_truth.py first.")
     with open(GROUND_TRUTH_PATH, encoding="utf-8") as f:
         return json.load(f)
 
@@ -71,6 +67,7 @@ def _build_pipeline():
     """Load indices + build HybridRetriever + Synthesiser. Deferred DenseRetriever
     import to avoid Windows torch-import hang (same fix as retrieval_eval_runner)."""
     from retrieval import DenseRetriever
+
     if not BM25_PATH.exists() or not CHROMA_DIR.exists():
         raise SystemExit("Indices missing. Run: uv run python scripts/build_indices.py")
     bm25 = BM25Retriever.load(BM25_PATH)
@@ -80,6 +77,7 @@ def _build_pipeline():
     # Synthesiser import must happen AFTER DenseRetriever, same Windows quirk.
     from synthesis import Synthesiser
     from synthesis.synthesiser import PROMPT_VERSION as _DEFAULT_PROMPT_VERSION
+
     version = PROMPT_VERSION_OVERRIDE or _DEFAULT_PROMPT_VERSION
     synth = Synthesiser(prompt_version=version)
     return hybrid, synth
@@ -107,7 +105,9 @@ def _score_pair(pair: dict, hybrid, synth, judge) -> dict:
     t0 = time.time()
     try:
         chunks = hybrid.retrieve(
-            pair["question"], top_k=RETRIEVAL_TOP_K, institutions=institutions,
+            pair["question"],
+            top_k=RETRIEVAL_TOP_K,
+            institutions=institutions,
         )
     except Exception as e:
         logger.exception("Retrieval failed for %s", pair["id"])
@@ -189,10 +189,7 @@ def _aggregate_by_slice(per_query: list[dict], slice_key: str) -> dict[str, dict
         if val is None:
             continue
         groups.setdefault(str(val), []).append(r)
-    return {
-        group: {**aggregate_metrics(rows), "n": len(rows)}
-        for group, rows in groups.items()
-    }
+    return {group: {**aggregate_metrics(rows), "n": len(rows)} for group, rows in groups.items()}
 
 
 def _negatives_summary(per_query: list[dict]) -> dict:
@@ -230,7 +227,8 @@ def run(output_path: Path | None = None) -> Path:
     judge = LLMJudge()
     logger.info(
         "Pipeline + judge ready. Judge=%s  metadata_filter=%s",
-        judge.model, METADATA_FILTER_ENABLED,
+        judge.model,
+        METADATA_FILTER_ENABLED,
     )
 
     t_run = time.time()
@@ -319,8 +317,10 @@ def run(output_path: Path | None = None) -> Path:
     print("=" * 80)
     if results["negatives"]["n"]:
         n = results["negatives"]
-        print(f"  Handled well:          {n['n_handled_well']}/{n['n']}"
-              f" ({n['handled_well_rate']:.0%})   (refusal_appropriateness >= 4)")
+        print(
+            f"  Handled well:          {n['n_handled_well']}/{n['n']}"
+            f" ({n['handled_well_rate']:.0%})   (refusal_appropriateness >= 4)"
+        )
         print(f"  Mean refusal_appr:     {n['mean_refusal_appropriateness']:.2f}")
 
     print()
@@ -329,8 +329,10 @@ def run(output_path: Path | None = None) -> Path:
     print("=" * 80)
     print(f"  Wall time:            {total_wall_time_sec:.0f}s")
     print(f"  Synthesis cost:       ${results['cost_summary']['synthesis_total_usd']:.4f}")
-    print(f"  Judge cost:           ${results['cost_summary']['judge_total_usd']:.4f}"
-          f"  (0 if judge model pricing not yet in _JUDGE_PRICING)")
+    print(
+        f"  Judge cost:           ${results['cost_summary']['judge_total_usd']:.4f}"
+        f"  (0 if judge model pricing not yet in _JUDGE_PRICING)"
+    )
     print(f"  Total cost:           ${results['cost_summary']['total_usd']:.4f}")
 
     return output_path

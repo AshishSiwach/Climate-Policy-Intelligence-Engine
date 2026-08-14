@@ -39,7 +39,7 @@ class BM25Retriever:
     @staticmethod
     def _tokenize(text: str) -> list[str]:
         """Lowercase, strip punctuation, split on whitespace."""
-        return re.sub(r'[^\w\s]', ' ', text.lower()).split()
+        return re.sub(r"[^\w\s]", " ", text.lower()).split()
 
     # ------------------------------------------------------------------
     # Index lifecycle
@@ -54,7 +54,7 @@ class BM25Retriever:
         if not chunks:
             raise ValueError("Cannot build index from an empty chunk list.")
         self._chunks = list(chunks)
-        tokenized = [self._tokenize(c['text']) for c in self._chunks]
+        tokenized = [self._tokenize(c["text"]) for c in self._chunks]
         self._index = BM25Okapi(tokenized, k1=self.k1, b=self.b)
         logger.info("BM25 index built: %d chunks", len(self._chunks))
 
@@ -74,11 +74,13 @@ class BM25Retriever:
         for rank, i in enumerate(top_idx, 1):
             if float(scores[i]) <= 0:
                 break
-            results.append({
-                **self._chunks[i],
-                'bm25_score': float(scores[i]),
-                'bm25_rank': rank,
-            })
+            results.append(
+                {
+                    **self._chunks[i],
+                    "bm25_score": float(scores[i]),
+                    "bm25_rank": rank,
+                }
+            )
         return results
 
     # ------------------------------------------------------------------
@@ -89,20 +91,20 @@ class BM25Retriever:
         """Pickle the index and chunk list to disk."""
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             pickle.dump(
-                {'index': self._index, 'chunks': self._chunks, 'k1': self.k1, 'b': self.b},
+                {"index": self._index, "chunks": self._chunks, "k1": self.k1, "b": self.b},
                 f,
             )
         logger.info("BM25 index saved to %s", path)
 
     @classmethod
-    def load(cls, path: str | Path) -> 'BM25Retriever':
+    def load(cls, path: str | Path) -> "BM25Retriever":
         """Load a previously saved BM25 index from disk."""
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             data = pickle.load(f)
-        obj = cls(k1=data['k1'], b=data['b'])
-        obj._index = data['index']
-        obj._chunks = data['chunks']
+        obj = cls(k1=data["k1"], b=data["b"])
+        obj._index = data["index"]
+        obj._chunks = data["chunks"]
         logger.info("BM25 index loaded from %s: %d chunks", path, len(obj._chunks))
         return obj

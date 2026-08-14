@@ -16,7 +16,7 @@ from sentence_transformers import CrossEncoder
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = 'cross-encoder/ms-marco-MiniLM-L-6-v2'
+MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 
 class Reranker:
@@ -82,7 +82,7 @@ class Reranker:
             return []
 
         model = self._get_model()
-        pairs = [(query, c['text']) for c in candidates]
+        pairs = [(query, c["text"]) for c in candidates]
 
         t0 = time.time()
         scores = model.predict(pairs)
@@ -99,9 +99,9 @@ class Reranker:
         return [
             {
                 **chunk,
-                'rerank_score': float(score),
-                'rerank_rank': rank,
-                'rerank_latency_ms': round(latency_ms, 1),
+                "rerank_score": float(score),
+                "rerank_rank": rank,
+                "rerank_latency_ms": round(latency_ms, 1),
             }
             for rank, (score, chunk) in enumerate(ranked[: self.top_k], 1)
         ]

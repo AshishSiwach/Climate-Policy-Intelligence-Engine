@@ -1,3 +1,6 @@
+# ruff: noqa: E501
+# Field descriptions are intentionally verbose — they document the schema for
+# the LLM via Structured Outputs and must not be truncated.
 """
 Pydantic output schema for the analyst brief.
 
@@ -21,6 +24,7 @@ from pydantic import BaseModel, Field
 
 class LLMCitation(BaseModel):
     """What the LLM returns via Structured Outputs. No enriched metadata."""
+
     doc_id: str = Field(..., description="Source document identifier, e.g. OFGEM_SMART_SECURE_2025")
     passage: str = Field(..., description="Verbatim quote from the retrieved chunk that supports the claim")
     page: int = Field(..., ge=1, description="Page number in the source document")
@@ -28,6 +32,7 @@ class LLMCitation(BaseModel):
 
 class Citation(BaseModel):
     """Final citation in AnalystBrief. Enriched from retrieved chunk metadata."""
+
     doc_id: str
     passage: str
     page: int = Field(..., ge=1)
@@ -39,6 +44,7 @@ class Citation(BaseModel):
 
 class Contradiction(BaseModel):
     """Experimental — LLM self-report of conflicting claims across sources."""
+
     doc_a: str
     doc_b: str
     summary: str
@@ -46,6 +52,7 @@ class Contradiction(BaseModel):
 
 class LLMResponse(BaseModel):
     """Raw JSON shape returned by the LLM."""
+
     answer: str
     citations: list[LLMCitation] = Field(default_factory=list)
     contradictions: list[Contradiction] = Field(default_factory=list)
@@ -53,6 +60,7 @@ class LLMResponse(BaseModel):
 
 class AnalystBrief(BaseModel):
     """Final structured brief returned to the user."""
+
     answer: str
     citations: list[Citation] = Field(default_factory=list)
     contradictions: list[Contradiction] = Field(default_factory=list)

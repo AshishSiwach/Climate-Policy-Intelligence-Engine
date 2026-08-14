@@ -43,5 +43,6 @@ __all__ = [
 def __getattr__(name: str):
     if name in ("LLMJudge", "JudgeScore"):
         from evaluation.judge import JudgeScore, LLMJudge
+
         return {"LLMJudge": LLMJudge, "JudgeScore": JudgeScore}[name]
     raise AttributeError(f"module 'evaluation' has no attribute {name!r}")

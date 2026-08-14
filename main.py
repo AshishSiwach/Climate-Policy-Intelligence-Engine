@@ -11,6 +11,10 @@ Runs the full pipeline:
 Logs one record per query to logs/queries.jsonl (started day one per CLAUDE.md).
 """
 
+# isort: skip_file
+# torch must be imported before numpy/openai/rank_bm25 on Windows to claim
+# its OpenBLAS DLLs first. Reordering this import causes an access violation
+# (exit code -1073741819) with no Python traceback. Do not let ruff sort it.
 from __future__ import annotations
 
 # Must import before numpy/rank_bm25/openai get a chance to (via the imports
@@ -53,17 +57,11 @@ LOG_PATH = Path("logs/queries.jsonl")
 METADATA_FILTER_ENABLED = True
 
 # --- Input guardrails (see CLAUDE.md Locked Decisions) --------------------
-MAX_QUERY_CHARS = 500          # cost-blow-up defense
-DAILY_COST_LIMIT_USD = 5.00    # daily API-spend circuit breaker
+MAX_QUERY_CHARS = 500  # cost-blow-up defense
+DAILY_COST_LIMIT_USD = 5.00  # daily API-spend circuit breaker
 
-QUERY_TOO_LONG_MSG = (
-    f"Query exceeds the {MAX_QUERY_CHARS}-character limit. "
-    "Rephrase your question more concisely."
-)
-COST_LIMIT_MSG = (
-    "The daily cost limit for this deployment has been reached. "
-    "Try again after 00:00 UTC."
-)
+QUERY_TOO_LONG_MSG = f"Query exceeds the {MAX_QUERY_CHARS}-character limit. Rephrase your question more concisely."
+COST_LIMIT_MSG = "The daily cost limit for this deployment has been reached. Try again after 00:00 UTC."
 
 
 def _canonical_refusal(msg: str) -> AnalystBrief:
@@ -106,13 +104,9 @@ def _daily_cost_so_far(log_path: Path) -> float:
 def build_pipeline() -> tuple[HybridRetriever, Synthesiser]:
     """Load indices + retriever + synthesiser. One-time setup per CLI invocation."""
     if not BM25_PATH.exists():
-        raise SystemExit(
-            f"BM25 index not found at {BM25_PATH}. Run: uv run python scripts/build_indices.py"
-        )
+        raise SystemExit(f"BM25 index not found at {BM25_PATH}. Run: uv run python scripts/build_indices.py")
     if not CHROMA_DIR.exists():
-        raise SystemExit(
-            f"Chroma index not found at {CHROMA_DIR}. Run: uv run python scripts/build_indices.py"
-        )
+        raise SystemExit(f"Chroma index not found at {CHROMA_DIR}. Run: uv run python scripts/build_indices.py")
 
     # Lazy import — see module-level note.
     from retrieval import DenseRetriever
@@ -154,8 +148,11 @@ def run_query(
             retrieved_chunks=[],
             retrieval_latency_ms=0.0,
             synthesis_result={
-                "brief": brief, "latency_ms": 0.0, "prompt_tokens": 0,
-                "completion_tokens": 0, "cost_usd": 0.0,
+                "brief": brief,
+                "latency_ms": 0.0,
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "cost_usd": 0.0,
             },
             model_used=synth.model,
             failure_reason=f"guardrail: query_too_long ({len(query)} chars)",
@@ -174,8 +171,11 @@ def run_query(
             retrieved_chunks=[],
             retrieval_latency_ms=0.0,
             synthesis_result={
-                "brief": brief, "latency_ms": 0.0, "prompt_tokens": 0,
-                "completion_tokens": 0, "cost_usd": 0.0,
+                "brief": brief,
+                "latency_ms": 0.0,
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "cost_usd": 0.0,
             },
             model_used=synth.model,
             failure_reason=f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)",
@@ -216,14 +216,14 @@ def run_query(
         query_id=query_id,
         detected_institutions=institutions,
     )
-    qlogger.log(record)                # primary sink — always fires
-    _safe_db_write(record)             # secondary sink — never-raise on DB down
+    qlogger.log(record)  # primary sink — always fires
+    _safe_db_write(record)  # secondary sink — never-raise on DB down
 
     if synthesis_result is None:
         return {"error": failure_reason, "query_id": query_id}
 
     result = synthesis_result["brief"].model_dump()
-    result["query_id"] = query_id       # so Streamlit / callers can attach feedback
+    result["query_id"] = query_id  # so Streamlit / callers can attach feedback
     return result
 
 

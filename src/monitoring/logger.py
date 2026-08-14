@@ -89,31 +89,25 @@ def build_query_record(
     record: dict[str, Any] = {
         "query_id": query_id or str(uuid.uuid4()),
         "query": query,
-
         # Retrieval
         "retrieved_doc_ids": [c["doc_id"] for c in retrieved_chunks],
         "retrieved_pages": [c["page_number"] for c in retrieved_chunks],
         "rrf_scores": [round(c.get("rrf_score", 0.0), 6) for c in retrieved_chunks],
         "retrieval_latency_ms": round(retrieval_latency_ms, 1),
         "detected_institutions": list(detected_institutions or []),
-
         # Synthesis
-        "synthesis_latency_ms": (
-            round(synthesis_result["latency_ms"], 1) if synthesis_result else 0.0
-        ),
+        "synthesis_latency_ms": (round(synthesis_result["latency_ms"], 1) if synthesis_result else 0.0),
         "model_used": model_used,
         "prompt_version": synthesis_result.get("prompt_version") if synthesis_result else None,
         "prompt_tokens": synthesis_result["prompt_tokens"] if synthesis_result else 0,
         "completion_tokens": synthesis_result["completion_tokens"] if synthesis_result else 0,
         "cost_usd": synthesis_result["cost_usd"] if synthesis_result else 0.0,
-
         # Answer
         "answer": answer,
         "is_refusal": is_refusal,
         "cited_doc_ids": cited,
         "citation_count": len(brief.citations) if brief else 0,
         "contradiction_count": len(brief.contradictions) if brief else 0,
-
         # Failure tracking
         "failure_reason": failure_reason,
     }

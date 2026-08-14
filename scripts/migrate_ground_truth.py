@@ -44,8 +44,13 @@ OUT_PATH = Path("data/eval/ground_truth.json")
 
 ALLOWED_QUERY_TYPES = {"factual", "cross_document", "summarisation", "numeric", "negative"}
 REQUIRED_FIELDS = {
-    "id", "query_type", "question", "expected_answer",
-    "expected_source_docs", "expected_page_range", "notes",
+    "id",
+    "query_type",
+    "question",
+    "expected_answer",
+    "expected_source_docs",
+    "expected_page_range",
+    "notes",
 }
 
 # Ground-truth authoring used slightly different doc_id naming than DOC_REGISTRY.
@@ -55,11 +60,11 @@ DOC_ID_ALIASES = {
     # Naming / date drift between authored ground truth and DOC_REGISTRY.
     # DOC_REGISTRY was corrected (see pdf_loader.py) after PDF front-matter verification;
     # aliases translate the authored ids in ground_truth_raw.json to the canonical ids.
-    "ZEV_MANDATE_2023":             "DESNZ_ZEV_MANDATE_2023",
-    "OFGEM_SMART_SECURE_2024":      "OFGEM_SMART_SECURE_2025",
+    "ZEV_MANDATE_2023": "DESNZ_ZEV_MANDATE_2023",
+    "OFGEM_SMART_SECURE_2024": "OFGEM_SMART_SECURE_2025",
     "BOE_MEASURING_RISKS_SCENARIO": "BOE_MEASURING_CLIMATE_RISKS",
-    "BOE_CLIMATE_DISCLOSURE_2024":  "BOE_DISCLOSURE_2024",
-    "CCC_SEVENTH_BUDGET_2025":      "CCC_SEVENTH_CARBON_BUDGET_2025",
+    "BOE_CLIMATE_DISCLOSURE_2024": "BOE_DISCLOSURE_2024",
+    "CCC_SEVENTH_BUDGET_2025": "CCC_SEVENTH_CARBON_BUDGET_2025",
 }
 
 
@@ -83,8 +88,8 @@ def _migrate_one(pair: dict, valid_docs: set[str]) -> dict:
         raise ValueError(f"Pair {pair['id']} has unknown query_type: {qt!r}")
 
     docs_raw: list[str] = pair["expected_source_docs"]
-    docs: list[str] = [_resolve(d) for d in docs_raw]   # apply aliases
-    page_range = pair["expected_page_range"]   # [start, end] | null
+    docs: list[str] = [_resolve(d) for d in docs_raw]  # apply aliases
+    page_range = pair["expected_page_range"]  # [start, end] | null
 
     # Validate doc_ids AFTER alias resolution
     if qt != "negative":
@@ -96,11 +101,11 @@ def _migrate_one(pair: dict, valid_docs: set[str]) -> dict:
             )
 
     # Build expected_sources per migration rules
-    if not docs:                         # negative — empty
+    if not docs:  # negative — empty
         expected_sources: list[dict] = []
-    elif len(docs) == 1:                 # single-doc
+    elif len(docs) == 1:  # single-doc
         expected_sources = [{"doc_id": docs[0], "page_range": page_range}]
-    else:                                # multi-doc (cross_document)
+    else:  # multi-doc (cross_document)
         # Apply page_range to first doc only (usually null anyway for cross-doc);
         # remaining docs get null. Post-hoc enrichment in Week 5 can fill in per-doc
         # ranges via inspection.
@@ -179,7 +184,8 @@ def main() -> None:
         logger.info("  %-15s %d", qt, by_type[qt])
     logger.info(
         "Source-level page range coverage: %d/%d populated (%.0f%%)",
-        with_page_range, total_sources,
+        with_page_range,
+        total_sources,
         100 * with_page_range / max(total_sources, 1),
     )
     if DOC_ID_ALIASES:

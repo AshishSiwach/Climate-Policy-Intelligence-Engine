@@ -18,24 +18,28 @@ from evaluation.judge import (
     _estimate_cost,
 )
 
-
 # ---------------------------------------------------------------------------
 # JudgeScore Pydantic schema
 # ---------------------------------------------------------------------------
 
+
 def _valid_score(**overrides) -> dict:
     """Base valid payload — override fields to test bounds."""
     return {
-        "correctness": 5, "correctness_rationale": "matches reference",
-        "faithfulness": 5, "faithfulness_rationale": "supported by chunks",
-        "completeness": 5, "completeness_rationale": "all key points covered",
-        "refusal_appropriateness": 5, "refusal_appropriateness_rationale": "answered appropriately",
+        "correctness": 5,
+        "correctness_rationale": "matches reference",
+        "faithfulness": 5,
+        "faithfulness_rationale": "supported by chunks",
+        "completeness": 5,
+        "completeness_rationale": "all key points covered",
+        "refusal_appropriateness": 5,
+        "refusal_appropriateness_rationale": "answered appropriately",
         **overrides,
     }
 
 
 def test_judge_score_accepts_valid_payload():
-    JudgeScore(**_valid_score())   # must not raise
+    JudgeScore(**_valid_score())  # must not raise
 
 
 def test_judge_score_rejects_score_below_1():
@@ -58,6 +62,7 @@ def test_judge_score_requires_all_dimensions():
 # ---------------------------------------------------------------------------
 # _build_judge_message — prompt construction
 # ---------------------------------------------------------------------------
+
 
 def _mk_chunk(doc_id="OFGEM_TEST", page=25, text="Sample text."):
     return {"doc_id": doc_id, "page_number": page, "text": text}
@@ -109,6 +114,7 @@ def test_build_judge_message_renders_multiple_chunks_in_order():
 # LLMJudge.score — happy path (mocked LLM)
 # ---------------------------------------------------------------------------
 
+
 def _stub_judge() -> LLMJudge:
     return LLMJudge(api_key="test-key-not-used")
 
@@ -131,8 +137,11 @@ def test_score_happy_path_returns_validated_scores():
 
     with patch.object(judge._client.beta.chat.completions, "parse", return_value=fake_resp):
         result = judge.score(
-            question="q", query_type="factual", expected_answer="ref",
-            retrieved_chunks=[_mk_chunk()], generated_answer="gen",
+            question="q",
+            query_type="factual",
+            expected_answer="ref",
+            retrieved_chunks=[_mk_chunk()],
+            generated_answer="gen",
         )
 
     assert result["scores"].correctness == 4
@@ -148,8 +157,11 @@ def test_score_returns_zero_cost_for_unknown_model():
 
     with patch.object(judge._client.beta.chat.completions, "parse", return_value=fake_resp):
         result = judge.score(
-            question="q", query_type="factual", expected_answer="ref",
-            retrieved_chunks=[], generated_answer="gen",
+            question="q",
+            query_type="factual",
+            expected_answer="ref",
+            retrieved_chunks=[],
+            generated_answer="gen",
         )
 
     assert result["cost_usd"] == 0.0
@@ -161,8 +173,11 @@ def test_score_computes_cost_for_known_model():
 
     with patch.object(judge._client.beta.chat.completions, "parse", return_value=fake_resp):
         result = judge.score(
-            question="q", query_type="factual", expected_answer="ref",
-            retrieved_chunks=[], generated_answer="gen",
+            question="q",
+            query_type="factual",
+            expected_answer="ref",
+            retrieved_chunks=[],
+            generated_answer="gen",
         )
 
     # 1M input tokens at $0.15 + 1M output tokens at $0.60 = $0.75
@@ -172,6 +187,7 @@ def test_score_computes_cost_for_known_model():
 # ---------------------------------------------------------------------------
 # LLMJudge.score — refusal branch
 # ---------------------------------------------------------------------------
+
 
 def test_score_handles_judge_refusal_gracefully():
     """If the judge model refuses to score, return scores=None + refusal_reason."""
@@ -186,8 +202,11 @@ def test_score_handles_judge_refusal_gracefully():
 
     with patch.object(judge._client.beta.chat.completions, "parse", return_value=fake_response):
         result = judge.score(
-            question="q", query_type="factual", expected_answer="ref",
-            retrieved_chunks=[_mk_chunk()], generated_answer="gen",
+            question="q",
+            query_type="factual",
+            expected_answer="ref",
+            retrieved_chunks=[_mk_chunk()],
+            generated_answer="gen",
         )
 
     assert result["scores"] is None
@@ -199,6 +218,7 @@ def test_score_handles_judge_refusal_gracefully():
 # Timeout + retry wiring
 # ---------------------------------------------------------------------------
 
+
 def test_judge_client_has_timeout_and_retries():
     """Match the SDK resilience posture used by Synthesiser."""
     judge = _stub_judge()
@@ -209,6 +229,7 @@ def test_judge_client_has_timeout_and_retries():
 # ---------------------------------------------------------------------------
 # _estimate_cost helper
 # ---------------------------------------------------------------------------
+
 
 def test_estimate_cost_known_model():
     # 500 input tokens at $0.15/M + 200 output at $0.60/M

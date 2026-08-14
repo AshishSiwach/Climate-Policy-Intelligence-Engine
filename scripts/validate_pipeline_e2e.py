@@ -60,8 +60,7 @@ def main() -> None:
         all_pass = all_pass and passed
         top1_hit = "top-1" if top5 and top5[0]["doc_id"] == q["expected_doc"] else "in top-5"
 
-        print(f"{'PASS' if passed else 'FAIL'} — expected doc {top1_hit}, "
-              f"retrieval latency {latency_ms:.0f}ms")
+        print(f"{'PASS' if passed else 'FAIL'} — expected doc {top1_hit}, retrieval latency {latency_ms:.0f}ms")
         print()
         for c in top5:
             marker = "*" if c["doc_id"] == q["expected_doc"] else " "

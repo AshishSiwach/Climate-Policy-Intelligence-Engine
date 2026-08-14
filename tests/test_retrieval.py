@@ -15,10 +15,10 @@ import pytest
 from retrieval.bm25_retriever import BM25Retriever
 from retrieval.hybrid_retriever import HybridRetriever, _rrf_score
 
-
 # ---------------------------------------------------------------------------
 # BM25Retriever
 # ---------------------------------------------------------------------------
+
 
 def test_bm25_build_then_query_returns_results(sample_chunks):
     bm25 = BM25Retriever()
@@ -88,6 +88,7 @@ def test_bm25_save_load_roundtrip(sample_chunks, tmp_path):
 # RRF fusion math
 # ---------------------------------------------------------------------------
 
+
 def test_rrf_score_formula():
     """RRF: 1/(k + rank). k=60 default. Verify formula."""
     assert _rrf_score(1, 60) == pytest.approx(1 / 61)
@@ -106,6 +107,7 @@ def test_rrf_score_monotonic_decreasing_with_rank():
 # HybridRetriever — with mocked dense retriever
 # ---------------------------------------------------------------------------
 
+
 def test_hybrid_fuses_bm25_and_dense_results(sample_chunks):
     """Chunks appearing in both retrievers accumulate RRF from both sources."""
     bm25 = BM25Retriever()
@@ -113,10 +115,7 @@ def test_hybrid_fuses_bm25_and_dense_results(sample_chunks):
 
     # Mock dense retriever — returns same chunks with a fake dense_rank
     def fake_dense_query(text, top_k=20):
-        return [
-            {**c, "dense_score": 0.9 - 0.1 * i, "dense_rank": i + 1}
-            for i, c in enumerate(sample_chunks[:top_k])
-        ]
+        return [{**c, "dense_score": 0.9 - 0.1 * i, "dense_rank": i + 1} for i, c in enumerate(sample_chunks[:top_k])]
 
     dense_mock = MagicMock()
     dense_mock.query.side_effect = fake_dense_query
@@ -137,10 +136,7 @@ def test_hybrid_dedupes_chunks_by_id(sample_chunks):
     bm25.build(sample_chunks)
 
     def fake_dense_query(text, top_k=20):
-        return [
-            {**c, "dense_score": 0.9, "dense_rank": i + 1}
-            for i, c in enumerate(sample_chunks)
-        ]
+        return [{**c, "dense_score": 0.9, "dense_rank": i + 1} for i, c in enumerate(sample_chunks)]
 
     dense_mock = MagicMock()
     dense_mock.query.side_effect = fake_dense_query
@@ -160,10 +156,7 @@ def test_hybrid_returns_top_k_at_most(sample_chunks):
     bm25.build(sample_chunks)
 
     def fake_dense_query(text, top_k=20):
-        return [
-            {**c, "dense_score": 0.9, "dense_rank": i + 1}
-            for i, c in enumerate(sample_chunks)
-        ]
+        return [{**c, "dense_score": 0.9, "dense_rank": i + 1} for i, c in enumerate(sample_chunks)]
 
     dense_mock = MagicMock()
     dense_mock.query.side_effect = fake_dense_query
@@ -185,20 +178,20 @@ def test_hybrid_locked_rrf_k_default():
 # HybridRetriever — metadata filter (Week 5)
 # ---------------------------------------------------------------------------
 
+
 def _make_chunks(specs):
     """Helper: turn [(doc_id, chunk_idx, institution, text)] into chunk dicts."""
-    return [
-        {"doc_id": did, "chunk_index": ci, "institution": inst, "text": text}
-        for did, ci, inst, text in specs
-    ]
+    return [{"doc_id": did, "chunk_index": ci, "institution": inst, "text": text} for did, ci, inst, text in specs]
 
 
 def test_hybrid_filters_dense_via_native_where():
     """When institutions is non-empty, dense.query must receive institutions kwarg."""
-    chunks = _make_chunks([
-        ("A", 0, "Ofgem", "ofgem load control"),
-        ("B", 0, "IEA",   "iea global fossil"),
-    ])
+    chunks = _make_chunks(
+        [
+            ("A", 0, "Ofgem", "ofgem load control"),
+            ("B", 0, "IEA", "iea global fossil"),
+        ]
+    )
     bm25 = BM25Retriever()
     bm25.build(chunks)
 
@@ -217,16 +210,18 @@ def test_hybrid_filters_dense_via_native_where():
 
 def test_hybrid_post_filters_bm25_by_institution():
     """BM25 chunks not matching the filter must be dropped from fusion."""
-    chunks = _make_chunks([
-        ("A", 0, "Ofgem", "ofgem load control licensing"),
-        ("B", 0, "IEA",   "iea peak fossil demand"),
-        ("C", 0, "CCC",   "ccc progress report"),
-    ])
+    chunks = _make_chunks(
+        [
+            ("A", 0, "Ofgem", "ofgem load control licensing"),
+            ("B", 0, "IEA", "iea peak fossil demand"),
+            ("C", 0, "CCC", "ccc progress report"),
+        ]
+    )
     bm25 = BM25Retriever()
     bm25.build(chunks)
 
     dense_mock = MagicMock()
-    dense_mock.query.return_value = []   # dense returns nothing, force reliance on BM25
+    dense_mock.query.return_value = []  # dense returns nothing, force reliance on BM25
 
     hybrid = HybridRetriever(bm25=bm25, dense=dense_mock, rrf_k=60)
     # Query matches all three doc texts (single common token would); filter to Ofgem+IEA
@@ -241,10 +236,12 @@ def test_hybrid_post_filters_bm25_by_institution():
 
 def test_hybrid_falls_back_to_full_corpus_on_zero_filter_matches():
     """If the filter matches nothing, retrieval must fall back to unfiltered results."""
-    chunks = _make_chunks([
-        ("A", 0, "Ofgem", "ofgem load control"),
-        ("B", 0, "IEA",   "iea projections"),
-    ])
+    chunks = _make_chunks(
+        [
+            ("A", 0, "Ofgem", "ofgem load control"),
+            ("B", 0, "IEA", "iea projections"),
+        ]
+    )
     bm25 = BM25Retriever()
     bm25.build(chunks)
 
@@ -273,16 +270,10 @@ def test_hybrid_no_institutions_kwarg_matches_v1_behaviour(sample_chunks):
     bm25.build(sample_chunks)
 
     dense_mock = MagicMock()
-    dense_mock.query.return_value = [
-        {**sample_chunks[0], "dense_score": 0.9, "dense_rank": 1}
-    ]
+    dense_mock.query.return_value = [{**sample_chunks[0], "dense_score": 0.9, "dense_rank": 1}]
 
     hybrid = HybridRetriever(bm25=bm25, dense=dense_mock, rrf_k=60)
-    hybrid.retrieve("Ofgem", top_k=5)   # no institutions kwarg
+    hybrid.retrieve("Ofgem", top_k=5)  # no institutions kwarg
 
     _, kwargs = dense_mock.query.call_args
-    assert "institutions" not in kwargs, (
-        "no-filter path must not pass institutions to dense.query"
-    )
-
-
+    assert "institutions" not in kwargs, "no-filter path must not pass institutions to dense.query"

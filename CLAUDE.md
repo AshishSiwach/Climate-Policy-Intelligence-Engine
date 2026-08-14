@@ -781,8 +781,8 @@ cpie/
       judge.py                   # LLM-as-judge scoring
       eval_runner.py             # Run eval on ground truth dataset
     monitoring/
-      logger.py                  # JSON lines query logging
-      dashboard.py               # Logfire monitoring integration
+      logger.py                  # JSON lines query logging (fallback sink)
+      db.py                      # PostgreSQL writer — cpie.query_logs + cpie.user_feedback
   tests/
     test_ingestion.py
     test_retrieval.py

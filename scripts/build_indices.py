@@ -36,15 +36,10 @@ def load_all_chunks() -> list[dict]:
     expect that shape (they iterate .items() / index by string keys).
     """
     if not DUCKDB_PATH.exists():
-        raise RuntimeError(
-            f"DuckDB file not found at {DUCKDB_PATH}. "
-            "Run `uv run python scripts/ingest.py` first."
-        )
+        raise RuntimeError(f"DuckDB file not found at {DUCKDB_PATH}. Run `uv run python scripts/ingest.py` first.")
 
     with duckdb.connect(str(DUCKDB_PATH), read_only=True) as conn:
-        df = conn.execute(
-            f"SELECT * FROM {DATASET_NAME}.{TABLE_NAME} ORDER BY doc_id, chunk_index"
-        ).fetchdf()
+        df = conn.execute(f"SELECT * FROM {DATASET_NAME}.{TABLE_NAME} ORDER BY doc_id, chunk_index").fetchdf()
 
     chunks = df.to_dict("records")
     logger.info("Loaded %d chunks from %s", len(chunks), DUCKDB_PATH)

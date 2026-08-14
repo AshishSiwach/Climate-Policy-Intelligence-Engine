@@ -7,7 +7,7 @@ the LLM and still write a log record with a distinct failure_reason.
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -37,6 +37,7 @@ def _mock_pg(monkeypatch):
 # _daily_cost_so_far — cost accumulator
 # ---------------------------------------------------------------------------
 
+
 def _write_log_entry(path: Path, *, ts: str, cost: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
@@ -51,7 +52,7 @@ def test_daily_cost_sums_today_only(tmp_log_path):
     today = datetime.now(timezone.utc).isoformat()
     yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
 
-    _write_log_entry(tmp_log_path, ts=yesterday, cost=10.00)   # should NOT count
+    _write_log_entry(tmp_log_path, ts=yesterday, cost=10.00)  # should NOT count
     _write_log_entry(tmp_log_path, ts=today, cost=0.50)
     _write_log_entry(tmp_log_path, ts=today, cost=0.25)
 
@@ -74,6 +75,7 @@ def test_daily_cost_ignores_malformed_lines(tmp_log_path):
 # Query length guardrail
 # ---------------------------------------------------------------------------
 
+
 def _mock_pipeline():
     """Return (hybrid, synth) mocks that must NOT be called if a guardrail fires."""
     hybrid = MagicMock()
@@ -88,7 +90,7 @@ def test_query_length_guardrail_refuses_and_skips_pipeline(tmp_log_path):
     hybrid, synth = _mock_pipeline()
     qlogger = QueryLogger(log_path=tmp_log_path)
 
-    long_query = "x " * (MAX_QUERY_CHARS)   # 2 * MAX chars, over the limit
+    long_query = "x " * (MAX_QUERY_CHARS)  # 2 * MAX chars, over the limit
     assert len(long_query) > MAX_QUERY_CHARS
 
     result = run_query(long_query, hybrid, synth, qlogger, log_path=tmp_log_path)
@@ -119,14 +121,15 @@ def test_query_length_within_limit_proceeds(sample_chunks, tmp_log_path):
 
     synth = MagicMock()
     synth.model = "gpt-4o-mini"
-    synth.synthesise = MagicMock(return_value={
-        "brief": MagicMock(model_dump=lambda: {"answer": "ok",
-                                               "citations": [], "contradictions": []}),
-        "latency_ms": 100.0,
-        "prompt_tokens": 500,
-        "completion_tokens": 50,
-        "cost_usd": 0.0003,
-    })
+    synth.synthesise = MagicMock(
+        return_value={
+            "brief": MagicMock(model_dump=lambda: {"answer": "ok", "citations": [], "contradictions": []}),
+            "latency_ms": 100.0,
+            "prompt_tokens": 500,
+            "completion_tokens": 50,
+            "cost_usd": 0.0003,
+        }
+    )
 
     qlogger = QueryLogger(log_path=tmp_log_path)
     result = run_query("What does Ofgem propose?", hybrid, synth, qlogger, log_path=tmp_log_path)
@@ -139,6 +142,7 @@ def test_query_length_within_limit_proceeds(sample_chunks, tmp_log_path):
 # ---------------------------------------------------------------------------
 # Daily cost circuit breaker
 # ---------------------------------------------------------------------------
+
 
 def test_cost_circuit_breaker_refuses_when_budget_exhausted(tmp_log_path):
     """Log a spend >= DAILY_COST_LIMIT_USD; next query must be refused."""
@@ -180,12 +184,15 @@ def test_cost_circuit_breaker_below_limit_allows_query(sample_chunks, tmp_log_pa
     hybrid.retrieve = MagicMock(return_value=sample_chunks)
     synth = MagicMock()
     synth.model = "gpt-4o-mini"
-    synth.synthesise = MagicMock(return_value={
-        "brief": MagicMock(model_dump=lambda: {"answer": "ok",
-                                               "citations": [], "contradictions": []}),
-        "latency_ms": 50.0, "prompt_tokens": 100, "completion_tokens": 20,
-        "cost_usd": 0.0001,
-    })
+    synth.synthesise = MagicMock(
+        return_value={
+            "brief": MagicMock(model_dump=lambda: {"answer": "ok", "citations": [], "contradictions": []}),
+            "latency_ms": 50.0,
+            "prompt_tokens": 100,
+            "completion_tokens": 20,
+            "cost_usd": 0.0001,
+        }
+    )
 
     qlogger = QueryLogger(log_path=tmp_log_path)
     run_query("Ofgem", hybrid, synth, qlogger, log_path=tmp_log_path)
@@ -196,6 +203,7 @@ def test_cost_circuit_breaker_below_limit_allows_query(sample_chunks, tmp_log_pa
 # ---------------------------------------------------------------------------
 # Postgres dual-write (Week 5 Step 4b)
 # ---------------------------------------------------------------------------
+
 
 def test_dual_write_postgres_receives_record(sample_chunks, tmp_log_path, monkeypatch):
     """After a successful pipeline run, db_insert_query_record must be called
@@ -212,13 +220,21 @@ def test_dual_write_postgres_receives_record(sample_chunks, tmp_log_path, monkey
     fake_brief.answer = "Ofgem proposes a load control licensing regime."
     fake_brief.citations = []
     fake_brief.contradictions = []
-    fake_brief.model_dump = lambda: {"answer": fake_brief.answer,
-                                     "citations": [], "contradictions": []}
-    synth.synthesise = MagicMock(return_value={
-        "brief": fake_brief, "latency_ms": 100.0,
-        "prompt_tokens": 500, "completion_tokens": 50, "cost_usd": 0.0003,
-        "prompt_version": "v2_numeric",
-    })
+    fake_brief.model_dump = lambda: {
+        "answer": fake_brief.answer,
+        "citations": [],
+        "contradictions": [],
+    }
+    synth.synthesise = MagicMock(
+        return_value={
+            "brief": fake_brief,
+            "latency_ms": 100.0,
+            "prompt_tokens": 500,
+            "completion_tokens": 50,
+            "cost_usd": 0.0003,
+            "prompt_version": "v2_numeric",
+        }
+    )
 
     qlogger = QueryLogger(log_path=tmp_log_path)
     result = run_query("What does Ofgem propose?", hybrid, synth, qlogger, log_path=tmp_log_path)
@@ -247,12 +263,20 @@ def test_dual_write_refusal_answer_flagged(sample_chunks, tmp_log_path, monkeypa
     fake_brief.answer = "The corpus does not contain sufficient information to answer this query."
     fake_brief.citations = []
     fake_brief.contradictions = []
-    fake_brief.model_dump = lambda: {"answer": fake_brief.answer,
-                                     "citations": [], "contradictions": []}
-    synth.synthesise = MagicMock(return_value={
-        "brief": fake_brief, "latency_ms": 0.0,
-        "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0,
-    })
+    fake_brief.model_dump = lambda: {
+        "answer": fake_brief.answer,
+        "citations": [],
+        "contradictions": [],
+    }
+    synth.synthesise = MagicMock(
+        return_value={
+            "brief": fake_brief,
+            "latency_ms": 0.0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "cost_usd": 0.0,
+        }
+    )
 
     qlogger = QueryLogger(log_path=tmp_log_path)
     run_query("out of scope", hybrid, synth, qlogger, log_path=tmp_log_path)
@@ -263,7 +287,10 @@ def test_dual_write_refusal_answer_flagged(sample_chunks, tmp_log_path, monkeypa
 def test_dual_write_never_raises_on_postgres_failure(sample_chunks, tmp_log_path, monkeypatch):
     """Postgres blowing up must NOT propagate out of run_query. The
     _safe_db_write wrapper catches everything the inner db.py doesn't."""
-    def blowup(record): raise RuntimeError("postgres down")
+
+    def blowup(record):
+        raise RuntimeError("postgres down")
+
     monkeypatch.setattr("main.db_insert_query_record", blowup)
 
     hybrid = MagicMock()
@@ -275,10 +302,15 @@ def test_dual_write_never_raises_on_postgres_failure(sample_chunks, tmp_log_path
     fake_brief.citations = []
     fake_brief.contradictions = []
     fake_brief.model_dump = lambda: {"answer": "ok", "citations": [], "contradictions": []}
-    synth.synthesise = MagicMock(return_value={
-        "brief": fake_brief, "latency_ms": 50.0,
-        "prompt_tokens": 100, "completion_tokens": 20, "cost_usd": 0.0001,
-    })
+    synth.synthesise = MagicMock(
+        return_value={
+            "brief": fake_brief,
+            "latency_ms": 50.0,
+            "prompt_tokens": 100,
+            "completion_tokens": 20,
+            "cost_usd": 0.0001,
+        }
+    )
 
     qlogger = QueryLogger(log_path=tmp_log_path)
     # Must NOT raise despite the Postgres writer blowing up.
@@ -294,6 +326,7 @@ def test_dual_write_never_raises_on_postgres_failure(sample_chunks, tmp_log_path
 # ---------------------------------------------------------------------------
 # Constants — locked values
 # ---------------------------------------------------------------------------
+
 
 def test_guardrail_constants_match_locked_decisions():
     """CLAUDE.md Locked Decisions specify these values."""

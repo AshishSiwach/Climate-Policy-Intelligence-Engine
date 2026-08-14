@@ -59,5 +59,4 @@ def detect_institutions(query: str) -> list[str]:
     """
     if not query:
         return []
-    return [name for name, pattern in _INSTITUTION_PATTERNS.items()
-            if pattern.search(query)]
+    return [name for name, pattern in _INSTITUTION_PATTERNS.items() if pattern.search(query)]

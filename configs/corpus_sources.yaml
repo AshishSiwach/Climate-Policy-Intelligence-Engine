@@ -1,0 +1,87 @@
+# Canonical public URLs for the CPIE corpus PDFs.
+# Used by scripts/download_data.py to reproduce data/raw/ on a fresh clone.
+#
+# All documents are publicly available from their issuing institutions.
+# Do not commit the PDFs themselves — they are gitignored.
+# Run `make data` (or `uv run python scripts/download_data.py`) to fetch them.
+#
+# SHA-256 checksums are recorded here after the initial download so future
+# runs can verify file integrity. Leave as null on first add; the script
+# fills them in automatically on --record-checksums.
+
+documents:
+  - filename: "739682_ESO_Beyond2030_Report_2024_PRINT.pdf"
+    doc_id: "ESO_BEYOND2030_2024"
+    institution: "ESO"
+    url: "https://www.nationalgrideso.com/document/333526/download"
+    sha256: null  # run with --record-checksums to populate
+
+  - filename: "Smart-Secure-Electricity-Systems-Implementing-the-load-control-licensing-regime-consultation.pdf"
+    doc_id: "OFGEM_SMART_SECURE_2025"
+    institution: "Ofgem"
+    url: "https://www.ofgem.gov.uk/sites/default/files/2025-12/Smart-Secure-Electricity-Systems-Implementing-the-load-control-licensing-regime-consultation.pdf"
+    sha256: null
+
+  - filename: "WorldEnergyOutlook2025.pdf"
+    doc_id: "IEA_WEO_2025"
+    institution: "IEA"
+    # IEA WEO 2025 requires free registration at iea.org to download the full PDF.
+    # Obtain the PDF from: https://www.iea.org/reports/world-energy-outlook-2025
+    # then place it manually in data/raw/ — the download script will skip it
+    # if already present.
+    url: null
+    sha256: null
+
+  - filename: "The-Seventh-Carbon-Budget.pdf"
+    doc_id: "CCC_SEVENTH_CARBON_BUDGET_2025"
+    institution: "CCC"
+    url: "https://www.theccc.org.uk/wp-content/uploads/2025/02/The-Seventh-Carbon-Budget.pdf"
+    sha256: null
+
+  - filename: "Progress-in-reducing-emissions-2024-Report-to-Parliament-Web.pdf"
+    doc_id: "CCC_PROGRESS_2024"
+    institution: "CCC"
+    url: "https://www.theccc.org.uk/wp-content/uploads/2024/07/Progress-in-reducing-emissions-2024-Report-to-Parliament-Web.pdf"
+    sha256: null
+
+  - filename: "Progress-in-reducing-emissions-2025-report-to-Parliament.pdf"
+    doc_id: "CCC_PROGRESS_2025"
+    institution: "CCC"
+    url: "https://www.theccc.org.uk/wp-content/uploads/2025/07/Progress-in-reducing-emissions-2025-report-to-Parliament.pdf"
+    sha256: null
+
+  - filename: "boes-climate-related-financial-disclosure-2024.pdf"
+    doc_id: "BOE_DISCLOSURE_2024"
+    institution: "BoE"
+    url: "https://www.bankofengland.co.uk/-/media/boe/files/climate-change/2024/climate-related-financial-disclosure-2024.pdf"
+    sha256: null
+
+  - filename: "results-of-the-2021-climate-biennial-exploratory-scenario.pdf"
+    doc_id: "BOE_CBES_RESULTS_2021"
+    institution: "BoE"
+    url: "https://www.bankofengland.co.uk/-/media/boe/files/stress-testing/2022/results-of-the-2021-climate-biennial-exploratory-scenario.pdf"
+    sha256: null
+
+  - filename: "key-elements-2021-biennial-exploratory-scenario-financial-risks-climate-change.pdf"
+    doc_id: "BOE_CBES_KEY_ELEMENTS_2021"
+    institution: "BoE"
+    url: "https://www.bankofengland.co.uk/-/media/boe/files/stress-testing/2021/key-elements-of-the-2021-biennial-exploratory-scenario-climate-change.pdf"
+    sha256: null
+
+  - filename: "measuring-climate-related-financial-risks-using-scenario-analysis.pdf"
+    doc_id: "BOE_MEASURING_CLIMATE_RISKS"
+    institution: "BoE"
+    url: "https://www.bankofengland.co.uk/-/media/boe/files/quarterly-bulletin/2024/q1/measuring-climate-related-financial-risks-using-scenario-analysis.pdf"
+    sha256: null
+
+  - filename: "zev-mandate-consultation-summary-of-responses-and-joint-government-response.pdf"
+    doc_id: "DESNZ_ZEV_MANDATE_2023"
+    institution: "DESNZ"
+    url: "https://assets.publishing.service.gov.uk/media/6500e3b2a78c5f000d83bc1e/zev-mandate-consultation-summary-of-responses-and-joint-government-response.pdf"
+    sha256: null
+
+  - filename: "climate-change-possible-macroeconomic-implications.pdf"
+    doc_id: "BOE_MACRO_IMPLICATIONS"
+    institution: "BoE"
+    url: "https://www.bankofengland.co.uk/-/media/boe/files/quarterly-bulletin/2022/q4/climate-change-possible-macroeconomic-implications.pdf"
+    sha256: null

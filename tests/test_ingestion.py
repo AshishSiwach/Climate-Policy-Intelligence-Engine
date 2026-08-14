@@ -8,8 +8,6 @@ scripts/validate_pipeline_e2e.py, not here.
 
 from __future__ import annotations
 
-import pytest
-
 from ingestion.chunker import (
     CHUNK_SIZE,
     MAX_TOKENS,
@@ -19,14 +17,18 @@ from ingestion.chunker import (
 )
 from ingestion.pdf_loader import DOC_REGISTRY, clean_text
 
-
 # ---------------------------------------------------------------------------
 # Doc registry integrity
 # ---------------------------------------------------------------------------
 
 REQUIRED_META_FIELDS = {
-    "doc_id", "institution", "doc_type", "jurisdiction",
-    "publication_date", "tier1_strip", "tier2_inject",
+    "doc_id",
+    "institution",
+    "doc_type",
+    "jurisdiction",
+    "publication_date",
+    "tier1_strip",
+    "tier2_inject",
 }
 
 
@@ -48,6 +50,7 @@ def test_doc_registry_doc_ids_are_unique():
 # ---------------------------------------------------------------------------
 # clean_text — Tier 1 stripping
 # ---------------------------------------------------------------------------
+
 
 def test_clean_text_strips_eso_nav_elements():
     """ESO PDF has 'Navigation', 'Download a pdf', 'Text Links', 'Return to contents' clutter."""
@@ -80,6 +83,7 @@ def test_clean_text_untouched_for_tier3_documents():
 # chunk_page — bounds and behaviour
 # ---------------------------------------------------------------------------
 
+
 def _make_text(word_count: int) -> str:
     """Deterministic text of roughly `word_count` tokens (words ~= tokens for ASCII English)."""
     return " ".join(f"word{i}" for i in range(word_count))
@@ -94,6 +98,7 @@ def test_chunk_page_produces_at_least_one_chunk_for_long_input():
 def test_chunk_page_respects_chunk_size_upper_bound():
     """Each individual chunk from chunk_page must be <= CHUNK_SIZE tokens."""
     import tiktoken
+
     tok = tiktoken.get_encoding("cl100k_base")
 
     text = _make_text(1500)
@@ -104,7 +109,7 @@ def test_chunk_page_respects_chunk_size_upper_bound():
 
 def test_chunk_page_discards_fragments_below_min_tokens():
     """A very short input should return zero chunks (below MIN_TOKENS floor)."""
-    text = _make_text(10)   # ~10 tokens, well under MIN_TOKENS (50)
+    text = _make_text(10)  # ~10 tokens, well under MIN_TOKENS (50)
     chunks = chunk_page(text)
     assert chunks == [], "Fragments under MIN_TOKENS should be discarded"
 
@@ -112,6 +117,7 @@ def test_chunk_page_discards_fragments_below_min_tokens():
 def test_chunk_page_produces_overlap():
     """Consecutive chunks should share OVERLAP tokens' worth of content."""
     import tiktoken
+
     tok = tiktoken.get_encoding("cl100k_base")
 
     text = _make_text(1000)
@@ -131,6 +137,7 @@ def test_chunk_page_empty_string_returns_empty_list():
 def test_chunk_page_custom_chunk_size_and_overlap_honoured():
     """Non-default chunk_size and overlap args are respected."""
     import tiktoken
+
     tok = tiktoken.get_encoding("cl100k_base")
 
     text = _make_text(500)
@@ -142,6 +149,7 @@ def test_chunk_page_custom_chunk_size_and_overlap_honoured():
 # ---------------------------------------------------------------------------
 # Config constants — sanity check they haven't drifted
 # ---------------------------------------------------------------------------
+
 
 def test_chunker_constants_match_locked_decisions():
     """CLAUDE.md locks these values. Guardrail against accidental changes."""

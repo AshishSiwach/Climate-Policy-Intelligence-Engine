@@ -15,27 +15,30 @@ import pytest
 
 from retrieval.institution_detector import detect_institutions
 
-
 # ---------------------------------------------------------------------------
 # Positive cases — each institution matches its own name + variants
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("query,expected", [
-    ("What does Ofgem say about load control?", ["Ofgem"]),
-    ("ofgem lowercase should match", ["Ofgem"]),
-    ("OFGEM uppercase should match", ["Ofgem"]),
-    ("DESNZ policy on ZEV mandate", ["DESNZ"]),
-    ("Department for Energy Security and Net Zero response", ["DESNZ"]),
-    ("What does the IEA project?", ["IEA"]),
-    ("International Energy Agency scenario", ["IEA"]),
-    ("BoE CBES results", ["BoE"]),
-    ("Bank of England disclosure", ["BoE"]),
-    ("CCC Seventh Carbon Budget", ["CCC"]),
-    ("Climate Change Committee progress report", ["CCC"]),
-    ("ESO Beyond 2030 report", ["ESO"]),
-    ("National Grid transmission plan", ["ESO"]),
-    ("Electricity System Operator forecast", ["ESO"]),
-])
+
+@pytest.mark.parametrize(
+    "query,expected",
+    [
+        ("What does Ofgem say about load control?", ["Ofgem"]),
+        ("ofgem lowercase should match", ["Ofgem"]),
+        ("OFGEM uppercase should match", ["Ofgem"]),
+        ("DESNZ policy on ZEV mandate", ["DESNZ"]),
+        ("Department for Energy Security and Net Zero response", ["DESNZ"]),
+        ("What does the IEA project?", ["IEA"]),
+        ("International Energy Agency scenario", ["IEA"]),
+        ("BoE CBES results", ["BoE"]),
+        ("Bank of England disclosure", ["BoE"]),
+        ("CCC Seventh Carbon Budget", ["CCC"]),
+        ("Climate Change Committee progress report", ["CCC"]),
+        ("ESO Beyond 2030 report", ["ESO"]),
+        ("National Grid transmission plan", ["ESO"]),
+        ("Electricity System Operator forecast", ["ESO"]),
+    ],
+)
 def test_single_institution_detected(query, expected):
     assert detect_institutions(query) == expected
 
@@ -44,10 +47,9 @@ def test_single_institution_detected(query, expected):
 # Multi-institution queries
 # ---------------------------------------------------------------------------
 
+
 def test_cross_doc_query_returns_both_institutions():
-    result = detect_institutions(
-        "How does the Bank of England's Late Action scenario compare with the IEA's framing?"
-    )
+    result = detect_institutions("How does the Bank of England's Late Action scenario compare with the IEA's framing?")
     assert set(result) == {"BoE", "IEA"}
 
 
@@ -60,6 +62,7 @@ def test_three_institution_query_returns_all_three():
 # Order preservation — insertion order of _INSTITUTION_PATTERNS
 # ---------------------------------------------------------------------------
 
+
 def test_result_order_matches_pattern_definition_order():
     # Patterns defined in order: Ofgem, DESNZ, IEA, BoE, CCC, ESO
     # Query mentions IEA before Ofgem in text — result should still be Ofgem first
@@ -70,6 +73,7 @@ def test_result_order_matches_pattern_definition_order():
 # ---------------------------------------------------------------------------
 # Word boundaries — avoid false positives on substrings
 # ---------------------------------------------------------------------------
+
 
 def test_boeing_does_not_match_boe():
     """'boe' is a substring of 'boeing' — \\b must prevent that match."""
@@ -89,6 +93,7 @@ def test_no_stray_ccc_match_in_technical_string():
 # ---------------------------------------------------------------------------
 # Empty / no-match cases
 # ---------------------------------------------------------------------------
+
 
 def test_empty_query_returns_empty():
     assert detect_institutions("") == []

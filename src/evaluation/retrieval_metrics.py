@@ -28,6 +28,7 @@ from typing import Iterable
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _unique_ordered(items: Iterable[str]) -> list[str]:
     """Deduplicate preserving first-appearance order."""
     seen: set[str] = set()
@@ -47,6 +48,7 @@ def retrieved_doc_ids(retrieved_chunks: list[dict], k: int) -> list[str]:
 # ---------------------------------------------------------------------------
 # Core metrics — all doc-level, cutoff = k chunks
 # ---------------------------------------------------------------------------
+
 
 def recall_at_k(retrieved_chunks: list[dict], expected_docs: set[str], k: int) -> float:
     """Fraction of expected docs represented by any chunk in top-k."""
@@ -108,6 +110,7 @@ def hit_at_k(retrieved_chunks: list[dict], expected_docs: set[str], k: int) -> i
 # chunk_type slice — added Week 5 Step 2b (CLAUDE.md) for table-retrieval eval
 # ---------------------------------------------------------------------------
 
+
 def table_fraction_at_k(retrieved_chunks: list[dict], k: int) -> float:
     """
     Fraction of top-k retrieved chunks that carry `chunk_type == "table"`.
@@ -127,9 +130,10 @@ def table_fraction_at_k(retrieved_chunks: list[dict], k: int) -> float:
 # Bonus: page-level in-range rate
 # ---------------------------------------------------------------------------
 
+
 def page_in_range_rate(
     retrieved_chunks: list[dict],
-    expected_sources: list[dict],   # from ground_truth.json enriched schema
+    expected_sources: list[dict],  # from ground_truth.json enriched schema
     k: int,
 ) -> float | None:
     """
@@ -140,9 +144,7 @@ def page_in_range_rate(
     """
     # Build lookup: doc_id -> [start, end] (only for sources with a range)
     ranges: dict[str, list[int]] = {
-        s["doc_id"]: s["page_range"]
-        for s in expected_sources
-        if s.get("page_range") is not None
+        s["doc_id"]: s["page_range"] for s in expected_sources if s.get("page_range") is not None
     }
     if not ranges:
         return None
@@ -164,6 +166,7 @@ def page_in_range_rate(
 # ---------------------------------------------------------------------------
 # Per-query aggregation
 # ---------------------------------------------------------------------------
+
 
 def evaluate_query(
     retrieved_chunks: list[dict],

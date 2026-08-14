@@ -12,32 +12,29 @@ import logging
 import time
 from pathlib import Path
 
-import torch
 import chromadb
+import torch
 from sentence_transformers import SentenceTransformer
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = 'BAAI/bge-base-en-v1.5'
-_CHROMA_BATCH = 500   # Chroma upsert limit per call
+MODEL_NAME = "BAAI/bge-base-en-v1.5"
+_CHROMA_BATCH = 500  # Chroma upsert limit per call
 
 
 def _default_device() -> str:
-    return 'cuda' if torch.cuda.is_available() else 'cpu'
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def _safe_chunk_id(doc_id: str, chunk_index: int) -> str:
     """Chroma IDs must be non-empty strings with no special chars."""
-    safe = doc_id.replace('/', '_').replace(' ', '_')
+    safe = doc_id.replace("/", "_").replace(" ", "_")
     return f"{safe}__{chunk_index}"
 
 
 def _metadata_safe(chunk: dict) -> dict:
     """Chroma metadata values must be str | int | float | bool."""
-    return {
-        k: v for k, v in chunk.items()
-        if k != 'text' and isinstance(v, (str, int, float, bool))
-    }
+    return {k: v for k, v in chunk.items() if k != "text" and isinstance(v, (str, int, float, bool))}
 
 
 class DenseRetriever:
@@ -55,8 +52,8 @@ class DenseRetriever:
 
     def __init__(
         self,
-        persist_dir: str | Path = 'data/processed/chroma_db',
-        collection_name: str = 'cpie',
+        persist_dir: str | Path = "data/processed/chroma_db",
+        collection_name: str = "cpie",
         device: str | None = None,
     ) -> None:
         self.persist_dir = str(persist_dir)
@@ -82,7 +79,7 @@ class DenseRetriever:
             self._client = chromadb.PersistentClient(path=self.persist_dir)
             self._collection = self._client.get_or_create_collection(
                 name=self.collection_name,
-                metadata={'hnsw:space': 'cosine'},
+                metadata={"hnsw:space": "cosine"},
             )
         return self._collection
 
@@ -102,7 +99,7 @@ class DenseRetriever:
         model = self._get_model()
         collection = self._get_collection()
 
-        texts = [c['text'] for c in chunks]
+        texts = [c["text"] for c in chunks]
         logger.info("Encoding %d chunks with %s...", len(chunks), MODEL_NAME)
         t0 = time.time()
         embeddings = model.encode(
@@ -114,12 +111,12 @@ class DenseRetriever:
         logger.info("Encoding complete: %.1fs", time.time() - t0)
 
         for start in range(0, len(chunks), _CHROMA_BATCH):
-            batch_chunks = chunks[start: start + _CHROMA_BATCH]
-            batch_embs = embeddings[start: start + _CHROMA_BATCH]
+            batch_chunks = chunks[start : start + _CHROMA_BATCH]
+            batch_embs = embeddings[start : start + _CHROMA_BATCH]
             collection.upsert(
-                ids=[_safe_chunk_id(c['doc_id'], c['chunk_index']) for c in batch_chunks],
+                ids=[_safe_chunk_id(c["doc_id"], c["chunk_index"]) for c in batch_chunks],
                 embeddings=batch_embs.tolist(),
-                documents=[c['text'] for c in batch_chunks],
+                documents=[c["text"] for c in batch_chunks],
                 metadatas=[_metadata_safe(c) for c in batch_chunks],
             )
 
@@ -157,9 +154,7 @@ class DenseRetriever:
 
         n_items = collection.count()
         if n_items == 0:
-            raise RuntimeError(
-                f"Chroma collection '{self.collection_name}' is empty. Call build() first."
-            )
+            raise RuntimeError(f"Chroma collection '{self.collection_name}' is empty. Call build() first.")
         k = min(top_k, n_items)
 
         embedding = model.encode([text], convert_to_numpy=True)[0]
@@ -172,21 +167,23 @@ class DenseRetriever:
             query_embeddings=[embedding.tolist()],
             n_results=k,
             where=where_filter,
-            include=['documents', 'metadatas', 'distances'],
+            include=["documents", "metadatas", "distances"],
         )
 
         output = []
         for doc, meta, dist in zip(
-            results['documents'][0],
-            results['metadatas'][0],
-            results['distances'][0],
+            results["documents"][0],
+            results["metadatas"][0],
+            results["distances"][0],
         ):
-            output.append({
-                'text': doc,
-                **meta,
-                'dense_score': float(1.0 - dist),   # cosine distance → similarity
-                'dense_rank': len(output) + 1,
-            })
+            output.append(
+                {
+                    "text": doc,
+                    **meta,
+                    "dense_score": float(1.0 - dist),  # cosine distance → similarity
+                    "dense_rank": len(output) + 1,
+                }
+            )
         return output
 
     def delete_collection(self) -> None:

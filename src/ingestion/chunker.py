@@ -72,12 +72,14 @@ def chunk_document(path: str | Path) -> list[dict]:
                 f"Chunk exceeds {MAX_TOKENS}-token ceiling after heading injection: "
                 f"{token_count} tokens in {meta['doc_id']} page {meta['page_number']}"
             )
-            all_chunks.append({
-                **meta,
-                "text": final_text,
-                "chunk_index": chunk_idx,
-                "token_count": token_count,
-            })
+            all_chunks.append(
+                {
+                    **meta,
+                    "text": final_text,
+                    "chunk_index": chunk_idx,
+                    "token_count": token_count,
+                }
+            )
             chunk_idx += 1
 
     if not all_chunks:
@@ -88,7 +90,9 @@ def chunk_document(path: str | Path) -> list[dict]:
     avg_tokens = sum(c["token_count"] for c in all_chunks) / len(all_chunks)
     logger.info(
         "Chunked %s: %d chunks, avg %.0f tokens, max %d tokens",
-        doc_id, len(all_chunks), avg_tokens,
+        doc_id,
+        len(all_chunks),
+        avg_tokens,
         max(c["token_count"] for c in all_chunks),
     )
     return all_chunks

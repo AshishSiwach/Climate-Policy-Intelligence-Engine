@@ -90,22 +90,21 @@ class HybridRetriever:
             bm25_raw = self.bm25.query(query, top_k=candidate_pool * 5)
             bm25_filtered = [c for c in bm25_raw if c.get("institution") in institutions]
             dense_filtered = self.dense.query(
-                query, top_k=candidate_pool, institutions=institutions,
+                query,
+                top_k=candidate_pool,
+                institutions=institutions,
             )
 
             if not bm25_filtered and not dense_filtered:
                 logger.info(
-                    "Metadata filter matched zero chunks for institutions=%s; "
-                    "falling back to unfiltered retrieval",
+                    "Metadata filter matched zero chunks for institutions=%s; falling back to unfiltered retrieval",
                     institutions,
                 )
                 bm25_results = self.bm25.query(query, top_k=candidate_pool)
                 dense_results = self.dense.query(query, top_k=candidate_pool)
             else:
                 # Re-rank filtered BM25 to top-N and stitch bm25_rank sequentially.
-                bm25_results = [
-                    {**c, "bm25_rank": i} for i, c in enumerate(bm25_filtered[:candidate_pool], 1)
-                ]
+                bm25_results = [{**c, "bm25_rank": i} for i, c in enumerate(bm25_filtered[:candidate_pool], 1)]
                 dense_results = dense_filtered
         else:
             bm25_results = self.bm25.query(query, top_k=candidate_pool)
@@ -131,7 +130,7 @@ class HybridRetriever:
 
         results = []
         for cid in sorted_ids:
-            chunk = {**chunk_meta[cid], 'rrf_score': round(rrf_scores[cid], 6)}
+            chunk = {**chunk_meta[cid], "rrf_score": round(rrf_scores[cid], 6)}
             results.append(chunk)
 
         logger.debug(
@@ -145,6 +144,6 @@ class HybridRetriever:
 
 def _chunk_id(chunk: dict) -> str:
     """Stable string key for a chunk. Uses doc_id + chunk_index."""
-    doc_id = chunk.get('doc_id', 'unknown')
-    chunk_index = chunk.get('chunk_index', 0)
+    doc_id = chunk.get("doc_id", "unknown")
+    chunk_index = chunk.get("chunk_index", 0)
     return f"{doc_id}__{chunk_index}"

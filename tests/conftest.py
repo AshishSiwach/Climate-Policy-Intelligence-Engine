@@ -21,6 +21,7 @@ sys.path.insert(0, str(REPO_ROOT))
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
+
 def _make_chunk(
     doc_id: str,
     chunk_index: int,
@@ -52,19 +53,27 @@ def sample_chunks() -> list[dict]:
     """Three synthetic chunks from two documents — enough for retrieval + synthesis tests."""
     return [
         _make_chunk(
-            "OFGEM_TEST", 0,
+            "OFGEM_TEST",
+            0,
             "Ofgem proposes new load control licensing requirements for 2026 applications.",
-            page=1, rrf_score=0.032,
+            page=1,
+            rrf_score=0.032,
         ),
         _make_chunk(
-            "OFGEM_TEST", 1,
+            "OFGEM_TEST",
+            1,
             "The consultation closes in February 2026 and responses will be published on the Ofgem website.",
-            page=2, rrf_score=0.028,
+            page=2,
+            rrf_score=0.028,
         ),
         _make_chunk(
-            "BOE_TEST", 0,
+            "BOE_TEST",
+            0,
             "UK banks faced aggregate losses of £334 billion under the CBES early action scenario.",
-            page=53, institution="BoE", publication_date="2021", rrf_score=0.015,
+            page=53,
+            institution="BoE",
+            publication_date="2021",
+            rrf_score=0.015,
         ),
     ]
 

@@ -82,7 +82,7 @@ def main() -> None:
 
     print()
     print("=" * 90)
-    print(f"All 5 records logged to logs/queries.jsonl")
+    print("All 5 records logged to logs/queries.jsonl")
 
 
 if __name__ == "__main__":

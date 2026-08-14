@@ -98,7 +98,7 @@ def main() -> None:
             query_results.append(r)
 
         print(f"  {'Config':<34} {'Latency':>10} {'Top-1':>7} {'Top-5':>7}  Top-5 doc_ids (unique)")
-        print(f"  {'-'*34} {'-'*10} {'-'*7} {'-'*7}  {'-'*40}")
+        print(f"  {'-' * 34} {'-' * 10} {'-' * 7} {'-' * 7}  {'-' * 40}")
         for r in query_results:
             unique_docs = list(dict.fromkeys(r["top5_docs"]))
             marker1 = "PASS" if r["top1_hit"] else "----"
@@ -114,7 +114,7 @@ def main() -> None:
     print("=" * 90)
     config_names = [c[0] for c in configs]
     print(f"  {'Config':<34} {'Top-1 hits':>12} {'Top-5 hits':>12} {'Avg latency':>13}")
-    print(f"  {'-'*34} {'-'*12} {'-'*12} {'-'*13}")
+    print(f"  {'-' * 34} {'-' * 12} {'-' * 12} {'-' * 13}")
     for name in config_names:
         top1 = sum(1 for q in all_results for r in q["results"] if r["config"] == name and r["top1_hit"])
         top5 = sum(1 for q in all_results for r in q["results"] if r["config"] == name and r["top5_hit"])

@@ -33,6 +33,7 @@ def _chunk(doc_id: str, page: int = 1) -> dict:
 # retrieved_doc_ids
 # ---------------------------------------------------------------------------
 
+
 def test_retrieved_doc_ids_dedupes_preserving_order():
     chunks = [_chunk("A"), _chunk("A"), _chunk("B"), _chunk("A"), _chunk("C")]
     assert retrieved_doc_ids(chunks, k=5) == ["A", "B", "C"]
@@ -46,6 +47,7 @@ def test_retrieved_doc_ids_respects_k():
 # ---------------------------------------------------------------------------
 # recall_at_k
 # ---------------------------------------------------------------------------
+
 
 def test_recall_at_k_full_hit_single_doc():
     chunks = [_chunk("A"), _chunk("B"), _chunk("C")]
@@ -72,6 +74,7 @@ def test_recall_at_k_empty_expected_raises():
 # precision_at_k
 # ---------------------------------------------------------------------------
 
+
 def test_precision_at_k_all_relevant():
     chunks = [_chunk("A"), _chunk("A"), _chunk("B")]
     # Unique docs = [A, B], both expected → precision = 1.0
@@ -92,6 +95,7 @@ def test_precision_at_k_empty_retrieved_returns_zero():
 # mrr_at_k
 # ---------------------------------------------------------------------------
 
+
 def test_mrr_at_k_top_1_hit():
     chunks = [_chunk("A"), _chunk("B")]
     assert mrr_at_k(chunks, {"A"}, k=5) == 1.0
@@ -110,6 +114,7 @@ def test_mrr_at_k_no_hit_in_topk():
 # ---------------------------------------------------------------------------
 # ndcg_at_k
 # ---------------------------------------------------------------------------
+
 
 def test_ndcg_at_k_perfect_ranking():
     """All relevant at the top → nDCG = 1.0."""
@@ -137,6 +142,7 @@ def test_ndcg_at_k_no_relevant_returns_zero():
 # hit_at_k
 # ---------------------------------------------------------------------------
 
+
 def test_hit_at_k_one_of_two_expected():
     chunks = [_chunk("A"), _chunk("X")]
     assert hit_at_k(chunks, {"A", "B"}, k=5) == 1
@@ -151,6 +157,7 @@ def test_hit_at_k_zero_when_none():
 # page_in_range_rate
 # ---------------------------------------------------------------------------
 
+
 def test_page_in_range_all_hit():
     chunks = [_chunk("A", page=25), _chunk("A", page=30)]
     expected_sources = [{"doc_id": "A", "page_range": [20, 35]}]
@@ -158,7 +165,7 @@ def test_page_in_range_all_hit():
 
 
 def test_page_in_range_half_hit():
-    chunks = [_chunk("A", page=25), _chunk("A", page=50)]   # 25 in range, 50 out
+    chunks = [_chunk("A", page=25), _chunk("A", page=50)]  # 25 in range, 50 out
     expected_sources = [{"doc_id": "A", "page_range": [20, 35]}]
     assert page_in_range_rate(chunks, expected_sources, k=5) == 0.5
 
@@ -182,6 +189,7 @@ def test_page_in_range_ignores_chunks_from_unexpected_docs():
 # evaluate_query
 # ---------------------------------------------------------------------------
 
+
 def test_evaluate_query_returns_all_metrics_at_all_ks():
     chunks = [_chunk("A", page=25), _chunk("B", page=1), _chunk("A", page=30)]
     sources = [{"doc_id": "A", "page_range": [20, 35]}]
@@ -198,7 +206,7 @@ def test_evaluate_query_skips_page_metric_when_no_ranges():
     sources = [{"doc_id": "A", "page_range": None}]
     result = evaluate_query(chunks, sources, ks=(5,))
     assert "page_in_range@5" not in result
-    assert "recall@5" in result   # doc-level still computed
+    assert "recall@5" in result  # doc-level still computed
 
 
 def test_evaluate_query_negative_raises():
@@ -209,6 +217,7 @@ def test_evaluate_query_negative_raises():
 # ---------------------------------------------------------------------------
 # aggregate_metrics
 # ---------------------------------------------------------------------------
+
 
 def test_aggregate_mean_of_numeric_metrics():
     per_query = [
@@ -224,11 +233,11 @@ def test_aggregate_handles_partial_missing_keys():
     """Some queries may lack page_in_range@k (cross-doc null ranges) — aggregate skips missing."""
     per_query = [
         {"recall@5": 1.0, "page_in_range@5": 0.8},
-        {"recall@5": 0.5},   # no page metric
+        {"recall@5": 0.5},  # no page metric
     ]
     agg = aggregate_metrics(per_query)
     assert agg["recall@5"] == pytest.approx(0.75)
-    assert agg["page_in_range@5"] == pytest.approx(0.8)   # single-value mean
+    assert agg["page_in_range@5"] == pytest.approx(0.8)  # single-value mean
 
 
 def test_aggregate_empty_returns_empty():

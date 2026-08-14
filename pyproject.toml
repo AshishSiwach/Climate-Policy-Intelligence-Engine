@@ -48,8 +48,11 @@ explicit = true
 packages = ["src/ingestion", "src/retrieval", "src/synthesis", "src/evaluation", "src/monitoring"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py311"
+# Notebooks are exploratory: intentional torch-first imports (E402), long
+# query strings (E501), and scratchpad code. Exclude them from CI linting.
+exclude = ["notebooks/", "*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]

@@ -48,16 +48,17 @@ JUDGE_MAX_RETRIES = 2
 # chat-completions Usage object doesn't return cached-token breakdowns yet;
 # we count all input at the uncached rate — treat cost as an upper bound.
 _JUDGE_PRICING = {
-    "gpt-4o-mini":   (0.15, 0.60),
-    "gpt-4o":        (2.50, 10.00),
-    "gpt-5.4-mini":  (0.75, 4.50),   # cached input: $0.075/M (not tracked)
-    "gpt-5.4":       (2.50, 15.00),  # cached input: $0.25/M (not tracked)
+    "gpt-4o-mini": (0.15, 0.60),
+    "gpt-4o": (2.50, 10.00),
+    "gpt-5.4-mini": (0.75, 4.50),  # cached input: $0.075/M (not tracked)
+    "gpt-5.4": (2.50, 15.00),  # cached input: $0.25/M (not tracked)
 }
 
 
 # ---------------------------------------------------------------------------
 # Judge output schema
 # ---------------------------------------------------------------------------
+
 
 class JudgeScore(BaseModel):
     """Structured Outputs schema — what the judge model must return."""
@@ -72,8 +73,10 @@ class JudgeScore(BaseModel):
     completeness_rationale: str = Field(..., description="One-sentence justification")
 
     refusal_appropriateness: int = Field(
-        ..., ge=1, le=5,
-        description="1-5 — did the system refuse when it should have, or answer when it should have"
+        ...,
+        ge=1,
+        le=5,
+        description="1-5 — did the system refuse when it should have, or answer when it should have",
     )
     refusal_appropriateness_rationale: str = Field(..., description="One-sentence justification")
 
@@ -135,6 +138,7 @@ Be strict but fair. Provide one sentence per rationale — no essays."""
 # ---------------------------------------------------------------------------
 # The judge
 # ---------------------------------------------------------------------------
+
 
 class LLMJudge:
     """Wraps a model call + rubric prompt into a scoring function."""
@@ -225,6 +229,7 @@ class LLMJudge:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _build_judge_message(
     *,
     question: str,
@@ -234,10 +239,13 @@ def _build_judge_message(
     generated_answer: str,
 ) -> str:
     """Render the judge's user-side message. Keep it compact — judge cost scales with prompt tokens."""
-    chunk_block = "\n\n".join(
-        f"[Chunk {i}] doc_id={c['doc_id']} page={c['page_number']}\n{c['text']}"
-        for i, c in enumerate(retrieved_chunks, 1)
-    ) or "(no chunks — pipeline short-circuited)"
+    chunk_block = (
+        "\n\n".join(
+            f"[Chunk {i}] doc_id={c['doc_id']} page={c['page_number']}\n{c['text']}"
+            for i, c in enumerate(retrieved_chunks, 1)
+        )
+        or "(no chunks — pipeline short-circuited)"
+    )
 
     return (
         f"QUESTION:\n{question}\n\n"
@@ -256,8 +264,8 @@ def _estimate_cost(model: str, prompt_tokens: int, completion_tokens: int) -> fl
     if model not in _JUDGE_PRICING:
         if model not in _pricing_warned:
             logger.warning(
-                "No pricing for judge model %r — logged cost will be 0. "
-                "Add to _JUDGE_PRICING when known.", model,
+                "No pricing for judge model %r — logged cost will be 0. Add to _JUDGE_PRICING when known.",
+                model,
             )
             _pricing_warned.add(model)
         return 0.0

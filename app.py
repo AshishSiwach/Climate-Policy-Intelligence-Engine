@@ -57,7 +57,7 @@ st.set_page_config(
 # ────────────────────────────────────────────────────────────────────────
 
 
-@st.cache_resource(show_spinner="Loading indices + embedding model (once per session)…")
+@st.cache_resource(show_spinner=False)
 def _load_pipeline():
     """Load Chroma + BM25 + Synthesiser exactly once per Streamlit process.
 
@@ -200,8 +200,13 @@ with st.sidebar:
         st.rerun()
 
 
-# Pipeline load (cached — spinner shown only on first invocation of the session)
-hybrid, synth, qlogger = _load_pipeline()
+# Pipeline load — cached per process; spinner is shown in the main content area
+# so the user gets clear feedback during the ~15 s first-run model load.
+with st.spinner(
+    "⏳ Loading CPIE pipeline — BM25 index + BAAI/bge-base-en-v1.5 embedding model "
+    "(one-time setup, ~15 s on first run)…"
+):
+    hybrid, synth, qlogger = _load_pipeline()
 
 
 # ── Render past messages ─────────────────────────────────────────────

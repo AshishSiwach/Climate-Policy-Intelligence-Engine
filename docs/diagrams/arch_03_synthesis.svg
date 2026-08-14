@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 660 472" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#161b22" rx="12"/>
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#6e7681"/>
+    </marker>
+    <marker id="a3r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#f85149"/>
+    </marker>
+  </defs>
+  <!-- Input -->
+  <rect x="175" y="22" width="250" height="44" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="300" y="40" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Top-5 Chunks + Query</text>
+  <text x="300" y="57" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">retrieved context · user question</text>
+  <line x1="300" y1="66" x2="300" y2="96" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a3)"/>
+  <!-- GPT-5.4-mini -->
+  <rect x="175" y="98" width="250" height="52" rx="8" fill="#3d2d0a" stroke="#d29922" stroke-width="1.5"/>
+  <text x="300" y="118" text-anchor="middle" fill="#e3b341" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">GPT-5.4-mini</text>
+  <text x="300" y="136" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Structured Outputs · Pydantic validation</text>
+  <line x1="300" y1="150" x2="300" y2="192" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a3)"/>
+  <!-- CRAG Gate -->
+  <rect x="190" y="194" width="220" height="52" rx="8" fill="#21262d" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="300" y="214" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">CRAG Correction Gate</text>
+  <text x="300" y="231" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">empty retrieval? · LLM refuses?</text>
+  <!-- CRAG → Refusal -->
+  <line x1="410" y1="220" x2="458" y2="220" stroke="#f85149" stroke-width="1.5" marker-end="url(#a3r)"/>
+  <text x="434" y="213" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">yes</text>
+  <rect x="460" y="196" width="170" height="52" rx="8" fill="#3a1f1f" stroke="#f85149" stroke-width="1.5"/>
+  <text x="545" y="216" text-anchor="middle" fill="#ff7b72" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Canonical Refusal</text>
+  <text x="545" y="234" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">"corpus does not contain…"</text>
+  <!-- CRAG no -->
+  <text x="278" y="260" text-anchor="middle" fill="#8b949e" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">no</text>
+  <line x1="300" y1="246" x2="300" y2="278" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a3)"/>
+  <!-- Citation Verifier -->
+  <rect x="178" y="280" width="244" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="300" y="299" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Citation Verifier</text>
+  <text x="300" y="317" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">passage in chunks? keep · drop fabricated</text>
+  <path d="M 422,306 C 460,306 460,350 422,350" stroke="#6e7681" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+  <text x="464" y="332" text-anchor="middle" fill="#6e7681" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">loop</text>
+  <line x1="300" y1="332" x2="300" y2="378" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a3)"/>
+  <!-- AnalystBrief -->
+  <rect x="175" y="380" width="250" height="52" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
+  <text x="300" y="399" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">AnalystBrief JSON</text>
+  <text x="300" y="417" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">answer · citations[] · contradictions[]</text>
+</svg>

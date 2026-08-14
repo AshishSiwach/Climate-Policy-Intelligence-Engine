@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#161b22" rx="12"/>
+  <defs>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#6e7681"/>
+    </marker>
+  </defs>
+  <!-- User Query -->
+  <rect x="210" y="22" width="180" height="42" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="300" y="38" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">User Query</text>
+  <text x="300" y="55" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">natural language question</text>
+  <line x1="300" y1="64" x2="300" y2="94" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a2)"/>
+  <!-- Institution Detector -->
+  <rect x="168" y="96" width="264" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="300" y="116" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Institution Detector</text>
+  <text x="300" y="134" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Ofgem · FCA · IEA · BoE · CCC · DESNZ · ESO</text>
+  <!-- Branch -->
+  <line x1="300" y1="148" x2="300" y2="178" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="162" y1="178" x2="438" y2="178" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="162" y1="178" x2="162" y2="208" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a2)"/>
+  <line x1="438" y1="178" x2="438" y2="208" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a2)"/>
+  <!-- BM25 Retriever -->
+  <rect x="72" y="210" width="180" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="162" y="230" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">BM25 Retriever</text>
+  <text x="162" y="248" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">rank-bm25 · keyword match</text>
+  <!-- Dense Retriever -->
+  <rect x="348" y="210" width="180" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="438" y="230" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Dense Retriever</text>
+  <text x="438" y="248" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">BAAI/bge-base-en-v1.5 · Chroma</text>
+  <!-- Merge -->
+  <line x1="162" y1="262" x2="162" y2="306" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="438" y1="262" x2="438" y2="306" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="162" y1="306" x2="438" y2="306" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="300" y1="306" x2="300" y2="322" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a2)"/>
+  <!-- RRF Fusion -->
+  <rect x="200" y="324" width="200" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="300" y="342" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">RRF Fusion  k=60</text>
+  <text x="300" y="359" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Cormack et al. 2009 · no score normalisation</text>
+  <line x1="300" y1="368" x2="300" y2="398" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a2)"/>
+  <!-- Top-5 Chunks -->
+  <rect x="195" y="400" width="210" height="44" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
+  <text x="300" y="419" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Top-5 Chunks</text>
+  <text x="300" y="436" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">text · doc_id · page · rrf_score</text>
+</svg>

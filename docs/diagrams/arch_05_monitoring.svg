@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 700 390" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#161b22" rx="12"/>
+  <defs>
+    <marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#6e7681"/>
+    </marker>
+    <marker id="a5p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#8957e5"/>
+    </marker>
+  </defs>
+  <!-- Every Query + Response -->
+  <rect x="240" y="22" width="220" height="44" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="350" y="40" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Every Query + Response</text>
+  <text x="350" y="57" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">query_id · latency · cost · citations</text>
+  <!-- Branch -->
+  <line x1="350" y1="66" x2="350" y2="92" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="92" x2="554" y2="92" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="92" x2="148" y2="118" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a5)"/>
+  <line x1="554" y1="92" x2="554" y2="118" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a5)"/>
+  <!-- JSONL Logger -->
+  <rect x="58" y="120" width="180" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="148" y="139" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">JSONL Logger</text>
+  <text x="148" y="157" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">logs/queries.jsonl · fallback sink</text>
+  <!-- Postgres Writer -->
+  <rect x="464" y="120" width="180" height="52" rx="8" fill="#1a2f1a" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="554" y="139" text-anchor="middle" fill="#56d364" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Postgres Writer</text>
+  <text x="554" y="157" text-anchor="middle" fill="#3fb950" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">cpie.query_logs · primary store</text>
+  <!-- Postgres branch down -->
+  <line x1="554" y1="172" x2="554" y2="208" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="396" y1="208" x2="620" y2="208" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="396" y1="208" x2="396" y2="234" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a5)"/>
+  <line x1="620" y1="208" x2="620" y2="234" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a5)"/>
+  <!-- Grafana -->
+  <rect x="302" y="236" width="188" height="60" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="396" y="256" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Grafana Dashboards</text>
+  <text x="396" y="272" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">8 panels · auto-provisioned</text>
+  <text x="396" y="287" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">volume · latency · cost · refusal rate</text>
+  <!-- Streamlit -->
+  <rect x="526" y="236" width="188" height="60" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="620" y="256" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Streamlit UI</text>
+  <text x="620" y="272" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">chat interface</text>
+  <text x="620" y="287" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">thumbs feedback widget</text>
+  <!-- Feedback arrow (dashed purple) -->
+  <path d="M 526,285 C 490,325 430,335 380,305" stroke="#8957e5" stroke-width="1.2" fill="none" stroke-dasharray="4,3" marker-end="url(#a5p)"/>
+  <text x="462" y="336" text-anchor="middle" fill="#8957e5" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">user_feedback table</text>
+  <!-- cpie.user_feedback -->
+  <rect x="240" y="316" width="188" height="44" rx="8" fill="#1a2f1a" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="334" y="335" text-anchor="middle" fill="#56d364" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">cpie.user_feedback</text>
+  <text x="334" y="351" text-anchor="middle" fill="#3fb950" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">FK → query_logs · thumbs up/down</text>
+  <!-- Grafana → user_feedback dashed -->
+  <line x1="396" y1="296" x2="396" y2="308" stroke="#6e7681" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="396" y1="308" x2="334" y2="308" stroke="#6e7681" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="334" y1="308" x2="334" y2="316" stroke="#6e7681" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#a5)"/>
+</svg>

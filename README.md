@@ -31,65 +31,138 @@ multiple sources simultaneously.
 
 ---
 
-## Architecture
+## Pipeline
 
-```
-User Query
-    │
-    ▼
-[Institution Detector] ── detects Ofgem / FCA / IEA / BoE / CCC in query
-    │                      pre-filters retrieval to named institutions
-    │
-    ├───────────────────────┐
-    ▼                       ▼
-[BM25 Retriever]   [Dense Retriever]
-(rank-bm25)        BAAI/bge-base-en-v1.5 → Chroma
-    │                       │
-    └───────────────────────┘
-                │
-                ▼
-        [RRF Fusion k=60]  ← keyword + semantic hybrid
-                │
-                ▼
-          Top-5 Chunks
-                │
-        empty retrieval? ──YES──────────────────────┐
-                │NO                                  │
-                ▼                                    │
-   [Synthesiser — GPT-5.4-mini]                     │
-   Structured Outputs (Pydantic)                     │
-                │                                    │
-        LLM refuses? ──YES──────────────────────────►│
-                │NO                                  │
-                ▼                                    ▼
-   [Citation Verifier]                    [Canonical Refusal]
-   ┌──────────────────────────┐           "corpus does not contain
-   │  for each citation:      │◄──┐        sufficient information"
-   │    passage in chunks?    │   │ loop
-   │      YES → keep          │───┘
-   │      NO  → drop          │
-   └──────────────────────────┘
-                │
-                ▼
-        AnalystBrief
-   {answer, citations[], contradictions[]}
-                │
-      ┌─────────┴─────────┐
-      ▼                   ▼
-[JSONL Logger]    [Postgres Writer]
-(fallback sink)   (Grafana dashboards
-                   + Streamlit feedback)
-```
+CPIE is organised into five stages. Stage 1 (Ingestion) runs once offline to
+build the search indices; Stages 2–5 execute on every query.
 
-**Ingestion (one-time, local):**
+<p align="center">
+  <img src="docs/diagrams/arch_00_overview.svg" alt="Complete Architecture Overview" width="680">
+</p>
 
-```
-data/raw/ PDFs → PyMuPDF → Chunker (400t / 80t overlap) → dlt → DuckDB
-                                                                    │
-                                                                    ▼
-                                                        build_indices.py
-                                                        BM25 (.pkl) + Chroma
-```
+### Stage 1 — Ingestion (offline)
+
+PDFs are extracted with PyMuPDF, cleaned of layout noise (ESO nav elements,
+Ofgem security stamps), and split into sliding-window chunks. A dlt pipeline
+writes chunks into DuckDB. `build_indices.py` reads from DuckDB to produce the
+BM25 pickle and Chroma vector store used at query time.
+
+<p align="center">
+  <img src="docs/diagrams/arch_01_ingestion.svg" alt="Stage 1 — Ingestion" width="580">
+</p>
+
+| Parameter | Value |
+|---|---|
+| Chunk size | 400 tokens |
+| Overlap | 80 tokens |
+| Floor / ceiling | 50t / 512t |
+| Embedding model | BAAI/bge-base-en-v1.5 (768-dim) |
+| Vector store | Chroma (`cpie` collection) |
+
+---
+
+### Stage 2 — Retrieval
+
+Each query is first scanned for named institutions (Ofgem, FCA, IEA, BoE, CCC,
+DESNZ, ESO). Matching institutions pre-filter both retrievers before RRF fusion.
+
+<p align="center">
+  <img src="docs/diagrams/arch_02_retrieval.svg" alt="Stage 2 — Retrieval" width="580">
+</p>
+
+| Component | Choice | Reason |
+|---|---|---|
+| BM25 | rank-bm25 | Exact keyword match on institution names, policy codes |
+| Dense | BAAI/bge-base-en-v1.5 | Mean cosine 0.543 vs 0.278 for all-MiniLM (ablation) |
+| Fusion | RRF k=60 | Cormack et al. 2009 default; no score normalisation needed |
+| Reranker | Not active | 5.2× latency, zero aggregate Correctness gain (ablation) |
+
+---
+
+### Stage 3 — Synthesis
+
+Retrieved chunks and the original query are passed to GPT-5.4-mini. CPIE
+implements a CRAG-style (Yan et al. 2024) correction layer between retrieval
+and synthesis:
+
+- **CORRECT** — LLM does not refuse → synthesise and return `AnalystBrief`
+- **INCORRECT** — empty retrieval or LLM emits `message.refusal` → canonical refusal
+
+After synthesis, every cited passage is verified against the retrieved chunks;
+fabricated citations are dropped.
+
+<p align="center">
+  <img src="docs/diagrams/arch_03_synthesis.svg" alt="Stage 3 — Synthesis" width="640">
+</p>
+
+| Component | Choice | Reason |
+|---|---|---|
+| Synthesis model | GPT-5.4-mini | +0.09 Correctness, +0.25 Faithfulness vs gpt-4o-mini; −26% latency (A/B) |
+| Prompt | v2_numeric | Adds "verbatim value extraction" instruction; best aggregate Correctness, no regressions |
+| Output schema | Pydantic `AnalystBrief` | Structured outputs — `answer`, `citations[]`, `contradictions[]` |
+| Confidence | Removed | AUC 0.668 on 47-query calibration — signals too weak to promise users |
+
+---
+
+### Stage 4 — Evaluation
+
+Evaluated on 52 hand-crafted QA pairs across all 12 documents (29 factual,
+8 numeric, 4 cross-document, 9 out-of-corpus negatives, 2 summarisation).
+LLM-as-judge: GPT-5.4-mini, 4-dimensional rubric (1–5 scale).
+
+<p align="center">
+  <img src="docs/diagrams/arch_04_evaluation.svg" alt="Stage 4 — Evaluation" width="580">
+</p>
+
+**Retrieval (hybrid BM25 + dense + RRF, with institution metadata filter)**
+
+| Metric | Score |
+|---|---|
+| Recall@5 | **0.907** |
+| MRR@5 | 0.884 |
+| nDCG@5 | 0.894 |
+| Hit@5 | 0.953 |
+| Precision@5 | 0.722 |
+
+**LLM-as-judge (52 queries, shipped config: v2\_numeric prompt + gpt-5.4-mini)**
+
+| Metric | Overall | Factual | Numeric | Cross-doc | Negative |
+|---|---|---|---|---|---|
+| Correctness | **4.13** | 4.14 | 4.25 | 3.50 | — |
+| Faithfulness | **4.37** | 4.52 | 4.62 | 3.50 | — |
+| Completeness | **3.33** | 3.07 | 3.75 | 2.75 | — |
+| Refusal appropriateness | **4.85** | — | — | — | 4.11 |
+
+Out-of-corpus negatives correctly handled: **77.8%** (7/9).
+
+Evaluation scripts: `src/evaluation/eval_runner.py`, `src/evaluation/judge.py`.
+Ground truth: `data/eval/ground_truth.json`. Results: `data/eval/results/`.
+
+---
+
+### Stage 5 — Monitoring
+
+Every query is dual-written to `logs/queries.jsonl` (primary fallback) and
+`cpie.query_logs` (Postgres, feeds Grafana). The Streamlit UI writes thumbs
+feedback to `cpie.user_feedback`.
+
+<p align="center">
+  <img src="docs/diagrams/arch_05_monitoring.svg" alt="Stage 5 — Monitoring" width="680">
+</p>
+
+Grafana dashboards (auto-provisioned, no manual setup):
+
+| Panel | What it shows |
+|---|---|
+| Query volume | Queries per hour |
+| Refusal rate | % is\_refusal over time |
+| Latency percentiles | p50 synthesis + retrieval |
+| Top-cited docs | Which sources get used |
+| Cost per day | Cumulative $ spend |
+| User feedback ratio | Thumbs up / total votes |
+| Recent failures | Failure reason + query snippet |
+
+Start the monitoring stack: `docker compose up -d postgres grafana`
 
 ---
 
@@ -166,35 +239,6 @@ docker compose up
 
 ---
 
-## Evaluation Results
-
-Evaluated on 52 hand-crafted QA pairs across all 12 documents (29 factual,
-8 numeric, 4 cross-document, 9 out-of-corpus negatives, 2 summarisation).
-LLM-as-judge: GPT-5.4-mini, 4-dimensional rubric (1–5 scale).
-
-### Retrieval (hybrid BM25 + dense + RRF, with institution metadata filter)
-
-| Metric | Score |
-|---|---|
-| Recall@5 | **0.907** |
-| MRR@5 | 0.884 |
-| nDCG@5 | 0.894 |
-| Hit@5 | 0.953 |
-| Precision@5 | 0.722 |
-
-### LLM-as-judge (52 queries, shipped config: v2\_numeric prompt + gpt-5.4-mini)
-
-| Metric | Overall | Factual | Numeric | Cross-doc | Negative |
-|---|---|---|---|---|---|
-| Correctness | **4.13** | 4.14 | 4.25 | 3.50 | — |
-| Faithfulness | **4.37** | 4.52 | 4.62 | 3.50 | — |
-| Completeness | **3.33** | 3.07 | 3.75 | 2.75 | — |
-| Refusal appropriateness | **4.85** | — | — | — | 4.11 |
-
-Out-of-corpus negatives correctly handled: **77.8%** (7/9).
-
----
-
 ## Design Decisions
 
 ### Corrective RAG (CRAG-style correction layer)
@@ -209,22 +253,21 @@ synthesis:
 
 Both paths are logged distinctly. Not yet implemented: retriever-agreement gate
 (replaces the deleted RRF-threshold short-circuit) and confidence layer
-(removed after Week 5 calibration showed AUC 0.668 — too weak to promise to
-users).
+(removed after calibration showed AUC 0.668 — too weak to promise to users).
 
 ### Hybrid retrieval — BM25 + dense + RRF k=60
 
 BM25 handles exact keyword matches (institution names, policy codes); dense
 retrieval (BAAI/bge-base-en-v1.5, 768-dim) handles semantic equivalence.
 RRF k=60 (Cormack et al. 2009) fuses ranked lists without score normalisation.
-Embedding model chosen after Week 2 ablation: mean cosine 0.543 vs 0.278 for
+Embedding model chosen after ablation: mean cosine 0.543 vs 0.278 for
 all-MiniLM-L6-v2.
 
 ### Institution metadata filter
 
 The query text is scanned for named institutions (Ofgem, FCA, IEA, BoE, CCC,
 DESNZ, ESO) before retrieval. Matching institutions pre-filter both the Chroma
-collection and BM25 results. Week 5 A/B: cross-doc Completeness +1.0,
+collection and BM25 results. A/B result: cross-doc Completeness +1.0,
 Recall@5 +0.03, Refusal_appropriateness +0.26. Added 18ms latency.
 
 ### Prompt versioning and A/B testing
@@ -256,7 +299,7 @@ Evidence in `docs/week5_failure_analysis.md`.
   Accepting user content requires corpus-side prompt-injection scanning and
   per-user isolation.
 - **No confidence signal.** Pipeline-derived confidence was removed after
-  Week 5 calibration (best AUC 0.668, overlapping random). Every answer carries
+  calibration (best AUC 0.668, overlapping random). Every answer carries
   a standing "verify against sources" caveat instead.
 - **CCC Progress traffic-light indicators** do not extract as text from PDF
   (PyMuPDF limitation). The surrounding prose restates the assessment and
@@ -267,28 +310,6 @@ Evidence in `docs/week5_failure_analysis.md`.
   LLM self-report, not cross-doc claim verification. Treat as a hint.
 - **Streamlit app is not authenticated.** Anonymous single-user demo. Multi-tenant
   session tracking is future work.
-
----
-
-## Monitoring
-
-Every query is dual-written to `logs/queries.jsonl` (primary fallback) and
-`cpie.query_logs` (Postgres, feeds Grafana). The Streamlit UI writes thumbs
-feedback to `cpie.user_feedback`.
-
-Grafana dashboards (auto-provisioned, no manual setup):
-
-| Panel | What it shows |
-|---|---|
-| Query volume | Queries per hour |
-| Refusal rate | % is\_refusal over time |
-| Latency percentiles | p50 synthesis + retrieval |
-| Top-cited docs | Which sources get used |
-| Cost per day | Cumulative $ spend |
-| User feedback ratio | Thumbs up / total votes |
-| Recent failures | Failure reason + query snippet |
-
-Start the monitoring stack: `docker compose up -d postgres grafana`
 
 ---
 
@@ -313,6 +334,7 @@ cpie/
     grafana/provisioning/      datasource + dashboard provider YAMLs
   docs/
     week5_failure_analysis.md  A/B evidence for every dropped component
+    ai_engineering_decisions.md  full decision log with A/B results
   scripts/
     ingest.py                  run dlt ingestion pipeline
     build_indices.py           build BM25 + Chroma from DuckDB

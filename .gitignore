@@ -28,8 +28,9 @@ logs/
 
 # Personal reference docs — not for commit
 # (already-tracked docs like week3_observations.md stay tracked;
-# new files added under docs/ are ignored)
-docs/
+# new files added under docs/ are ignored, except docs/diagrams/)
+docs/*
+!docs/diagrams/
 
 # OS
 .DS_Store

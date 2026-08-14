@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 730 858" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#161b22" rx="12"/>
+  <defs>
+    <marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#6e7681"/>
+    </marker>
+    <marker id="a0r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,1 L10,5 L0,9 z" fill="#f85149"/>
+    </marker>
+  </defs>
+  <text x="300" y="24" text-anchor="middle" fill="#6e7681" font-size="9.5" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">query-time pipeline — BM25 + Chroma indices pre-built by ingestion stage</text>
+  <!-- User Query -->
+  <rect x="210" y="32" width="180" height="40" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="300" y="47" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">User Query</text>
+  <text x="300" y="63" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">natural language question</text>
+  <line x1="300" y1="72" x2="300" y2="106" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- Institution Detector -->
+  <rect x="168" y="108" width="264" height="48" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="300" y="127" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Institution Detector</text>
+  <text x="300" y="145" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Ofgem · FCA · IEA · BoE · CCC · DESNZ · ESO</text>
+  <!-- Branch to BM25 / Dense -->
+  <line x1="300" y1="156" x2="300" y2="178" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="178" x2="452" y2="178" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="178" x2="148" y2="188" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <line x1="452" y1="178" x2="452" y2="188" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- BM25 -->
+  <rect x="58" y="190" width="180" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="148" y="208" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">BM25 Retriever</text>
+  <text x="148" y="224" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">rank-bm25 · keyword match</text>
+  <!-- Dense -->
+  <rect x="352" y="190" width="200" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="452" y="208" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Dense Retriever</text>
+  <text x="452" y="224" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">BAAI/bge-base-en-v1.5 · Chroma</text>
+  <!-- Merge to RRF -->
+  <line x1="148" y1="234" x2="148" y2="268" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="452" y1="234" x2="452" y2="268" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="268" x2="452" y2="268" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="300" y1="268" x2="300" y2="274" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- RRF Fusion -->
+  <rect x="200" y="276" width="200" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="300" y="294" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">RRF Fusion  k=60</text>
+  <text x="300" y="310" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">reciprocal rank fusion · Cormack 2009</text>
+  <line x1="300" y1="320" x2="300" y2="334" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- Top-5 Chunks -->
+  <rect x="200" y="336" width="200" height="44" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
+  <text x="300" y="354" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Top-5 Chunks</text>
+  <text x="300" y="370" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">text · doc_id · page · rrf_score</text>
+  <line x1="300" y1="380" x2="300" y2="414" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- CRAG Gate -->
+  <rect x="190" y="416" width="220" height="52" rx="8" fill="#21262d" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="300" y="435" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">CRAG Correction</text>
+  <text x="300" y="452" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">empty retrieval? · LLM refuses?</text>
+  <!-- CRAG → Canonical Refusal -->
+  <line x1="410" y1="442" x2="466" y2="442" stroke="#f85149" stroke-width="1.5" marker-end="url(#a0r)"/>
+  <text x="438" y="435" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">yes</text>
+  <rect x="468" y="416" width="162" height="52" rx="8" fill="#3a1f1f" stroke="#f85149" stroke-width="1.5"/>
+  <text x="549" y="435" text-anchor="middle" fill="#ff7b72" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Canonical Refusal</text>
+  <text x="549" y="452" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">"corpus does not contain…"</text>
+  <!-- CRAG no → GPT -->
+  <text x="277" y="490" text-anchor="middle" fill="#8b949e" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">no</text>
+  <line x1="300" y1="468" x2="300" y2="508" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- GPT-5.4-mini -->
+  <rect x="180" y="510" width="240" height="52" rx="8" fill="#3d2d0a" stroke="#d29922" stroke-width="1.5"/>
+  <text x="300" y="530" text-anchor="middle" fill="#e3b341" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">GPT-5.4-mini</text>
+  <text x="300" y="547" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Structured Outputs · Pydantic · prompt v2_numeric</text>
+  <line x1="300" y1="562" x2="300" y2="600" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- Citation Verifier -->
+  <rect x="180" y="602" width="240" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="300" y="622" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Citation Verifier</text>
+  <text x="300" y="639" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">passage in chunks? keep · drop fabricated</text>
+  <path d="M 420,628 C 458,628 458,672 420,672" stroke="#6e7681" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
+  <text x="463" y="654" text-anchor="middle" fill="#6e7681" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">loop</text>
+  <line x1="300" y1="654" x2="300" y2="692" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- AnalystBrief -->
+  <rect x="175" y="694" width="250" height="52" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
+  <text x="300" y="713" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">AnalystBrief JSON</text>
+  <text x="300" y="730" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">answer · citations[] · contradictions[]</text>
+  <!-- Branch to monitoring -->
+  <line x1="300" y1="746" x2="300" y2="776" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="776" x2="452" y2="776" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="148" y1="776" x2="148" y2="788" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <line x1="452" y1="776" x2="452" y2="788" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <!-- JSONL Logger -->
+  <rect x="63" y="790" width="170" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="148" y="808" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">JSONL Logger</text>
+  <text x="148" y="825" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">fallback · offline analytics</text>
+  <!-- Postgres + Grafana -->
+  <rect x="367" y="790" width="170" height="44" rx="8" fill="#1a2f1a" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="452" y="808" text-anchor="middle" fill="#56d364" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Postgres + Grafana</text>
+  <text x="452" y="825" text-anchor="middle" fill="#3fb950" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">dashboards · Streamlit feedback</text>
+</svg>

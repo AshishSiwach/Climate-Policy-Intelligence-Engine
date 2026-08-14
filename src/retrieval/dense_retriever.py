@@ -9,6 +9,7 @@ Locked decisions (Week 2 audit):
 """
 
 import logging
+import os
 import time
 from pathlib import Path
 
@@ -70,15 +71,14 @@ class DenseRetriever:
     def _get_model(self) -> SentenceTransformer:
         if self._model is None:
             logger.info("Loading embedding model: %s on %s", MODEL_NAME, self.device)
-            try:
-                # Skip the HuggingFace Hub network check when the model is already
-                # cached locally — that check can block for minutes on slow or
-                # firewalled connections even though the weights are already on disk.
-                self._model = SentenceTransformer(MODEL_NAME, device=self.device, local_files_only=True)
-            except Exception:
-                # Model not in local cache yet — download it (first-ever install only).
-                logger.info("Model not in local cache — downloading from HuggingFace Hub…")
-                self._model = SentenceTransformer(MODEL_NAME, device=self.device)
+            # Force HuggingFace Hub into offline mode before loading.
+            # Without this, sentence-transformers makes a network request to check
+            # for model updates even when the weights are already on disk — that
+            # check can block for 4+ minutes on slow or firewalled connections.
+            # The model is in local cache because build_indices.py downloaded it
+            # when it first ran; we never need the network again after that.
+            os.environ["HF_HUB_OFFLINE"] = "1"
+            self._model = SentenceTransformer(MODEL_NAME, device=self.device)
         return self._model
 
     def _get_collection(self):

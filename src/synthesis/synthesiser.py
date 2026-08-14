@@ -34,7 +34,7 @@ import os
 import time
 from typing import Any
 
-from openai import OpenAI
+from openai import LengthFinishReasonError, OpenAI
 
 from synthesis.output_schema import AnalystBrief, Citation, LLMCitation, LLMResponse
 
@@ -209,18 +209,40 @@ class Synthesiser:
         user_msg = f"Question: {query}\n\nRetrieved excerpts:\n{context}"
 
         t0 = time.time()
-        response = self._client.beta.chat.completions.parse(
-            model=self.model,
-            temperature=self.temperature,
-            # `max_completion_tokens` is required by gpt-5.x; older models
-            # (gpt-4o, gpt-4o-mini) accept it as an alias for max_tokens.
-            max_completion_tokens=self.max_tokens,
-            response_format=LLMResponse,
-            messages=[
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": user_msg},
-            ],
-        )
+        try:
+            response = self._client.beta.chat.completions.parse(
+                model=self.model,
+                temperature=self.temperature,
+                # `max_completion_tokens` is required by gpt-5.x; older models
+                # (gpt-4o, gpt-4o-mini) accept it as an alias for max_tokens.
+                max_completion_tokens=self.max_tokens,
+                response_format=LLMResponse,
+                messages=[
+                    {"role": "system", "content": self.system_prompt},
+                    {"role": "user", "content": user_msg},
+                ],
+            )
+        except LengthFinishReasonError as exc:
+            # Structured output was truncated mid-JSON — cannot parse partial response.
+            # Degrade gracefully: return a canonical refusal with a distinct failure
+            # reason so Grafana can distinguish this from a true out-of-corpus refusal.
+            latency_ms = (time.time() - t0) * 1000
+            logger.warning("LengthFinishReasonError — response truncated: %s", exc)
+            usage = getattr(getattr(exc, "completion", None), "usage", None)
+            prompt_tokens = usage.prompt_tokens if usage else 0
+            return {
+                "brief": AnalystBrief(
+                    answer=OUT_OF_CORPUS_ANSWER,
+                    citations=[],
+                    contradictions=[],
+                ),
+                "latency_ms": latency_ms,
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": self.max_tokens,
+                "cost_usd": _estimate_cost(self.model, prompt_tokens, self.max_tokens),
+                "prompt_version": self.prompt_version,
+                "refusal_reason": f"length_limit_exceeded (max_tokens={self.max_tokens})",
+            }
         latency_ms = (time.time() - t0) * 1000
 
         message = response.choices[0].message

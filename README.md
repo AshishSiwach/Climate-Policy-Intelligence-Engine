@@ -106,15 +106,21 @@ fabricated citations are dropped.
 
 ### Stage 4 — Evaluation
 
-Evaluated on 52 hand-crafted QA pairs across all 12 documents (29 factual,
-8 numeric, 4 cross-document, 9 out-of-corpus negatives, 2 summarisation).
-LLM-as-judge: GPT-5.4-mini, 4-dimensional rubric (1–5 scale).
+CPIE uses two complementary evaluation tracks: **offline evaluation** run
+against a fixed ground-truth dataset before deployment, and **online
+monitoring** of live traffic captured through the production stack.
 
 <p align="center">
   <img src="docs/diagrams/arch_04_evaluation.svg" alt="Stage 4 — Evaluation" width="580">
 </p>
 
-**Retrieval (hybrid BM25 + dense + RRF, with institution metadata filter)**
+#### Offline evaluation
+
+52 hand-crafted QA pairs across all 12 documents (29 factual, 8 numeric,
+4 cross-document, 9 out-of-corpus negatives, 2 summarisation) — written
+before running the system on them.
+
+**Retrieval metrics** (hybrid BM25 + dense + RRF, institution metadata filter)
 
 | Metric | Score |
 |---|---|
@@ -124,7 +130,7 @@ LLM-as-judge: GPT-5.4-mini, 4-dimensional rubric (1–5 scale).
 | Hit@5 | 0.953 |
 | Precision@5 | 0.722 |
 
-**LLM-as-judge (52 queries, shipped config: v2\_numeric prompt + gpt-5.4-mini)**
+**LLM-as-judge** (GPT-5.4-mini, 4-dimensional rubric, 1–5 scale; shipped config: v2\_numeric prompt)
 
 | Metric | Overall | Factual | Numeric | Cross-doc | Negative |
 |---|---|---|---|---|---|
@@ -138,13 +144,30 @@ Out-of-corpus negatives correctly handled: **77.8%** (7/9).
 Evaluation scripts: `src/evaluation/eval_runner.py`, `src/evaluation/judge.py`.
 Ground truth: `data/eval/ground_truth.json`. Results: `data/eval/results/`.
 
+#### Online evaluation (live traffic)
+
+Every production query is logged to Postgres and surfaced in Grafana. Online
+metrics complement the static ground-truth run by catching quality drift on
+real user queries over time.
+
+| Online metric | How it is measured |
+|---|---|
+| Refusal rate | `is_refusal = true` rows / total queries over time |
+| Latency (p50 / p95) | `retrieval_latency_ms` + `synthesis_latency_ms` per query |
+| Cost per query / per day | `cost_usd` field, aggregated daily |
+| Citation count | Mean `citation_count` per answered query |
+| User satisfaction | Thumbs up / (thumbs up + thumbs down) from `cpie.user_feedback` |
+| Top-cited documents | Most frequent `doc_id` values in `cited_doc_ids` |
+| Failure reasons | Breakdown of `failure_reason` field (empty retrieval, LLM refusal, cost limit) |
+
 ---
 
-### Stage 5 — Monitoring
+### Stage 5 — Monitoring (online evaluation infrastructure)
 
 Every query is dual-written to `logs/queries.jsonl` (primary fallback) and
 `cpie.query_logs` (Postgres, feeds Grafana). The Streamlit UI writes thumbs
-feedback to `cpie.user_feedback`.
+feedback to `cpie.user_feedback`. This is the infrastructure that powers
+the online evaluation metrics described in Stage 4.
 
 <p align="center">
   <img src="docs/diagrams/arch_05_monitoring.svg" alt="Stage 5 — Monitoring" width="680">

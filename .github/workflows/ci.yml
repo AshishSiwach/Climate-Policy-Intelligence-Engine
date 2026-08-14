@@ -1,0 +1,119 @@
+name: CI
+
+# Triggers: run on every push to main, and on every pull request targeting main.
+# This catches both direct pushes and feature-branch PRs before they merge.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least-privilege: this workflow only needs to read the repo, not write to it.
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1 — Lint & Format (fast gate, ~30 seconds)
+  #
+  # Runs ruff in two modes:
+  #   ruff format --check  →  fails if any file is not correctly formatted
+  #   ruff check           →  fails on any lint rule violation (E/F/I from pyproject.toml)
+  #
+  # Ruff is installed standalone here (not from the project venv) so this job
+  # has zero heavy dependencies and completes in under a minute.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install "ruff>=0.4.0"
+
+      - name: Check formatting (ruff format)
+        run: ruff format --check .
+
+      - name: Check lint rules (ruff check)
+        run: ruff check .
+
+  # ---------------------------------------------------------------------------
+  # Job 2 — Unit Tests (only runs if lint passes)
+  #
+  # Key decisions:
+  #
+  # 1. CPU-only torch: pyproject.toml points torch at a CUDA index
+  #    (pytorch-cu124) for local GPU dev. In CI there is no GPU, and the CUDA
+  #    build is 2 GB+. We install CPU torch first via uv pip; subsequent
+  #    `uv pip install -e ".[dev]"` sees torch already satisfied and skips it.
+  #
+  # 2. uv pip (not uv sync): `uv sync` respects [tool.uv.sources] and would
+  #    pull from the CUDA index. `uv pip install` ignores named sources and
+  #    uses only what we tell it — giving us the index override we need.
+  #
+  # 3. Fake env vars: OPENAI_API_KEY and DATABASE_URL are required by the
+  #    module imports even though every test mocks the actual calls. A dummy
+  #    value prevents ImportError / config validation failures at collection.
+  #
+  # 4. Coverage: --cov=src prints a line-level miss report. No upload target
+  #    yet — the terminal output is enough to spot regressions in PRs.
+  # ---------------------------------------------------------------------------
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint  # don't waste time on tests if code doesn't even lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      # Cache the virtual environment between runs.
+      # The cache key includes the OS and pyproject.toml hash — any dependency
+      # change invalidates the cache and forces a clean reinstall.
+      - name: Cache virtual environment
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py3.11-${{ hashFiles('pyproject.toml') }}
+          restore-keys: venv-${{ runner.os }}-py3.11-
+
+      - name: Create virtual environment
+        run: uv venv
+
+      # Install CPU-only torch BEFORE the rest of the project deps.
+      # `uv pip` ignores [tool.uv.sources], so this fetches from the CPU wheel
+      # index rather than pytorch-cu124. Once torch is present in the venv,
+      # the next step sees it as already satisfied and leaves it alone.
+      - name: Install CPU-only PyTorch (CI replaces CUDA build)
+        run: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install project and dev dependencies
+        run: uv pip install -e ".[dev]"
+
+      - name: Run unit tests with coverage
+        run: uv run pytest --tb=short -q --cov=src --cov-report=term-missing
+        env:
+          # Synthesis + judge tests mock the OpenAI client but the module still
+          # validates that the key env var exists on import.
+          OPENAI_API_KEY: sk-test-00000000000000000000000000000000
+          # db.py reads this on import; tests mock insert_query_record so no
+          # real connection is attempted, but the var must be present.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci

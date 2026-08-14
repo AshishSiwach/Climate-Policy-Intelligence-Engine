@@ -1,5 +1,7 @@
 # CPIE — Climate Policy Intelligence Engine
 
+[![CI](https://github.com/ashishsiwach2789/cpie/actions/workflows/ci.yml/badge.svg)](https://github.com/ashishsiwach2789/cpie/actions/workflows/ci.yml)
+
 Domain-aware RAG system that reads 12 UK and global climate policy PDFs and
 returns structured analyst briefs with verified citations, so policy researchers
 can act on regulatory signals without reading hundreds of pages themselves.

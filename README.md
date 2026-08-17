@@ -363,7 +363,7 @@ dedicated classifier is more general.
 The gate is a GPT-4o-mini call (~120 tokens, ~$0.00003) that classifies the
 query as in-domain or out-of-domain before any retrieval or synthesis runs.
 It fails-open: any API error passes the query through to the normal pipeline.
-The synthesis prompt's Rule 6 ("do not answer from general knowledge") acts as
+The system prompt's Rule 6 ("do not answer from general knowledge") acts as
 a second defence layer for anything that slips through.
 
 ### Stress testing results

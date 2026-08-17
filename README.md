@@ -231,14 +231,14 @@ Start the monitoring stack: `docker compose up -d postgres grafana`
 The Grafana **Recent failures** panel surfaced a `LengthFinishReasonError` on a
 legitimate corpus query ("What load control licensing requirements does Ofgem
 propose?") during live use. The Ofgem licensing response contains three detailed
-citations and a multi-paragraph answer — the previous `max_completion_tokens=800`
+citations and a multi-paragraph answer, the previous `max_completion_tokens=800`
 limit truncated the JSON mid-stream. The OpenAI SDK raised `LengthFinishReasonError`
 before the response could be parsed, and the exception propagated as a raw pipeline
 failure rather than a graceful refusal.
 
 The Grafana failure panel surfaced this within seconds of the query being logged.
-The fix — catching `LengthFinishReasonError` explicitly in `synthesiser.py` and
-returning a canonical refusal with a distinct `failure_reason` — was applied
+The fix, catching `LengthFinishReasonError` explicitly in `synthesiser.py` and
+returning a canonical refusal with a distinct `failure_reason`, was applied
 immediately. `MAX_TOKENS` was already at 2000 (bumped from 800 in a prior session);
 the exception handler adds defence-in-depth for any response that would exceed the
 current limit.

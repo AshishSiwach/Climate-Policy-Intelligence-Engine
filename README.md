@@ -81,16 +81,18 @@ DESNZ, ESO). Matching institutions pre-filter both retrievers before RRF fusion.
 ### Stage 3 — Synthesis
 
 Retrieved chunks and the original query are passed to GPT-5.4-mini with a
-structured output schema (`LLMResponse`). The model is instructed to answer
-only from the provided excerpts; if it cannot, it signals refusal via the
-OpenAI Structured Outputs `message.refusal` field rather than fabricating an
-answer.
+structured output schema (`LLMResponse`). The system prompt instructs the
+model to answer only from the provided excerpts. If the excerpts don't contain
+enough information, the model produces a parsed response whose `answer` field
+says so — it does not fabricate. `message.refusal` is a separate OpenAI safety
+mechanism (content policy) and is handled as a fallback, not the primary
+refusal path.
 
 CPIE wraps this in a CRAG-style (Yan et al. 2024) correction layer — a
-decision gate that routes the response to one of two paths:
+decision gate that routes to one of two paths:
 
-- **CORRECT** — LLM produces an answer → validated, returned as `AnalystBrief`
-- **INCORRECT** — retrieval returned zero chunks, or the LLM emits `message.refusal` → canonical refusal (`"The corpus does not contain sufficient information…"`)
+- **CORRECT** — LLM returns a substantive answer → validated, returned as `AnalystBrief`
+- **INCORRECT** — retrieval returned zero chunks (short-circuit, no LLM call), or the LLM's parsed answer indicates the excerpts are insufficient → canonical refusal (`"The corpus does not contain sufficient information…"`)
 
 After synthesis, every cited passage is matched against the retrieved chunks
 (substring anchor check). Any citation whose passage cannot be found in the

@@ -92,7 +92,13 @@ CPIE wraps this in a CRAG-style (Yan et al. 2024) correction layer — a
 decision gate that routes to one of two paths:
 
 - **CORRECT** — LLM returns a substantive answer → validated, returned as `AnalystBrief`
-- **INCORRECT** — retrieval returned zero chunks (short-circuit, no LLM call), or the LLM's parsed answer indicates the excerpts are insufficient → canonical refusal (`"The corpus does not contain sufficient information…"`)
+- **INCORRECT** → canonical refusal (`"The corpus does not contain sufficient information…"`)
+
+Three things trigger the INCORRECT path:
+
+- **Zero chunks** — retriever returns nothing → short-circuit before the LLM call even happens
+- **Primary refusal** — chunks retrieved → LLM parses them → `answer` field says "excerpts don't contain this"
+- **`message.refusal`** — OpenAI safety system blocks the request at the API level (content policy); handled as a separate fallback
 
 After synthesis, every cited passage is matched against the retrieved chunks
 (substring anchor check). Any citation whose passage cannot be found in the

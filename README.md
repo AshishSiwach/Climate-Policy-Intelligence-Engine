@@ -456,7 +456,8 @@ cpie/
   src/
     ingestion/       pdf_loader, chunker, dlt_pipeline
     retrieval/       bm25_retriever, dense_retriever, hybrid_retriever,
-                     institution_detector, reranker (preserved, not active)
+                     institution_detector, reranker (evaluated, not active),
+                     query_rewriter (evaluated, not active)
     synthesis/       synthesiser, output_schema, query_classifier (domain gate)
     evaluation/      judge, eval_runner, retrieval_metrics
     monitoring/      logger (JSONL), db (Postgres)
@@ -482,7 +483,6 @@ cpie/
     download_data.py           fetch 12 corpus PDFs with SHA-256 verification
   app.py                       Streamlit chat UI
   main.py                      CLI entry point
-  api.py                       FastAPI endpoint (/query POST)
   docker-compose.yml           postgres + grafana + app services
   Dockerfile                   containerised Streamlit app
 ```

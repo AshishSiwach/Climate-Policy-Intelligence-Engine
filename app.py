@@ -291,15 +291,39 @@ with st.sidebar:
 # Main content
 # ────────────────────────────────────────────────────────────────────────
 
-logo_tag = _logo_img_tag(width=44)
+# Theme-aware title colour: McKinsey navy in light mode, a light steel-blue
+# in dark mode so the heading is equally legible on both backgrounds.
 st.markdown(
-    f"<div style='display:flex;align-items:center;gap:12px;margin-bottom:4px'>"
-    f"{logo_tag}"
-    f"<div>"
-    f"<div style='font-size:1.5rem;font-weight:700;line-height:1.2'>Climate Policy Intelligence Engine</div>"
-    f"<div style='color:gray;font-size:0.85rem'>Domain-aware RAG over 12 UK &amp; global climate policy documents "
+    """
+    <style>
+    :root                    { --cpie-title: #00205C; }
+    @media (prefers-color-scheme: dark) { :root { --cpie-title: #C8D8F0; } }
+    html[data-theme="dark"]  { --cpie-title: #C8D8F0; }
+    html[data-theme="light"] { --cpie-title: #00205C; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+try:
+    _b64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode()
+    _header_logo = (
+        f'<img src="data:image/svg+xml;base64,{_b64}" '
+        f'width="84" style="display:block;margin:0 auto 14px"/>'
+    )
+except Exception:
+    _header_logo = ""
+
+st.markdown(
+    f"<div style='text-align:center;padding:28px 0 18px'>"
+    f"{_header_logo}"
+    f"<div style='font-size:1.85rem;font-weight:700;letter-spacing:-0.01em;"
+    f"color:var(--cpie-title);line-height:1.2;margin-bottom:6px'>"
+    f"Climate Policy Intelligence Engine</div>"
+    f"<div style='color:gray;font-size:0.84rem'>"
+    f"Domain-aware RAG over 12 UK &amp; global climate policy documents "
     f"(Ofgem, DESNZ, IEA, BoE, CCC, ESO)</div>"
-    f"</div></div>",
+    f"</div>",
     unsafe_allow_html=True,
 )
 

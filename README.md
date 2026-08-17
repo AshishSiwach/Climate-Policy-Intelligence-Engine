@@ -146,6 +146,25 @@ before running the system on them.
 | Hit@5 | 0.953 |
 | Precision@5 | 0.722 |
 
+**Recall@5 is the primary metric for this system.** A chunk missed at retrieval
+is unrecoverable — the LLM can only synthesise from what it receives, so a
+missed relevant chunk always produces a wrong or refused answer regardless of
+how good the synthesis prompt is. A false positive (irrelevant chunk included)
+is tolerable: the LLM filters noise and the citation verifier drops fabricated
+passages. This asymmetry — a miss is fatal, noise is manageable — makes Recall
+the right thing to optimise. MRR and nDCG measure rank position within the top
+5, which matters for search UIs where users scan results; CPIE sends all top 5
+to the LLM at once so rank within that set has no effect on output quality.
+
+**Business justification:** CPIE's users are climate finance analysts tracking
+regulatory signals across hundreds of pages on a deadline. A missed signal — a
+liability threshold buried in an Ofgem consultation, a new BoE stress-test
+scenario — can mean a misaligned investment decision or a compliance gap. The
+cost of a false negative (analyst acts on incomplete information) far outweighs
+the cost of a false positive (analyst reads one extra citation). A Recall@5 of
+0.907 means the system surfaces the right evidence 9 times out of 10 — the
+remaining gap is the honest case for keeping a human in the loop.
+
 **LLM-as-judge** (GPT-5.4-mini, 4-dimensional rubric, 1–5 scale; shipped config: v2\_numeric prompt)
 
 | Metric | Overall | Factual | Numeric | Cross-doc | Negative |

@@ -413,8 +413,6 @@ should answer from what exists without fabricating:
    or agentic loops.
 - **Contradiction detection is experimental.** The `contradictions[]` field is
   LLM self-report, not cross-doc claim verification. Treat as a hint.
-- **Streamlit app is not authenticated.** Anonymous single-user demo. Multi-tenant
-  session tracking is future work.
 
 ---
 

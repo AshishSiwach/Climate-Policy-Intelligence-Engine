@@ -1,14 +1,10 @@
 # CPIE — Climate Policy Intelligence Engine
 
-[![CI](https://github.com/ashishsiwach2789/cpie/actions/workflows/ci.yml/badge.svg)](https://github.com/ashishsiwach2789/cpie/actions/workflows/ci.yml)
+
 
 Domain-aware RAG system that reads 12 UK and global climate policy PDFs and
 returns structured analyst briefs with verified citations, so policy researchers
 can act on regulatory signals without reading hundreds of pages themselves.
-
-> **Disclaimer:** CPIE is an assistant, not a source of truth. Verify every
-> citation against the source document before relying on it. CPIE does not
-> provide investment, legal, or regulatory advice.
 
 ---
 
@@ -35,7 +31,7 @@ multiple sources simultaneously.
 
 ## Pipeline
 
-CPIE is organised into five stages. Stage 1 (Ingestion) runs once offline to
+The entire RAG pipeline for the project is organised into five stages. Stage 1 (Ingestion) runs once offline to
 build the search indices; Stages 2–5 execute on every query.
 
 <p align="center">
@@ -45,7 +41,7 @@ build the search indices; Stages 2–5 execute on every query.
 ### Stage 1 — Ingestion (offline)
 
 PDFs are extracted with PyMuPDF, cleaned of layout noise (ESO nav elements,
-Ofgem security stamps), and split into sliding-window chunks. A dlt pipeline
+Ofgem security stamps), and split into sliding-window chunks. A **dlt pipeline**
 writes chunks into DuckDB. `build_indices.py` reads from DuckDB to produce the
 BM25 pickle and Chroma vector store used at query time.
 

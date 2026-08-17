@@ -326,77 +326,6 @@ against the 52-query ground truth. `v2_numeric` shipped as default: adds a
 Correctness without regressing any metric. `v2_crossdoc` preserved in the
 registry for per-query-type activation (future roadmap item).
 
-### Input guardrails and domain gate
-
-CPIE applies three guardrails on every query before retrieval or synthesis run:
-
-| Guardrail | What it catches | Cost |
-|---|---|---|
-| Query length limit (500 chars) | Cost blow-up from very long inputs | Zero |
-| Daily cost circuit breaker ($5/day) | Runaway API spend | Zero |
-| Pre-retrieval domain gate | Off-domain queries — see below | ~$0.00003 / query |
-
-**Why a domain gate?** Early stress testing (see below) showed that prompt-level
-rules for refusing off-domain queries are brittle: patching a rule for spelling
-requests doesn't close the gap for arithmetic, CEO lookups, or general knowledge
-facts that coincidentally mention a word in the corpus. A dedicated classifier is
-more general.
-
-The gate is a GPT-4o-mini call (~120 tokens total, ~$0.00003) that classifies the
-query as in-domain or out-of-domain before any retrieval or synthesis runs. The
-synthesis prompt's Rule 6 ("do not answer from general knowledge") remains as a
-second defence layer. The gate fails-open: any API error passes the query through
-to the normal pipeline rather than blocking it.
-
----
-
-### Stress testing — edge cases and what they revealed
-
-After the system was working end-to-end, a structured stress test was run across
-three categories. Results drove two fixes.
-
-**Category 1 — Parametric knowledge traps** (queries the LLM could answer from
-training data, should refuse):
-
-| Query | Pre-fix | Post-fix |
-|---|---|---|
-| "What is the capital of France?" | ❌ Answered "Paris" with a fabricated CCC citation | ✅ Refused — domain gate rejects before retrieval |
-| "What is the GDP of the UK?" | ⚠️ Correctly refused the specific ask but cited GDP growth-rate passages | ✅ Refused — domain gate blocks |
-| "Who is the CEO of BP?" | ⚠️ Correctly refused but attached an IEA bibliography entry as a citation | ✅ Refused — domain gate blocks |
-| "What is 1+1?" | ❌ Answered "2" | ✅ Refused — domain gate rejects |
-
-**Root cause:** The synthesis prompt had no explicit instruction against answering
-from parametric knowledge. The LLM answered general-knowledge queries and then
-retrieved a tangentially related chunk to justify a citation.
-
-**Fix 1 — Rule 6 in the synthesis prompt:** "Do not answer from your general
-knowledge under any circumstances." Added to `v2_numeric` to handle any query that
-slips past the domain gate.
-
-**Fix 2 — Pre-retrieval domain gate:** GPT-4o-mini classifier blocks off-domain
-queries before retrieval or synthesis runs. This is the architecturally correct
-fix — it addresses all parametric knowledge categories without per-pattern
-enumeration and saves synthesis tokens (~$0.003/query) on every refusal.
-
----
-
-**Category 2 — Partial corpus match** (corpus has something related, but not the
-exact answer — should answer correctly from what exists):
-
-| Query | Result |
-|---|---|
-| "What is carbon pricing?" | ✅ Answered from BoE + CCC corpus passages |
-| "What happened at COP26?" | ✅ Answered from CCC Seventh Carbon Budget with Glasgow Climate Pact detail |
-
-**Category 3 — Legitimate corpus queries** (should answer fully with citations):
-
-| Query | Result |
-|---|---|
-| "What aggregate losses did UK banks face under the CBES early action scenario?" | ✅ Correctly surfaced the comparative figure (30% higher in Late Action, £110bn extra) rather than inventing an absolute figure |
-| "What does Ofgem propose for load control licensing?" | ✅ 3 verified citations from OFGEM_SMART_SECURE_2025 |
-
----
-
 ### Reranker and query rewriting — measured and dropped
 
 Both were built and A/B-measured against the eval dataset:
@@ -409,6 +338,63 @@ Both were built and A/B-measured against the eval dataset:
   HyDE-style rewrites.
 
 Evidence in `docs/week5_failure_analysis.md`.
+
+---
+
+## Guardrails & Safety
+
+Every query passes through three guardrails in sequence before retrieval or
+synthesis runs. A query stopped by any guardrail returns the canonical refusal
+immediately — no retrieval, no LLM synthesis, no wasted tokens.
+
+| # | Guardrail | What it catches | Cost |
+|---|---|---|---|
+| 1 | Query length limit (500 chars) | Cost blow-up from very long inputs | Zero |
+| 2 | Daily cost circuit breaker ($5/day) | Runaway API spend | Zero |
+| 3 | Pre-retrieval domain gate (GPT-4o-mini) | Off-domain queries | ~$0.00003 / query |
+
+### Domain gate
+
+Prompt-level rules for refusing off-domain queries are brittle — patching one
+failure mode (spelling requests) leaves gaps for arithmetic, CEO lookups, and
+general-knowledge facts that coincidentally mention a corpus keyword. A
+dedicated classifier is more general.
+
+The gate is a GPT-4o-mini call (~120 tokens, ~$0.00003) that classifies the
+query as in-domain or out-of-domain before any retrieval or synthesis runs.
+It fails-open: any API error passes the query through to the normal pipeline.
+The synthesis prompt's Rule 6 ("do not answer from general knowledge") acts as
+a second defence layer for anything that slips through.
+
+### Stress testing results
+
+A structured stress test was run across three categories after the system was
+working end-to-end. Results drove the two fixes above.
+
+**Parametric knowledge traps** — queries the LLM could answer from training
+data; should always refuse:
+
+| Query | Pre-fix | Post-fix |
+|---|---|---|
+| "What is the capital of France?" | ❌ Answered "Paris" with a fabricated CCC citation | ✅ Domain gate blocks |
+| "What is the GDP of the UK?" | ⚠️ Refused the ask but cited unrelated GDP passages | ✅ Domain gate blocks |
+| "Who is the CEO of BP?" | ⚠️ Refused but attached an IEA bibliography entry | ✅ Domain gate blocks |
+| "What is 1+1?" | ❌ Answered "2" | ✅ Domain gate blocks |
+
+**Partial corpus match** — corpus has related content but not the exact answer;
+should answer from what exists without fabricating:
+
+| Query | Result |
+|---|---|
+| "What is carbon pricing?" | ✅ Answered from BoE + CCC corpus passages |
+| "What happened at COP26?" | ✅ Answered from CCC Seventh Carbon Budget with Glasgow Climate Pact detail |
+
+**Legitimate corpus queries** — should answer fully with verified citations:
+
+| Query | Result |
+|---|---|
+| "What aggregate losses did UK banks face under the CBES early action scenario?" | ✅ Surfaced the comparative figure (30% higher in Late Action, £110bn extra) |
+| "What does Ofgem propose for load control licensing?" | ✅ 3 verified citations from OFGEM_SMART_SECURE_2025 |
 
 ---
 

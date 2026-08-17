@@ -117,7 +117,6 @@ the model from inventing plausible-sounding but fabricated sources.
 | Synthesis model | GPT-5.4-mini | +0.09 Correctness, +0.25 Faithfulness vs gpt-4o-mini; −26% latency (A/B) |
 | Prompt | v2_numeric | Adds "verbatim value extraction" instruction; best aggregate Correctness, no regressions |
 | Output schema | Pydantic `AnalystBrief` | Structured outputs — `answer`, `citations[]`, `contradictions[]` |
-| Confidence | Removed | AUC 0.668 on 47-query calibration — signals too weak to promise users |
 
 ---
 

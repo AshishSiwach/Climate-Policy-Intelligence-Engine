@@ -201,7 +201,7 @@ with st.sidebar:
         st.markdown(logo_tag, unsafe_allow_html=True)
     st.markdown(
         "<div style='text-align:center;font-weight:700;font-size:1.15rem;"
-        "letter-spacing:.04em;color:#0D9488;margin-bottom:2px'>CPIE</div>"
+        "letter-spacing:.04em;color:#0E4B44;margin-bottom:2px'>CPIE</div>"
         "<div style='text-align:center;font-size:0.72rem;color:gray;"
         "margin-bottom:6px'>Climate Policy Intelligence Engine</div>",
         unsafe_allow_html=True,
@@ -296,10 +296,10 @@ with st.sidebar:
 st.markdown(
     """
     <style>
-    :root                    { --cpie-title: #0D9488; }
-    @media (prefers-color-scheme: dark) { :root { --cpie-title: #5EEAD4; } }
-    html[data-theme="dark"]  { --cpie-title: #5EEAD4; }
-    html[data-theme="light"] { --cpie-title: #0D9488; }
+    :root                    { --cpie-title: #0D6E5B; --cpie-sub: #4A5568; }
+    @media (prefers-color-scheme: dark) { :root { --cpie-title: #34D399; --cpie-sub: #94A3B8; } }
+    html[data-theme="dark"]  { --cpie-title: #34D399; --cpie-sub: #94A3B8; }
+    html[data-theme="light"] { --cpie-title: #0D6E5B; --cpie-sub: #4A5568; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -320,7 +320,7 @@ st.markdown(
     f"<div style='font-size:1.85rem;font-weight:700;letter-spacing:-0.01em;"
     f"color:var(--cpie-title);line-height:1.2;margin-bottom:6px'>"
     f"Climate Policy Intelligence Engine</div>"
-    f"<div style='color:gray;font-size:0.84rem'>"
+    f"<div style='color:var(--cpie-sub);font-size:0.84rem'>"
     f"Domain-aware RAG over 12 UK &amp; global climate policy documents "
     f"(Ofgem, DESNZ, IEA, BoE, CCC, ESO)</div>"
     f"</div>",

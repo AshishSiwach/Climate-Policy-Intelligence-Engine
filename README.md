@@ -42,8 +42,9 @@ build the search indices; Stages 2–5 execute on every query.
 
 PDFs are extracted with PyMuPDF, cleaned of layout noise (ESO nav elements,
 Ofgem security stamps), and split into sliding-window chunks. A **dlt pipeline**
-writes chunks into DuckDB. `build_indices.py` reads from DuckDB to produce the
-BM25 pickle and Chroma vector store used at query time.
+writes chunks into DuckDB. `build_indices.py` reads from DuckDB to produce two
+search indices used at query time: a **BM25 index** (keyword matching) and a
+**Chroma vector store** (dense semantic embeddings).
 
 <p align="center">
   <img src="docs/diagrams/arch_01_ingestion.svg" alt="Stage 1 — Ingestion" width="580">

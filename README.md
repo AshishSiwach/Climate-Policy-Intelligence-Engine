@@ -311,7 +311,7 @@ uv run python scripts/build_indices.py
 make run
 ```
 
-Open the app at **http://localhost:8501** and Grafana at **http://localhost:3000** (admin / admin).
+Open the app at **http://localhost:8501** and Grafana at **http://127.0.0.1:3000** (admin / admin).
 
 ### Docker (alternative)
 

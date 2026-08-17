@@ -21,10 +21,12 @@ import torch  # noqa: F401  # isort: skip
 
 import base64
 import logging
+import math
 import pathlib
 import time
 import uuid
 
+from PIL import Image, ImageDraw
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -38,12 +40,61 @@ logger = logging.getLogger("cpie.app")
 
 
 # ────────────────────────────────────────────────────────────────────────
+# Page icon (PIL) — drives the browser tab AND the chat-input avatar
+# ────────────────────────────────────────────────────────────────────────
+
+def _make_page_icon(size: int = 64) -> Image.Image:
+    """Draw the CPIE logo as a PIL image: rounded-square + network graph."""
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    bg = (14, 75, 68, 255)       # #0E4B44
+    white = (255, 255, 255, 230)
+    white_dim = (255, 255, 255, 160)
+
+    # Rounded square background
+    draw.rounded_rectangle([0, 0, size - 1, size - 1], radius=round(size * 0.18), fill=bg)
+
+    # Node positions (proportional to size)
+    top  = (size * 0.50, size * 0.28)   # query node
+    left = (size * 0.30, size * 0.65)   # BM25 node
+    right= (size * 0.70, size * 0.65)   # Dense node
+
+    def pt(p): return (round(p[0]), round(p[1]))
+
+    # Edges
+    lw = max(1, round(size * 0.03))
+    draw.line([pt(top), pt(left)],  fill=white_dim, width=lw)
+    draw.line([pt(top), pt(right)], fill=white_dim, width=lw)
+
+    # Dashed fusion edge (approximate with short segments)
+    segs = 5
+    for i in range(segs):
+        if i % 2 == 0:
+            x0 = left[0]  + (right[0] - left[0])  * i / segs
+            x1 = left[0]  + (right[0] - left[0])  * (i + 0.7) / segs
+            y0 = left[1]  + (right[1] - left[1])  * i / segs
+            y1 = left[1]  + (right[1] - left[1])  * (i + 0.7) / segs
+            draw.line([(round(x0), round(y0)), (round(x1), round(y1))],
+                      fill=white_dim, width=max(1, lw - 1))
+
+    # Nodes (circles)
+    r_top = round(size * 0.09)
+    r_bot = round(size * 0.07)
+    for centre, r, fill in [(top, r_top, white), (left, r_bot, white_dim), (right, r_bot, white_dim)]:
+        x, y = centre
+        draw.ellipse([x - r, y - r, x + r, y + r], fill=fill)
+
+    return img
+
+
+# ────────────────────────────────────────────────────────────────────────
 # Page config
 # ────────────────────────────────────────────────────────────────────────
 
 st.set_page_config(
     page_title="CPIE — Climate Policy Intelligence Engine",
-    page_icon="🌿",
+    page_icon=_make_page_icon(),
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -291,28 +342,59 @@ with st.sidebar:
 # Main content
 # ────────────────────────────────────────────────────────────────────────
 
-# Theme-aware title colour: McKinsey navy in light mode, a light steel-blue
-# in dark mode so the heading is equally legible on both backgrounds.
-st.markdown(
+# Compute logo base64 once — used for header image, CSS avatar, and ::before.
+try:
+    _b64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode()
+    _logo_url = f"data:image/svg+xml;base64,{_b64}"
+    _header_logo = (
+        f'<img src="{_logo_url}" '
+        f'width="84" style="display:block;margin:0 auto 14px"/>'
+    )
+except Exception:
+    _b64 = ""
+    _logo_url = ""
+    _header_logo = ""
+
+# Theme-aware title/subtitle colours + chat-input avatar via CSS ::before.
+# The ::before pseudo-element on the chat input's inner flex container inserts
+# the logo icon to the left of the textarea without touching the DOM directly.
+_chat_avatar_css = (
+    f"""
+    [data-testid="stChatInput"] {{
+        position: relative !important;
+    }}
+    [data-testid="stChatInput"]::before {{
+        content: '' !important;
+        position: absolute !important;
+        left: 10px !important;
+        bottom: 10px !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 7px !important;
+        background-image: url('{_logo_url}') !important;
+        background-size: cover !important;
+        background-repeat: no-repeat !important;
+        z-index: 10 !important;
+    }}
+    [data-testid="stChatInputTextArea"] {{
+        padding-left: 46px !important;
+    }}
     """
+    if _logo_url else ""
+)
+
+st.markdown(
+    f"""
     <style>
-    :root                    { --cpie-title: #0D6E5B; --cpie-sub: #4A5568; }
-    @media (prefers-color-scheme: dark) { :root { --cpie-title: #34D399; --cpie-sub: #94A3B8; } }
-    html[data-theme="dark"]  { --cpie-title: #34D399; --cpie-sub: #94A3B8; }
-    html[data-theme="light"] { --cpie-title: #0D6E5B; --cpie-sub: #4A5568; }
+    :root                    {{ --cpie-title: #0D6E5B; --cpie-sub: #4A5568; }}
+    @media (prefers-color-scheme: dark) {{ :root {{ --cpie-title: #34D399; --cpie-sub: #94A3B8; }} }}
+    html[data-theme="dark"]  {{ --cpie-title: #34D399; --cpie-sub: #94A3B8; }}
+    html[data-theme="light"] {{ --cpie-title: #0D6E5B; --cpie-sub: #4A5568; }}
+    {_chat_avatar_css}
     </style>
     """,
     unsafe_allow_html=True,
 )
-
-try:
-    _b64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode()
-    _header_logo = (
-        f'<img src="data:image/svg+xml;base64,{_b64}" '
-        f'width="84" style="display:block;margin:0 auto 14px"/>'
-    )
-except Exception:
-    _header_logo = ""
 
 st.markdown(
     f"<div style='text-align:center;padding:28px 0 18px'>"

@@ -73,8 +73,8 @@ DESNZ, ESO). Matching institutions pre-filter both retrievers before RRF fusion.
 |---|---|---|
 | BM25 | rank-bm25 | Exact keyword match on institution names, policy codes |
 | Dense | BAAI/bge-base-en-v1.5 | Mean cosine 0.543 vs 0.278 for all-MiniLM (ablation) |
-| Fusion | RRF k=60 | Cormack et al. 2009 default |
-| Reranker | Not active | 5.2× latency, zero aggregate Correctness gain (ablation) |
+| Fusion | RRF k=60 | Cormack et al. 2009 default; no score normalisation needed |
+| Reranker | Not active | Reorders chunks by relevance, but hybrid retrieval already ranks well — 5.2× latency, zero downstream Correctness gain (ablation) |
 
 ---
 

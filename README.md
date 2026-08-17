@@ -80,15 +80,22 @@ DESNZ, ESO). Matching institutions pre-filter both retrievers before RRF fusion.
 
 ### Stage 3 — Synthesis
 
-Retrieved chunks and the original query are passed to GPT-5.4-mini. CPIE
-implements a CRAG-style (Yan et al. 2024) correction layer between retrieval
-and synthesis:
+Retrieved chunks and the original query are passed to GPT-5.4-mini with a
+structured output schema (`LLMResponse`). The model is instructed to answer
+only from the provided excerpts; if it cannot, it signals refusal via the
+OpenAI Structured Outputs `message.refusal` field rather than fabricating an
+answer.
 
-- **CORRECT** — LLM does not refuse → synthesise and return `AnalystBrief`
-- **INCORRECT** — empty retrieval or LLM emits `message.refusal` → canonical refusal
+CPIE wraps this in a CRAG-style (Yan et al. 2024) correction layer — a
+decision gate that routes the response to one of two paths:
 
-After synthesis, every cited passage is verified against the retrieved chunks;
-fabricated citations are dropped.
+- **CORRECT** — LLM produces an answer → validated, returned as `AnalystBrief`
+- **INCORRECT** — retrieval returned zero chunks, or the LLM emits `message.refusal` → canonical refusal (`"The corpus does not contain sufficient information…"`)
+
+After synthesis, every cited passage is matched against the retrieved chunks
+(substring anchor check). Any citation whose passage cannot be found in the
+retrieved set is dropped — this is the anti-hallucination step that prevents
+the model from inventing plausible-sounding but fabricated sources.
 
 <p align="center">
   <img src="docs/diagrams/arch_03_synthesis.svg" alt="Stage 3 — Synthesis" width="640">

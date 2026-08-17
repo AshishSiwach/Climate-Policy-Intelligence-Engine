@@ -366,12 +366,9 @@ registry for per-query-type activation (future roadmap item).
 
 Both were built and A/B-measured against the eval dataset:
 - **Reranker** (`cross-encoder/ms-marco-MiniLM-L-6-v2`): 5.2× retrieval
-  latency, zero aggregate Correctness gain over hybrid. Per-query-type
-  activation on numeric queries is a future candidate.
+  latency, zero aggregate Correctness gain over hybrid.
 - **Query rewriting** (GPT-4o mini paraphrase): cross-doc Correctness −0.75,
-  Recall@5 −5pp, 3× latency. Semantically-preserving paraphrases concentrated
-  RRF votes on the same chunks, hurting diversity. Re-introduction requires
-  HyDE-style rewrites.
+  Recall@5 −5pp, 3× latency.
 
 Evidence in `docs/week5_failure_analysis.md`.
 

@@ -436,13 +436,20 @@ cpie/
     grafana/dashboards/        provisioned JSON
     grafana/provisioning/      datasource + dashboard provider YAMLs
   docs/
-    week5_failure_analysis.md  A/B evidence for every dropped component
+    week5_failure_analysis.md    A/B evidence for every dropped component
     ai_engineering_decisions.md  full decision log with A/B results
+    ablation_tables_for_publishing.md
+    week4_evaluation_playbook.md
+    project_what_and_why.md
+    images/                      screenshots (Grafana dashboard)
+    diagrams/                    architecture SVGs
   scripts/
     ingest.py                  run dlt ingestion pipeline
     build_indices.py           build BM25 + Chroma from DuckDB
+    download_data.py           fetch 12 corpus PDFs with SHA-256 verification
   app.py                       Streamlit chat UI
   main.py                      CLI entry point
+  api.py                       FastAPI endpoint (/query POST)
   docker-compose.yml           postgres + grafana + app services
   Dockerfile                   containerised Streamlit app
 ```

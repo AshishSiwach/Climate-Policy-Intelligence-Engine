@@ -1,5 +1,6 @@
 # CPIE — Climate Policy Intelligence Engine
 
+<img width="2752" height="1536" alt="Accelerating_Climate_Policy_Intelligence_Overview" src="https://github.com/user-attachments/assets/61ccd59d-e978-46af-9e28-8744053b5d4d" />
 
 
 Domain-aware RAG system that reads 12 UK and global climate policy PDFs and

@@ -88,8 +88,11 @@ says so — it does not fabricate. `message.refusal` is a separate OpenAI safety
 mechanism (content policy) and is handled as a fallback, not the primary
 refusal path.
 
-CPIE wraps this in a CRAG-style (Yan et al. 2024) correction layer — a
-decision gate that routes to one of two paths:
+CPIE follows the CRAG (Yan et al. 2024) framing of routing responses into
+CORRECT / INCORRECT paths, though the mechanism is simpler: rather than a
+separate evaluator model scoring retrieved documents, the same LLM that
+synthesises the answer decides whether the chunks are sufficient and refuses
+if they are not. A decision gate routes to one of two paths:
 
 - **CORRECT** — LLM returns a substantive answer → validated, returned as `AnalystBrief`
 - **INCORRECT** → canonical refusal (`"The corpus does not contain sufficient information…"`)

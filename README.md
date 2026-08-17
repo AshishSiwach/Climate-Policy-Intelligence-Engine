@@ -345,7 +345,7 @@ Evidence in `docs/week5_failure_analysis.md`.
 
 Every query passes through three guardrails in sequence before retrieval or
 synthesis runs. A query stopped by any guardrail returns the canonical refusal
-immediately — no retrieval, no LLM synthesis, no wasted tokens.
+immediately, no retrieval, no LLM synthesis, no wasted tokens.
 
 | # | Guardrail | What it catches | Cost |
 |---|---|---|---|
@@ -355,7 +355,7 @@ immediately — no retrieval, no LLM synthesis, no wasted tokens.
 
 ### Domain gate
 
-Prompt-level rules for refusing off-domain queries are brittle — patching one
+Prompt-level rules for refusing off-domain queries are brittle, patching one
 failure mode (spelling requests) leaves gaps for arithmetic, CEO lookups, and
 general-knowledge facts that coincidentally mention a corpus keyword. A
 dedicated classifier is more general.

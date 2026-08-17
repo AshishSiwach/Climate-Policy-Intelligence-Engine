@@ -1,0 +1,47 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D9488"/>
+      <stop offset="100%" stop-color="#065F46"/>
+    </linearGradient>
+    <linearGradient id="leaf_fill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="white" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="100" height="100" rx="20" fill="url(#bg)"/>
+
+  <!-- Leaf silhouette -->
+  <path d="M50 14
+           C67 14 82 28 82 46
+           C82 64 68 78 50 84
+           C32 78 18 64 18 46
+           C18 28 33 14 50 14 Z"
+        fill="url(#leaf_fill)" stroke="white" stroke-width="1.4" stroke-opacity="0.35"/>
+
+  <!-- Stem -->
+  <line x1="50" y1="84" x2="50" y2="93"
+        stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity="0.5"/>
+
+  <!-- Network: top query node -->
+  <circle cx="50" cy="32" r="5.5" fill="white"/>
+
+  <!-- Network: bottom-left retrieval node -->
+  <circle cx="34" cy="60" r="4.5" fill="white" opacity="0.88"/>
+
+  <!-- Network: bottom-right retrieval node -->
+  <circle cx="66" cy="60" r="4.5" fill="white" opacity="0.88"/>
+
+  <!-- Edges: query → BM25 and query → Dense -->
+  <line x1="50" y1="37" x2="36" y2="56"
+        stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.72"/>
+  <line x1="50" y1="37" x2="64" y2="56"
+        stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.72"/>
+
+  <!-- Fusion edge (dashed) BM25 ↔ Dense -->
+  <line x1="38" y1="60" x2="62" y2="60"
+        stroke="white" stroke-width="1.4" stroke-linecap="round"
+        stroke-dasharray="4 3" opacity="0.6"/>
+</svg>

@@ -1,39 +1,36 @@
 """
-CPIE — Streamlit chat UI (Week 5 Step 4d).
+CPIE — Streamlit chat UI.
 
 Single-page Streamlit app: chat-style input, structured brief render, per-answer
 thumbs feedback widget writing to cpie.user_feedback.
 
 Run:
     docker compose up -d postgres     # Postgres must be up for feedback + logs
-    streamlit run app.py              # host-side; Dockerised in Week 6 Step 1
+    streamlit run app.py
 
 Notes:
-  - No confidence badge (pipeline-derived confidence removed in Week 5 Step 2d
-    after signals proved too weak). Every answer carries a standing "verify
-    against sources" caveat instead.
-  - No auth — anonymous single-user chat. Multi-tenant / session_id
-    tracking is not in scope.
-  - Postgres feedback write is never-raise (via db.py's own try/except + our
-    outer safety wrap) — Postgres down won't break the chat.
+  - No confidence badge (pipeline-derived confidence removed after calibration
+    showed AUC 0.668 — too weak to show to users).
+  - No auth — anonymous single-user chat.
+  - Postgres feedback write is never-raise — Postgres down won't break the chat.
 """
 
 # torch must load its BLAS DLLs BEFORE numpy/rank_bm25/openai on Windows —
-# same fix as main.py. Streamlit reruns the module top-to-bottom on interaction,
-# but torch will only actually initialise once per process.
+# same fix as main.py.
 import torch  # noqa: F401  # isort: skip
 
+import base64
 import logging
+import pathlib
 import time
 import uuid
 
 import streamlit as st
 from dotenv import load_dotenv
 
-# Reuse the exact pipeline main.py uses — one source of truth for what runs.
 from main import build_pipeline, run_query
 from monitoring import QueryLogger
-from monitoring.db import insert_feedback
+from monitoring.db import fetch_recent_queries, insert_feedback
 
 load_dotenv()
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s %(message)s")
@@ -46,9 +43,9 @@ logger = logging.getLogger("cpie.app")
 
 st.set_page_config(
     page_title="CPIE — Climate Policy Intelligence Engine",
-    page_icon="📄",
+    page_icon="🌿",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 
@@ -59,34 +56,57 @@ st.set_page_config(
 
 @st.cache_resource(show_spinner=False)
 def _load_pipeline():
-    """Load Chroma + BM25 + Synthesiser exactly once per Streamlit process.
-
-    Streamlit reruns the whole script on every widget interaction; without
-    caching this would reload torch + Chroma + BGE on every click (~20s).
-    @st.cache_resource caches non-serialisable objects across all reruns
-    and all sessions in the same process.
-    """
+    """Load Chroma + BM25 + Synthesiser exactly once per Streamlit process."""
     hybrid, synth = build_pipeline()
     qlogger = QueryLogger()
     return hybrid, synth, qlogger
 
 
 # ────────────────────────────────────────────────────────────────────────
-# Session state — chat history + per-answer feedback tracking
+# Session state
 # ────────────────────────────────────────────────────────────────────────
-# Structure: list[dict] where each entry is:
-#   { "role": "user",      "content": str }
-#   { "role": "assistant", "content": brief_dict, "voted": bool }
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-MAX_CHAT_HISTORY = 40  # bound memory; older messages fall off
+if "pg_history" not in st.session_state:
+    st.session_state.pg_history = None  # None = not yet fetched
+
+MAX_CHAT_HISTORY = 40
 
 
 def _trim_history() -> None:
     if len(st.session_state.messages) > MAX_CHAT_HISTORY:
         st.session_state.messages = st.session_state.messages[-MAX_CHAT_HISTORY:]
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Postgres history
+# ────────────────────────────────────────────────────────────────────────
+
+
+def _refresh_pg_history(limit: int = 30) -> None:
+    """Pull recent queries from Postgres and cache in session_state."""
+    st.session_state.pg_history = fetch_recent_queries(limit=limit)
+
+
+# ────────────────────────────────────────────────────────────────────────
+# Logo helper
+# ────────────────────────────────────────────────────────────────────────
+
+_LOGO_PATH = pathlib.Path("docs/images/cpie_logo.svg")
+
+
+def _logo_img_tag(width: int = 120) -> str:
+    """Return an <img> tag with the logo embedded as a base64 data URI."""
+    try:
+        b64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode()
+        return (
+            f'<img src="data:image/svg+xml;base64,{b64}" '
+            f'width="{width}" style="display:block;margin:0 auto 4px"/>'
+        )
+    except Exception:
+        return ""
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -101,8 +121,7 @@ CAVEAT = (
 
 
 def _render_brief(brief: dict, msg_index: int) -> None:
-    """Render an AnalystBrief dict + attach the feedback widget below it."""
-    # Error path (pipeline raised)
+    """Render an AnalystBrief dict and attach the feedback widget below it."""
     if "error" in brief:
         st.error(f"Pipeline failure: {brief['error']}")
         return
@@ -128,16 +147,17 @@ def _render_brief(brief: dict, msg_index: int) -> None:
     if contradictions:
         with st.expander(f"⚠️ Contradictions flagged ({len(contradictions)})", expanded=False):
             for c in contradictions:
-                st.markdown(f"- **{c.get('doc_a', '?')}** vs **{c.get('doc_b', '?')}**: {c.get('summary', '')}")
+                st.markdown(
+                    f"- **{c.get('doc_a', '?')}** vs **{c.get('doc_b', '?')}**: "
+                    f"{c.get('summary', '')}"
+                )
                 st.caption("Contradiction detection is experimental — treat as a hint, not a verdict.")
 
     st.caption(CAVEAT)
 
-    # ── Feedback widget ──────────────────────────────────────────────
+    # Feedback widget
     query_id = brief.get("query_id")
     if not query_id:
-        # No query_id means the record wasn't written to Postgres — can't
-        # attach feedback. Skip the widget silently.
         return
 
     msg = st.session_state.messages[msg_index]
@@ -159,50 +179,131 @@ def _render_brief(brief: dict, msg_index: int) -> None:
 
 
 def _record_feedback(query_id: str, verdict: int, msg_index: int) -> None:
-    """Write feedback to Postgres via db.insert_feedback, then mark voted in state."""
     try:
         fb_id = insert_feedback(query_id, verdict)
-        logger.info("Feedback recorded: query_id=%s verdict=%+d feedback_id=%s", query_id, verdict, fb_id)
+        logger.info(
+            "Feedback recorded: query_id=%s verdict=%+d feedback_id=%s",
+            query_id, verdict, fb_id,
+        )
     except Exception as e:
         logger.warning("Feedback write skipped: %s", e)
-    # Mark voted regardless — user shouldn't be spamming double clicks
     st.session_state.messages[msg_index]["voted"] = True
 
 
 # ────────────────────────────────────────────────────────────────────────
-# Layout
+# Sidebar
 # ────────────────────────────────────────────────────────────────────────
 
-st.title("📄 CPIE — Climate Policy Intelligence Engine")
-st.caption(
-    "Domain-aware RAG over 12 UK & global climate policy documents "
-    "(Ofgem, DESNZ, IEA, BoE, CCC, ESO). Ask a question, get a cited brief."
-)
-
 with st.sidebar:
-    st.subheader("About this demo")
+    # Logo + wordmark
+    logo_tag = _logo_img_tag(width=100)
+    if logo_tag:
+        st.markdown(logo_tag, unsafe_allow_html=True)
     st.markdown(
-        "- **Pipeline:** Hybrid BM25 + Dense (BAAI/bge-base-en-v1.5) → RRF → "
-        "GPT-5.4-mini synthesis with citation verification.\n"
-        "- **Prompt version:** v2_numeric (Week 5 Step 3a A/B winner).\n"
-        "- **Metadata filter:** on (Week 5 Step 2f).\n"
-        "- **No confidence score** — pipeline-derived signals proved too weak "
-        "in Week 5 Step 2d calibration; removed for honesty."
+        "<div style='text-align:center;font-weight:700;font-size:1.15rem;"
+        "letter-spacing:.04em;color:#0D9488;margin-bottom:2px'>CPIE</div>"
+        "<div style='text-align:center;font-size:0.72rem;color:gray;"
+        "margin-bottom:6px'>Climate Policy Intelligence Engine</div>",
+        unsafe_allow_html=True,
     )
-    st.subheader("Corpus")
-    st.markdown(
-        "Ofgem SSES · DESNZ ZEV Mandate · IEA WEO 2025 · "
-        "BoE CBES × 3 + Disclosure + Macro Implications · "
-        "CCC Progress 2024/2025 + Seventh Carbon Budget · ESO Beyond 2030"
-    )
-    if st.button("🗑️ Clear chat history"):
+    st.divider()
+
+    with st.expander("ℹ️ About"):
+        st.markdown(
+            "**Pipeline:** Hybrid BM25 + Dense (BAAI/bge-base-en-v1.5) → RRF → "
+            "GPT-5.4-mini synthesis with citation verification.\n\n"
+            "**Corpus:** Ofgem SSES · DESNZ ZEV Mandate · IEA WEO 2025 · "
+            "BoE CBES × 3 + Disclosure + Macro Implications · "
+            "CCC Progress 2024/2025 + Seventh Carbon Budget · ESO Beyond 2030"
+        )
+
+    # ── Query History ────────────────────────────────────────────────
+    st.subheader("🕒 Query History")
+
+    # Current session
+    session_queries = [
+        msg["content"]
+        for msg in st.session_state.messages
+        if msg["role"] == "user"
+    ]
+
+    if session_queries:
+        st.caption(f"**This session** — {len(session_queries)} {'query' if len(session_queries) == 1 else 'queries'}")
+        for i, q in enumerate(reversed(session_queries)):
+            label = (q[:54] + "…") if len(q) > 54 else q
+            if st.button(label, key=f"sess_{i}", use_container_width=True, help=q):
+                st.session_state["pending_query"] = q
+                st.rerun()
+    else:
+        st.caption("No queries yet this session.")
+
+    st.divider()
+
+    # Postgres history (cross-session)
+    hdr_col, btn_col = st.columns([4, 1])
+    with hdr_col:
+        st.caption("**All recent queries**")
+    with btn_col:
+        if st.button("↺", key="refresh_pg", help="Refresh from database"):
+            _refresh_pg_history()
+            st.rerun()
+
+    # Lazy-load on first render
+    if st.session_state.pg_history is None:
+        _refresh_pg_history()
+
+    pg_rows: list[dict] = st.session_state.pg_history or []
+    session_set = set(session_queries)
+    pg_unique = [r for r in pg_rows if r.get("query", "") not in session_set]
+
+    if pg_unique:
+        for i, row in enumerate(pg_unique[:20]):
+            q = row.get("query", "")
+            ts = row.get("ts")
+            is_refusal = row.get("is_refusal", False)
+
+            label = (q[:54] + "…") if len(q) > 54 else q
+            prefix = "🚫 " if is_refusal else ""
+
+            ts_str = ""
+            if ts:
+                try:
+                    ts_str = ts.strftime("%d %b")
+                except Exception:
+                    ts_str = str(ts)[:10]
+
+            help_text = f"{q}\n\n{ts_str}" if ts_str else q
+            if st.button(f"{prefix}{label}", key=f"pg_{i}", use_container_width=True, help=help_text):
+                st.session_state["pending_query"] = q
+                st.rerun()
+    elif not pg_rows:
+        st.caption("Database not reachable — showing session history only.")
+    else:
+        st.caption("All recent queries are already shown above.")
+
+    st.divider()
+    if st.button("🗑️ Clear chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
 
-# Pipeline load — cached per process.
-# Use st.empty() + st.info() so the loading state is a visible blue box in the
-# main content area (st.spinner shows only a tiny top-right indicator in 1.5x).
+# ────────────────────────────────────────────────────────────────────────
+# Main content
+# ────────────────────────────────────────────────────────────────────────
+
+logo_tag = _logo_img_tag(width=44)
+st.markdown(
+    f"<div style='display:flex;align-items:center;gap:12px;margin-bottom:4px'>"
+    f"{logo_tag}"
+    f"<div>"
+    f"<div style='font-size:1.5rem;font-weight:700;line-height:1.2'>Climate Policy Intelligence Engine</div>"
+    f"<div style='color:gray;font-size:0.85rem'>Domain-aware RAG over 12 UK &amp; global climate policy documents "
+    f"(Ofgem, DESNZ, IEA, BoE, CCC, ESO)</div>"
+    f"</div></div>",
+    unsafe_allow_html=True,
+)
+
+# Pipeline load — cached per process
 _startup_box = st.empty()
 if "pipeline_ready" not in st.session_state:
     _startup_box.info(
@@ -213,7 +314,7 @@ if "pipeline_ready" not in st.session_state:
     )
 hybrid, synth, qlogger = _load_pipeline()
 st.session_state["pipeline_ready"] = True
-_startup_box.empty()  # clear the box once the pipeline is ready
+_startup_box.empty()
 
 
 # ── Render past messages ─────────────────────────────────────────────
@@ -225,35 +326,36 @@ for i, msg in enumerate(st.session_state.messages):
             _render_brief(msg["content"], msg_index=i)
 
 
+# ── Pending query from sidebar click ────────────────────────────────
+pending: str | None = None
+if "pending_query" in st.session_state:
+    pending = st.session_state["pending_query"]
+    del st.session_state["pending_query"]
+
+
 # ── New query input ──────────────────────────────────────────────────
-prompt = st.chat_input("Ask a question about the corpus…")
+prompt = st.chat_input("Ask a question about the corpus…") or pending
+
 if prompt:
-    # 1. Echo the user's query
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # 2. Run the pipeline (spinner while waiting)
     with st.chat_message("assistant"):
         with st.spinner("Retrieving + synthesising…"):
             t0 = time.time()
             brief = run_query(prompt, hybrid, synth, qlogger)
             elapsed_s = time.time() - t0
 
-        # Guarantee a query_id — run_query returns one on both happy and
-        # error paths, but be defensive.
         brief.setdefault("query_id", str(uuid.uuid4()))
 
-        # Push into history BEFORE rendering so the feedback widget can
-        # look itself up by msg_index.
         st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": brief,
-                "voted": False,
-            }
+            {"role": "assistant", "content": brief, "voted": False}
         )
         _trim_history()
-
         _render_brief(brief, msg_index=len(st.session_state.messages) - 1)
         st.caption(f"⏱ {elapsed_s:.1f}s")
+
+    # Refresh sidebar history so the new query appears immediately
+    _refresh_pg_history()
+    st.rerun()

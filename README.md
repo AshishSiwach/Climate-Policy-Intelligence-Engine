@@ -337,9 +337,7 @@ decides whether retrieved chunks are sufficient:
   the LLM's `answer` field saying excerpts are insufficient, or `message.refusal`
   (OpenAI content-policy fallback) → return canonical refusal brief
 
-Both paths are logged distinctly. Not yet implemented: retriever-agreement gate
-(replaces the deleted RRF-threshold short-circuit) and confidence layer
-(removed after calibration showed AUC 0.668 — too weak to promise to users).
+Both paths are logged distinctly.
 
 ### Hybrid retrieval — BM25 + dense + RRF k=60
 

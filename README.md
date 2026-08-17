@@ -409,8 +409,8 @@ should answer from what exists without fabricating:
 - **CCC Progress traffic-light indicators** do not extract as text from PDF
   (PyMuPDF limitation). The surrounding prose restates the assessment and
   carries the retrieval signal.
-- **Single-turn RAG.** One retrieval pass + one LLM call. Query decomposition,
-  agentic loops, and iterative retrieval are future work.
+- **Single-turn RAG.** One retrieval pass + one LLM call. No Query decomposition,
+   or agentic loops.
 - **Contradiction detection is experimental.** The `contradictions[]` field is
   LLM self-report, not cross-doc claim verification. Treat as a hint.
 - **Streamlit app is not authenticated.** Anonymous single-user demo. Multi-tenant

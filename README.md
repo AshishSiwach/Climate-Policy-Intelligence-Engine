@@ -281,7 +281,7 @@ single live query exposed it immediately.
 ### Step 1 — Clone and install
 
 ```bash
-git clone https://github.com/ashishsiwach2789/cpie.git
+git clone https://github.com/AshishSiwach/Climate-Policy-Intelligence-Engine.git cpie
 cd cpie
 make install
 ```
@@ -329,12 +329,13 @@ docker compose up
 ### Corrective RAG (CRAG-style correction layer)
 
 CPIE implements a coarse CRAG pattern (Yan et al. 2024) between retrieval and
-synthesis:
+synthesis. Rather than a separate evaluator model, the same synthesis LLM
+decides whether retrieved chunks are sufficient:
 
-- **CORRECT** — LLM does not refuse → synthesise and return `AnalystBrief`
-- **INCORRECT** — LLM emits `message.refusal`, or retrieval returns zero chunks
-  → return canonical refusal brief (`"The corpus does not contain sufficient
-  information…"`)
+- **CORRECT** — LLM returns a substantive answer → return `AnalystBrief`
+- **INCORRECT** — triggered by zero chunks (short-circuit before LLM call),
+  the LLM's `answer` field saying excerpts are insufficient, or `message.refusal`
+  (OpenAI content-policy fallback) → return canonical refusal brief
 
 Both paths are logged distinctly. Not yet implemented: retriever-agreement gate
 (replaces the deleted RRF-threshold short-circuit) and confidence layer

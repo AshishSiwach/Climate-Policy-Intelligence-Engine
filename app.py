@@ -296,10 +296,10 @@ with st.sidebar:
 st.markdown(
     """
     <style>
-    :root                    { --cpie-title: #00205C; }
-    @media (prefers-color-scheme: dark) { :root { --cpie-title: #C8D8F0; } }
-    html[data-theme="dark"]  { --cpie-title: #C8D8F0; }
-    html[data-theme="light"] { --cpie-title: #00205C; }
+    :root                    { --cpie-title: #0D9488; }
+    @media (prefers-color-scheme: dark) { :root { --cpie-title: #5EEAD4; } }
+    html[data-theme="dark"]  { --cpie-title: #5EEAD4; }
+    html[data-theme="light"] { --cpie-title: #0D9488; }
     </style>
     """,
     unsafe_allow_html=True,

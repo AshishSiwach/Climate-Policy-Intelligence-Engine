@@ -221,7 +221,8 @@ Grafana dashboards (auto-provisioned, no manual setup):
 | Refusal rate | % is\_refusal over time |
 | Latency percentiles | p50 synthesis + retrieval |
 | Top-cited docs | Which sources get used |
-| Cost per day | Cumulative $ spend |
+| Cumulative cost | Total $ spend (last 24h, stat) |
+| Cost per day | Daily $ spend over time |
 | User feedback ratio | Thumbs up / total votes |
 | Recent failures | Failure reason + query snippet |
 
@@ -291,7 +292,8 @@ make install
 
 ```bash
 cp .env.example .env
-# Open .env and set OPENAI_API_KEY=sk-...
+# Required: set OPENAI_API_KEY=sk-...
+# Optional: Postgres and Grafana variables have working local defaults already set
 ```
 
 ### Step 3 — Download corpus, ingest, and run
@@ -305,8 +307,7 @@ make data       # downloads 12 PDFs to data/raw/ (note: IEA WEO 2025 needs manua
 docker compose up -d postgres grafana
 
 # Ingest PDFs → DuckDB, build BM25 + Chroma indices
-uv run python scripts/ingest.py
-uv run python scripts/build_indices.py
+make ingest
 
 # Run the Streamlit chat UI
 make run

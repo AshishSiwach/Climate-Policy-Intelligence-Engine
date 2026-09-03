@@ -72,6 +72,7 @@ def test_verify_citations_keeps_matching(sample_chunks):
         doc_id="OFGEM_TEST",
         passage="Ofgem proposes new load control licensing requirements",
         page=1,
+        chunk_id="OFGEM_TEST_0",
     )
     verified = _verify_citations([llm_citation], sample_chunks)
     assert len(verified) == 1
@@ -84,6 +85,7 @@ def test_verify_citations_drops_fabricated(sample_chunks):
         doc_id="OFGEM_TEST",
         passage="The moon is made of cheese and Ofgem regulates dairy",
         page=1,
+        chunk_id="OFGEM_TEST_0",
     )
     verified = _verify_citations([fabricated], sample_chunks)
     assert verified == []
@@ -94,6 +96,7 @@ def test_verify_citations_case_insensitive(sample_chunks):
         doc_id="OFGEM_TEST",
         passage="OFGEM PROPOSES NEW LOAD CONTROL LICENSING",
         page=1,
+        chunk_id="OFGEM_TEST_0",
     )
     verified = _verify_citations([citation], sample_chunks)
     assert len(verified) == 1
@@ -105,6 +108,7 @@ def test_verify_citations_injects_publication_date(sample_chunks):
         doc_id="BOE_TEST",
         passage="UK banks faced aggregate losses of £334 billion under the CBES",
         page=53,
+        chunk_id="BOE_TEST_0",
     )
     verified = _verify_citations([llm_citation], sample_chunks)
     assert len(verified) == 1
@@ -165,6 +169,7 @@ def test_synthesise_normal_path_returns_verified_citations(sample_chunks):
                 doc_id="OFGEM_TEST",
                 passage="Ofgem proposes new load control licensing requirements",
                 page=1,
+                chunk_id="OFGEM_TEST_0",
             )
         ],
         contradictions=[],

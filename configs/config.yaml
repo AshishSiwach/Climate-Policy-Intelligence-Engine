@@ -45,7 +45,10 @@ vector_store:
 # --- LLM synthesis (TBD — lock after Week 2 model_selection.ipynb) ---
 synthesis:
   model: gpt-5.4-mini  # LOCKED Week 5 Step 3b — upgraded from gpt-4o-mini after judge-strictness-controlled A/B (see model_selection.md)
-  max_tokens: 512
+  # max_tokens: 512  # OBSOLETE — runtime uses 2000 (src/config/settings.py). Bumped in Week 5 Step 3b
+  #                  # to avoid LengthFinishReasonError on structured output with 5 citations.
+  #                  # The canonical value is set in SynthesisSettings.max_tokens = 2000.
+  max_tokens: 2000
   temperature: 0.0
   # Lock after: quality, latency, cost comparison on 10 queries
 

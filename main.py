@@ -29,7 +29,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import date
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -96,7 +96,7 @@ def _daily_cost_so_far(log_path: Path) -> float:
     """Sum today's `cost_usd` values from the JSONL log."""
     if not log_path.exists():
         return 0.0
-    today = date.today().isoformat()
+    today = datetime.now(timezone.utc).date().isoformat()  # UTC date — matches UTC timestamps in log
     total = 0.0
     with open(log_path, encoding="utf-8") as f:
         for line in f:

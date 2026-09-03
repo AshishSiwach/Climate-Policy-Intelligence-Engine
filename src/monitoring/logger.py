@@ -30,6 +30,18 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
+# Lazy import — avoids pulling in pyyaml/pydantic at module load time.
+# Falls back gracefully if the settings module is not yet importable.
+def _get_config_fingerprint() -> str:
+    try:
+        from config.settings import settings_fingerprint
+
+        return settings_fingerprint()
+    except Exception:
+        return "unknown"
+
+
 DEFAULT_LOG_PATH = Path("logs/queries.jsonl")
 
 # Prefix of the canonical out-of-corpus refusal. Used to compute is_refusal
@@ -110,5 +122,8 @@ def build_query_record(
         "contradiction_count": len(brief.contradictions) if brief else 0,
         # Failure tracking
         "failure_reason": failure_reason,
+        # Config fingerprint — first 8 hex chars of SHA-256(settings JSON).
+        # Allows log slices to be tied to the exact config version that ran.
+        "config_fingerprint": _get_config_fingerprint(),
     }
     return record

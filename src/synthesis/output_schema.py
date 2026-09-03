@@ -28,6 +28,14 @@ class LLMCitation(BaseModel):
     doc_id: str = Field(..., description="Source document identifier, e.g. OFGEM_SMART_SECURE_2025")
     passage: str = Field(..., description="Verbatim quote from the retrieved chunk that supports the claim")
     page: int = Field(..., ge=1, description="Page number in the source document")
+    chunk_id: str | None = Field(
+        default=None,
+        description=(
+            "chunk_id of the retrieved excerpt this passage was drawn from. "
+            "Format: {doc_id}_{chunk_index} as shown in the [chunk_id=...] header of each excerpt. "
+            "Required — fill this from the excerpt header, not from your knowledge."
+        ),
+    )
 
 
 class Citation(BaseModel):

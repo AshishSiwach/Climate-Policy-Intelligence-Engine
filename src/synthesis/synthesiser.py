@@ -84,6 +84,7 @@ Rules:
 2. Quote verbatim from the excerpts — do not paraphrase quoted material inside a citation's `passage` field.
 3. Chunks marked `[chunk_type: table]` contain tabular data. Extract specific values and units; do not paraphrase.
 4. Contradictions between excerpts: only report if two excerpts make directly opposing factual claims. Otherwise leave `contradictions` empty. This is experimental — err on the side of not flagging.
+5. For each citation, set `chunk_id` to the value shown in the `[chunk_id=...]` header of the excerpt you drew the passage from (format: {doc_id}_{chunk_index}). This field is required — never leave it null.
 
 If the excerpts genuinely do not contain enough information to answer the question, refuse the request rather than fabricating an answer. (Structured Outputs will emit a refusal message.)
 
@@ -102,6 +103,7 @@ Rules:
 3. Chunks marked `[chunk_type: table]` contain tabular data. Extract specific values and units; do not paraphrase.
 4. Contradictions between excerpts: only report if two excerpts make directly opposing factual claims. Otherwise leave `contradictions` empty. This is experimental — err on the side of not flagging.
 5. When retrieved excerpts come from multiple different `doc_id` values AND the question calls for comparison, synthesis, or relating sources to each other: EXPLICITLY compare or contrast the positions from each source in your answer. Cite the specific `doc_id` you are drawing from at each comparison point. Do NOT collapse multi-source answers into a single-voice summary.
+6. For each citation, set `chunk_id` to the value shown in the `[chunk_id=...]` header of the excerpt you drew the passage from (format: {doc_id}_{chunk_index}). This field is required — never leave it null.
 
 If the excerpts genuinely do not contain enough information to answer the question, refuse the request rather than fabricating an answer. (Structured Outputs will emit a refusal message.)
 
@@ -122,6 +124,7 @@ Rules:
 4. Contradictions between excerpts: only report if two excerpts make directly opposing factual claims. Otherwise leave `contradictions` empty. This is experimental — err on the side of not flagging.
 5. When the question asks for a specific figure, percentage, cost, date, quantity, or unit-bearing value: FIRST scan the excerpts (prose AND table chunks) for the exact value. If found, quote it verbatim with the surrounding sentence in the citation `passage` and give the exact page. Do NOT round, generalise, or restate as "approximately". Do NOT refuse simply because the value is in a table chunk — extract it. If the value genuinely is not in the excerpts, refuse.
 6. Do NOT answer from your general knowledge under any circumstances. If the answer to the question is not present in the provided excerpts — even if you know the answer from your training data — you MUST refuse. This corpus covers climate policy, energy transition, and financial regulation only; questions outside that domain must be refused regardless of how simple they are.
+7. For each citation, set `chunk_id` to the value shown in the `[chunk_id=...]` header of the excerpt you drew the passage from (format: {doc_id}_{chunk_index}). This field is required — never leave it null.
 
 If the excerpts genuinely do not contain enough information to answer the question, refuse the request rather than fabricating an answer. (Structured Outputs will emit a refusal message.)
 
@@ -303,11 +306,16 @@ class Synthesiser:
 
 
 def _format_context(chunks: list[dict]) -> str:
-    """Render retrieved chunks into a compact, LLM-friendly context block."""
+    """Render retrieved chunks into a compact, LLM-friendly context block.
+
+    chunk_id is included in the header so the model can copy it verbatim into
+    each citation's chunk_id field — required by the hardened verifier.
+    """
     lines = []
     for i, c in enumerate(chunks, 1):
         header = (
-            f"[Excerpt {i}] doc_id={c['doc_id']}  page={c['page_number']}  chunk_type={c.get('chunk_type', 'prose')}"
+            f"[Excerpt {i}] doc_id={c['doc_id']}  page={c['page_number']}"
+            f"  chunk_type={c.get('chunk_type', 'prose')}  chunk_id={c.get('chunk_id', '')}"
         )
         lines.append(header)
         lines.append(c["text"].strip())
@@ -321,51 +329,25 @@ def _format_context(chunks: list[dict]) -> str:
 
 
 def _verify_citations(citations: list[LLMCitation], chunks: list[dict]) -> list[Citation]:
+    """Entry point for citation verification — delegates to the hardened verifier.
+
+    The hardened verifier (``evidence.citations.verify_citations``) is fail-closed:
+    it requires a ``chunk_id`` on every citation and pins each citation to the
+    exact chunk the model claimed, pulling doc_id/page from the chunk rather
+    than trusting the model-supplied values.
+
+    This wrapper preserves the original function signature so existing callers
+    in ``synthesise()`` continue to work unchanged.
+
+    ``evidence.citations`` is imported lazily (inside this function) to avoid a
+    circular import: ``evidence.citations`` imports from ``synthesis.output_schema``,
+    which causes ``synthesis/__init__.py`` to load ``synthesiser``, which would then
+    try to import ``evidence.citations`` at module level — a circular dependency.
+    The lazy import breaks the cycle.
     """
-    Verify each LLM-produced citation against retrieved chunks and enrich with
-    metadata (publication_date) pulled from the source chunk.
+    from evidence.citations import verify_citations  # lazy — avoids circular import
 
-    Comparison is case-insensitive with whitespace normalised. Fabricated
-    citations (LLM invented a passage) get dropped; genuine ones survive and
-    are upgraded from LLMCitation → Citation with pipeline-injected fields.
-    """
-    verified: list[Citation] = []
-    # Pair each normalised chunk text with the original chunk dict so we can
-    # inject metadata (publication_date) after a successful match.
-    normalised_chunks: list[tuple[str, dict]] = [(_normalise(c["text"]), c) for c in chunks]
-
-    for cit in citations:
-        target = _normalise(cit.passage)
-        if not target:
-            continue
-
-        # Anchor on the first 60 chars of the normalised passage — long enough
-        # to be distinctive, short enough that minor extraction noise doesn't
-        # break the match.
-        anchor = target[:60]
-        matched_chunk = next(
-            (chunk for chunk_text, chunk in normalised_chunks if anchor in chunk_text),
-            None,
-        )
-
-        if matched_chunk is not None:
-            verified.append(
-                Citation(
-                    doc_id=cit.doc_id,
-                    passage=cit.passage,
-                    page=cit.page,
-                    publication_date=matched_chunk.get("publication_date"),
-                )
-            )
-        else:
-            logger.info(
-                "Dropped unverified citation: doc_id=%s page=%d passage=%r",
-                cit.doc_id,
-                cit.page,
-                cit.passage[:80],
-            )
-
-    return verified
+    return verify_citations(citations, chunks)
 
 
 def _normalise(text: str) -> str:

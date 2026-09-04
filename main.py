@@ -27,6 +27,8 @@ import torch  # noqa: F401
 import argparse
 import json
 import logging
+import random
+import threading
 import time
 import uuid
 from datetime import datetime, timezone
@@ -38,6 +40,11 @@ from monitoring import QueryLogger, build_query_record
 from monitoring.db import insert_query_record as db_insert_query_record
 from retrieval import BM25Retriever, HybridRetriever
 from retrieval.institution_detector import detect_institutions
+from src.agent.router import Path as RoutePath
+from src.agent.router import complexity_router
+from src.agent.workflow import agent_graph
+from src.config.settings import get_settings
+from src.synthesis.output_schema import AnalystBrief as AgentAnalystBrief
 from synthesis import AnalystBrief, Synthesiser
 from synthesis.query_classifier import classify_query
 from synthesis.synthesiser import OUT_OF_CORPUS_ANSWER
@@ -109,6 +116,203 @@ def _daily_cost_so_far(log_path: Path) -> float:
     return total
 
 
+def _should_use_agent(mode: str, canary_pct: float) -> bool:
+    """Return True if the agent path should be used for this request.
+
+    Args:
+        mode:       "false" | "canary" | "true" (from AGENT_ROUTE_ENABLED).
+        canary_pct: Fraction of requests to route to agent in canary mode.
+    """
+    if mode == "true":
+        return True
+    if mode == "canary":
+        return random.random() < canary_pct
+    return False  # "false" or any unrecognised value → fast path
+
+
+def _run_fast_path(
+    query: str,
+    hybrid: HybridRetriever,
+    synth: Synthesiser,
+    qlogger: QueryLogger,
+    top_k: int,
+    log_path: Path,
+    query_id: str,
+) -> dict:
+    """Execute the fast path (institution detection → retrieval → synthesis → log).
+
+    This is the complete existing pipeline extracted so agent routing can
+    call it explicitly.  Adds ``source: "fast"`` to the returned dict.
+    """
+    failure_reason: str | None = None
+    synthesis_result = None
+    retrieval_latency_ms = 0.0
+    chunks: list[dict] = []
+    institutions: list[str] = []
+
+    try:
+        institutions = detect_institutions(query) if METADATA_FILTER_ENABLED else []
+        if institutions:
+            logger.info("Metadata filter active — institutions detected: %s", institutions)
+
+        t0 = time.time()
+        chunks = hybrid.retrieve(query, top_k=top_k, institutions=institutions)
+        retrieval_latency_ms = (time.time() - t0) * 1000
+
+        synthesis_result = synth.synthesise(query, chunks)
+    except Exception as e:
+        failure_reason = f"{type(e).__name__}: {e}"
+        logger.exception("Pipeline failure for query: %r", query)
+
+    record = build_query_record(
+        query=query,
+        retrieved_chunks=chunks,
+        retrieval_latency_ms=retrieval_latency_ms,
+        synthesis_result=synthesis_result,
+        model_used=synth.model,
+        failure_reason=failure_reason,
+        query_id=query_id,
+        detected_institutions=institutions,
+    )
+    qlogger.log(record)
+    _safe_db_write(record)
+
+    if synthesis_result is None:
+        return {"error": failure_reason, "query_id": query_id, "source": "fast"}
+
+    result = synthesis_result["brief"].model_dump()
+    result["query_id"] = query_id
+    result["source"] = "fast"
+    return result
+
+
+def _run_agent_path(
+    query: str,
+    task_type: str,
+    hybrid: HybridRetriever,
+    synth: Synthesiser,
+    qlogger: QueryLogger,
+    query_id: str,
+    log_path: Path,
+) -> dict:
+    """Execute the agent path (LangGraph workflow → AnalystBrief → log).
+
+    Returns a dict in the same shape as the fast path.  Raises on any
+    unhandled error so the caller can fall back to the fast path.
+    Adds ``source: "agent"`` to the returned dict.
+    """
+    t_start = time.time()
+
+    initial_state: dict = {
+        "request_id": query_id,
+        "query": query,
+        "task_type": task_type,
+        "sub_questions": [],
+        "retrievals": {},
+        "coverage": {},
+        "claims": [],
+        "verified_claims": [],
+        "steps_used": 0,
+        "cost_used_usd": 0.0,
+        "time_used_s": 0.0,
+        "retries_used": {},
+        "result": None,
+        "termination_reason": None,
+        "_retriever": hybrid,  # injected for the retriever node
+    }
+
+    final_state = agent_graph.invoke(initial_state)
+    latency_s = time.time() - t_start
+
+    result_dict = final_state.get("result") or {}
+    if result_dict:
+        brief = AgentAnalystBrief(**result_dict)
+    else:
+        brief = AgentAnalystBrief(
+            answer="The agent could not produce an answer for this query.",
+            citations=[],
+            truncated=True,
+            termination_reason=final_state.get("termination_reason", "fallback_to_fast"),
+        )
+
+    agent_cost = final_state.get("cost_used_usd", 0.0)
+
+    # Log the agent run using the same record shape as the fast path.
+    # retrieved_chunks is empty — retrieval happened per sub-question, not
+    # as a single pass; cost comes from the final_state budget tracker.
+    record = build_query_record(
+        query=query,
+        retrieved_chunks=[],
+        retrieval_latency_ms=0.0,
+        synthesis_result={
+            "brief": brief,
+            "latency_ms": latency_s * 1000,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "cost_usd": agent_cost,
+        },
+        model_used="agent",
+        failure_reason=None,
+        query_id=query_id,
+    )
+    qlogger.log(record)
+    _safe_db_write(record)
+
+    result = brief.model_dump()
+    result["query_id"] = query_id
+    result["source"] = "agent"
+    return result
+
+
+def _run_agent_shadow(
+    query: str,
+    task_type: str,
+    hybrid: HybridRetriever,
+    query_id: str,
+) -> None:
+    """Fire-and-forget agent run in a daemon thread (shadow / dry-run mode).
+
+    The result is discarded — only the LangGraph traces land in
+    cpie.agent_traces.  This lets us measure agent behaviour in production
+    traffic before enabling the agent path for users.
+    """
+
+    def _shadow_task() -> None:
+        try:
+            initial_state: dict = {
+                "request_id": query_id,
+                "query": query,
+                "task_type": task_type,
+                "sub_questions": [],
+                "retrievals": {},
+                "coverage": {},
+                "claims": [],
+                "verified_claims": [],
+                "steps_used": 0,
+                "cost_used_usd": 0.0,
+                "time_used_s": 0.0,
+                "retries_used": {},
+                "result": None,
+                "termination_reason": None,
+                "_retriever": hybrid,
+            }
+            final_state = agent_graph.invoke(initial_state)
+            logger.info(
+                "Shadow agent run complete: query_id=%s termination=%s cost=$%.4f steps=%d",
+                query_id,
+                final_state.get("termination_reason"),
+                final_state.get("cost_used_usd", 0.0),
+                final_state.get("steps_used", 0),
+            )
+        except Exception as exc:
+            logger.warning(
+                "Shadow agent run failed: query_id=%s error=%s", query_id, exc
+            )
+
+    thread = threading.Thread(target=_shadow_task, daemon=True, name=f"shadow-{query_id[:8]}")
+    thread.start()
+
+
 def build_pipeline() -> tuple[HybridRetriever, Synthesiser]:
     """Load indices + retriever + synthesiser. One-time setup per CLI invocation."""
     if not BM25_PATH.exists():
@@ -172,7 +376,7 @@ def run_query(
         )
         qlogger.log(record)
         _safe_db_write(record)
-        return {**brief.model_dump(), "query_id": query_id}
+        return {**brief.model_dump(), "query_id": query_id, "source": "fast"}
 
     # Guardrail 2 — daily cost circuit breaker
     daily_cost = _daily_cost_so_far(log_path)
@@ -195,7 +399,7 @@ def run_query(
         )
         qlogger.log(record)
         _safe_db_write(record)
-        return {**brief.model_dump(), "query_id": query_id}
+        return {**brief.model_dump(), "query_id": query_id, "source": "fast"}
 
     # Guardrail 3 — pre-retrieval domain gate
     # Classifies the query cheaply (GPT-4o-mini, ~$0.00003) before spending
@@ -221,48 +425,38 @@ def run_query(
             )
             qlogger.log(record)
             _safe_db_write(record)
-            return {**brief.model_dump(), "query_id": query_id}
+            return {**brief.model_dump(), "query_id": query_id, "source": "fast"}
 
-    # Normal pipeline
-    failure_reason: str | None = None
-    synthesis_result = None
-    retrieval_latency_ms = 0.0
-    chunks: list[dict] = []
-    institutions: list[str] = []
+    # ── Agent routing ────────────────────────────────────────────────────────
+    # Classify complexity AFTER guardrails — avoids spending router tokens on
+    # queries that will be refused anyway. Fails-open (returns FAST/factual)
+    # so any router error falls through to the fast path transparently.
+    settings = get_settings()
+    agent_enabled = settings.agent.route_enabled
 
-    try:
-        institutions = detect_institutions(query) if METADATA_FILTER_ENABLED else []
-        if institutions:
-            logger.info("Metadata filter active — institutions detected: %s", institutions)
+    path, task_type = complexity_router(query)
 
-        t0 = time.time()
-        chunks = hybrid.retrieve(query, top_k=top_k, institutions=institutions)
-        retrieval_latency_ms = (time.time() - t0) * 1000
-
-        synthesis_result = synth.synthesise(query, chunks)
-    except Exception as e:
-        failure_reason = f"{type(e).__name__}: {e}"
-        logger.exception("Pipeline failure for query: %r", query)
-
-    record = build_query_record(
-        query=query,
-        retrieved_chunks=chunks,
-        retrieval_latency_ms=retrieval_latency_ms,
-        synthesis_result=synthesis_result,
-        model_used=synth.model,
-        failure_reason=failure_reason,
-        query_id=query_id,
-        detected_institutions=institutions,
+    use_agent = (
+        _should_use_agent(agent_enabled, settings.agent.canary_pct)
+        if (path == RoutePath.AGENT and task_type == "cross_doc")
+        else False
     )
-    qlogger.log(record)  # primary sink — always fires
-    _safe_db_write(record)  # secondary sink — never-raise on DB down
 
-    if synthesis_result is None:
-        return {"error": failure_reason, "query_id": query_id}
+    if use_agent:
+        try:
+            return _run_agent_path(query, task_type, hybrid, synth, qlogger, query_id, log_path)
+        except Exception:
+            logger.exception(
+                "Agent path failed for query: %r — falling back to fast path", query
+            )
+            # Fall through to fast path below
 
-    result = synthesis_result["brief"].model_dump()
-    result["query_id"] = query_id  # so Streamlit / callers can attach feedback
-    return result
+    # Shadow mode: run agent in background if the query is agent-eligible but
+    # the flag is not fully enabled (or the canary coin flip said fast path).
+    if path == RoutePath.AGENT and agent_enabled in ("false", "canary"):
+        _run_agent_shadow(query, task_type, hybrid, query_id)
+
+    return _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
 
 
 def main() -> None:

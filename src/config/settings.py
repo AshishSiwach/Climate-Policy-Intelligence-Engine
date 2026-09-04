@@ -21,6 +21,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -103,6 +104,27 @@ class UISettings(BaseModel):
     title: str = "CPIE — Climate Policy Intelligence Engine"
 
 
+class AgentSettings(BaseModel):
+    """Feature-flag settings for the agent route.
+
+    ``route_enabled`` is read from the ``AGENT_ROUTE_ENABLED`` environment
+    variable at settings-construction time so docker/systemd env overrides
+    work without touching config.yaml.  The lru_cache on get_settings() means
+    this is sampled once per process; call ``get_settings.cache_clear()`` in
+    tests to reset between runs.
+    """
+
+    route_enabled: str = Field(default_factory=lambda: os.environ.get("AGENT_ROUTE_ENABLED", "false"))
+    """
+    Controls the agent route for cross_doc queries:
+      "false"  — shadow mode (agent runs but fast-path answer is returned)
+      "canary" — agent active for canary_pct fraction of cross_doc queries
+      "true"   — agent active for all cross_doc queries
+    """
+    canary_pct: float = 0.10
+    """Fraction of cross_doc queries routed to the agent in canary mode (0–1)."""
+
+
 # ---------------------------------------------------------------------------
 # Top-level Settings model
 # ---------------------------------------------------------------------------
@@ -119,6 +141,7 @@ class Settings(BaseModel):
     output: OutputSettings = Field(default_factory=OutputSettings)
     monitoring: MonitoringSettings = Field(default_factory=MonitoringSettings)
     ui: UISettings = Field(default_factory=UISettings)
+    agent: AgentSettings = Field(default_factory=AgentSettings)
 
     @classmethod
     def from_yaml(cls, path: str | Path = _DEFAULT_CONFIG_PATH) -> "Settings":

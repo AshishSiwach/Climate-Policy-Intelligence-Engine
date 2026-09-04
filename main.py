@@ -459,6 +459,161 @@ def run_query(
     return _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
 
 
+def run_query_with_progress(
+    query: str,
+    hybrid: HybridRetriever,
+    synth: Synthesiser,
+    qlogger: QueryLogger,
+    top_k: int = 5,
+    log_path: Path = LOG_PATH,
+):
+    """Generator version of run_query that emits per-node progress events for agent queries.
+
+    Yields dicts of three shapes:
+        {"type": "routing", "path": "fast" | "agent"}   — always first
+        {"type": "node",    "name": str, "update": dict} — agent only, once per node
+        {"type": "result",  "brief": dict}               — always last
+
+    Guardrail refusals (length / daily cost / out-of-domain) yield "routing"="fast"
+    then immediately "result" — no "node" events, matching the fast-path UX.
+
+    Note: guardrail logic mirrors run_query(). Keep both in sync when adding new gates.
+    """
+    query_id = str(uuid.uuid4())
+
+    def _fast_result(brief_obj) -> dict:
+        r = brief_obj.model_dump()
+        r["query_id"] = query_id
+        r["source"] = "fast"
+        return r
+
+    def _log_fast(brief_obj, failure_reason, cost_usd=0.0):
+        record = build_query_record(
+            query=query,
+            retrieved_chunks=[],
+            retrieval_latency_ms=0.0,
+            synthesis_result={"brief": brief_obj, "latency_ms": 0.0,
+                              "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": cost_usd},
+            model_used=synth.model,
+            failure_reason=failure_reason,
+            query_id=query_id,
+        )
+        qlogger.log(record)
+        _safe_db_write(record)
+
+    # Guardrail 1 — query length
+    if len(query) > MAX_QUERY_CHARS:
+        brief = _canonical_refusal(QUERY_TOO_LONG_MSG)
+        _log_fast(brief, f"guardrail: query_too_long ({len(query)} chars)")
+        yield {"type": "routing", "path": "fast"}
+        yield {"type": "result", "brief": _fast_result(brief)}
+        return
+
+    # Guardrail 2 — daily cost circuit breaker
+    daily_cost = _daily_cost_so_far(log_path)
+    if daily_cost >= DAILY_COST_LIMIT_USD:
+        brief = _canonical_refusal(COST_LIMIT_MSG)
+        _log_fast(brief, f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)")
+        yield {"type": "routing", "path": "fast"}
+        yield {"type": "result", "brief": _fast_result(brief)}
+        return
+
+    # Guardrail 3 — domain gate
+    if QUERY_CLASSIFIER_ENABLED:
+        classification = classify_query(query)
+        if not classification.in_domain:
+            brief = _canonical_refusal(OUT_OF_CORPUS_ANSWER)
+            _log_fast(brief, f"guardrail: out_of_domain ({classification.reason})")
+            yield {"type": "routing", "path": "fast"}
+            yield {"type": "result", "brief": _fast_result(brief)}
+            return
+
+    # Routing decision
+    settings = get_settings()
+    agent_enabled = settings.agent.route_enabled
+    path, task_type = complexity_router(query)
+    use_agent = (
+        _should_use_agent(agent_enabled, settings.agent.canary_pct)
+        if (path == RoutePath.AGENT and task_type == "cross_doc")
+        else False
+    )
+
+    if use_agent:
+        yield {"type": "routing", "path": "agent"}
+
+        initial_state: dict = {
+            "request_id": query_id,
+            "query": query,
+            "task_type": task_type,
+            "sub_questions": [],
+            "retrievals": {},
+            "coverage": {},
+            "claims": [],
+            "verified_claims": [],
+            "steps_used": 0,
+            "cost_used_usd": 0.0,
+            "time_used_s": 0.0,
+            "retries_used": {},
+            "result": None,
+            "termination_reason": None,
+            "_retriever": hybrid,
+        }
+
+        t_start = time.time()
+        accumulated: dict = {}
+
+        try:
+            for chunk in agent_graph.stream(initial_state, stream_mode="updates"):
+                node_name = next(iter(chunk))
+                state_update = chunk[node_name]
+                accumulated.update(state_update)
+                yield {"type": "node", "name": node_name, "update": state_update}
+        except Exception:
+            logger.exception("Agent streaming failed for query_id=%s — falling back to fast path", query_id)
+            yield {"type": "routing", "path": "fast"}
+            result = _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
+            yield {"type": "result", "brief": result}
+            return
+
+        latency_s = time.time() - t_start
+        result_dict = accumulated.get("result") or {}
+        if result_dict:
+            brief_agent = AgentAnalystBrief(**result_dict)
+        else:
+            brief_agent = AgentAnalystBrief(
+                answer="The agent could not produce an answer for this query.",
+                citations=[],
+                truncated=True,
+                termination_reason=accumulated.get("termination_reason", "fallback_to_fast"),
+            )
+
+        agent_cost = accumulated.get("cost_used_usd", 0.0)
+        record = build_query_record(
+            query=query,
+            retrieved_chunks=[],
+            retrieval_latency_ms=0.0,
+            synthesis_result={"brief": brief_agent, "latency_ms": latency_s * 1000,
+                              "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": agent_cost},
+            model_used="agent",
+            failure_reason=None,
+            query_id=query_id,
+        )
+        qlogger.log(record)
+        _safe_db_write(record)
+
+        result = brief_agent.model_dump()
+        result["query_id"] = query_id
+        result["source"] = "agent"
+        yield {"type": "result", "brief": result}
+
+    else:
+        yield {"type": "routing", "path": "fast"}
+        if path == RoutePath.AGENT and agent_enabled in ("false", "canary"):
+            _run_agent_shadow(query, task_type, hybrid, query_id)
+        result = _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
+        yield {"type": "result", "brief": result}
+
+
 def main() -> None:
     load_dotenv()
     logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s %(message)s")

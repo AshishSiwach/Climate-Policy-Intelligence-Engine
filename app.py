@@ -30,7 +30,7 @@ from PIL import Image, ImageDraw
 import streamlit as st
 from dotenv import load_dotenv
 
-from main import build_pipeline, run_query
+from main import build_pipeline, run_query, run_query_with_progress
 from monitoring import QueryLogger
 from monitoring.db import fetch_recent_queries, insert_feedback
 
@@ -477,11 +477,63 @@ if prompt:
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    _NODE_LABELS = {
+        "planner":         "Planning sub-questions 🗂",
+        "retriever":       "Retrieving evidence 🔍",
+        "grader":          "Assessing coverage 📊",
+        "retry_retriever": "Retrieving additional evidence 🔍",
+        "claim_builder":   "Extracting verified claims 📋",
+        "verifier":        "Verifying citations ✅",
+        "synthesiser":     "Composing analysis ✍️",
+        "handle_termination": "Completing analysis ⚠️",
+    }
+
+    def _node_detail(name: str, update: dict) -> str:
+        if name == "planner":
+            n = len(update.get("sub_questions") or [])
+            return f" — {n} sub-question{'s' if n != 1 else ''}" if n else ""
+        if name in ("retriever", "retry_retriever"):
+            total = sum(len(v) for v in (update.get("retrievals") or {}).values())
+            return f" — {total} chunks" if total else ""
+        if name == "claim_builder":
+            n = len(update.get("claims") or [])
+            return f" — {n} claim{'s' if n != 1 else ''}" if n else ""
+        if name == "verifier":
+            n = len(update.get("verified_claims") or [])
+            return f" — {n} verified" if n else ""
+        return ""
+
     with st.chat_message("assistant"):
-        with st.spinner("Retrieving + synthesising…"):
-            t0 = time.time()
-            brief = run_query(prompt, hybrid, synth, qlogger)
-            elapsed_s = time.time() - t0
+        t0 = time.time()
+        brief = None
+        path_used = "fast"
+
+        gen = run_query_with_progress(prompt, hybrid, synth, qlogger)
+        routing_event = next(gen, None)
+        if routing_event:
+            path_used = routing_event.get("path", "fast")
+
+        with st.status("Analysing…", expanded=True) as status_box:
+            if path_used == "agent":
+                for event in gen:
+                    if event["type"] == "node":
+                        label = _NODE_LABELS.get(event["name"], event["name"])
+                        detail = _node_detail(event["name"], event["update"])
+                        status_box.write(label + detail)
+                    elif event["type"] == "result":
+                        brief = event["brief"]
+            else:
+                status_box.write("Retrieving evidence 🔍")
+                status_box.write("Composing analysis ✍️")
+                for event in gen:
+                    if event["type"] == "result":
+                        brief = event["brief"]
+            status_box.update(label="Done ✓", state="complete", expanded=False)
+
+        elapsed_s = time.time() - t0
+
+        if brief is None:
+            brief = {"answer": "An error occurred — please try again.", "citations": []}
 
         brief.setdefault("query_id", str(uuid.uuid4()))
 

@@ -1,0 +1,163 @@
+{
+  "id": null,
+  "uid": "cpie-agent-route",
+  "title": "CPIE Agent Route",
+  "tags": ["cpie", "agent", "phase-3"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "barchart",
+      "title": "Agent step distribution",
+      "description": "How many steps (node invocations) each agent run took before completing or being terminated. Counts traces from cpie.agent_traces grouped by total steps per trace_id.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT steps, COUNT(*) AS runs FROM (SELECT trace_id, MAX(step_no) AS steps FROM cpie.agent_traces WHERE $__timeFilter(created_at) GROUP BY trace_id) sub GROUP BY steps ORDER BY steps",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "vertical",
+        "xField": "steps",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "legend": { "displayMode": "hidden" }
+      }
+    },
+
+    {
+      "id": 2,
+      "type": "piechart",
+      "title": "Termination reason breakdown",
+      "description": "Fraction of agent runs that ended with each termination reason: complete | max_steps | max_cost | max_time | fallback_to_fast. Drawn from the final step per trace where termination_reason is set.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT COALESCE(termination_reason, 'unknown') AS reason, COUNT(DISTINCT trace_id) AS runs FROM cpie.agent_traces WHERE $__timeFilter(created_at) AND termination_reason IS NOT NULL GROUP BY reason ORDER BY runs DESC",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "right" },
+        "pieType": "pie",
+        "tooltip": { "mode": "single" }
+      }
+    },
+
+    {
+      "id": 3,
+      "type": "barchart",
+      "title": "Per-node latency (mean ms)",
+      "description": "Mean latency in milliseconds per workflow node across all agent traces in the time window. Nodes: planner, retriever, grader, retry_retriever, claim_builder, verifier, synthesiser.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT node_name, ROUND(AVG(latency_ms)) AS mean_latency_ms FROM cpie.agent_traces WHERE $__timeFilter(created_at) AND latency_ms IS NOT NULL GROUP BY node_name ORDER BY mean_latency_ms DESC",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms" },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "vertical",
+        "xField": "node_name",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "legend": { "displayMode": "hidden" }
+      }
+    },
+
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Coverage retry rate (%)",
+      "description": "Percentage of agent runs where at least one retry_retriever node was invoked — indicating a sub-question had a coverage gap that triggered a retry.",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT 100.0 * COUNT(DISTINCT retry_traces.trace_id)::float / NULLIF(COUNT(DISTINCT all_traces.trace_id), 0) AS retry_pct FROM (SELECT DISTINCT trace_id FROM cpie.agent_traces WHERE $__timeFilter(created_at)) AS all_traces LEFT JOIN (SELECT DISTINCT trace_id FROM cpie.agent_traces WHERE $__timeFilter(created_at) AND node_name = 'retry_retriever') AS retry_traces ON all_traces.trace_id = retry_traces.trace_id",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 40 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      }
+    },
+
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Mean cost per complex query (USD)",
+      "description": "Mean total cost_usd summed across all steps per trace_id, for agent traces in the time window. Reflects actual LLM spend per agent-routed query.",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT AVG(trace_cost) AS mean_cost_usd FROM (SELECT trace_id, SUM(cost_usd) AS trace_cost FROM cpie.agent_traces WHERE $__timeFilter(created_at) AND cost_usd IS NOT NULL GROUP BY trace_id) sub",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 4,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.03 },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      }
+    }
+  ]
+}

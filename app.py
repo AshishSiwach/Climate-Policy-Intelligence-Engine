@@ -177,6 +177,22 @@ def _render_brief(brief: dict, msg_index: int) -> None:
         st.error(f"Pipeline failure: {brief['error']}")
         return
 
+    # Agent path badge — shown next to the answer header when the agent was used
+    source = brief.get("source", "fast")
+    if source == "agent":
+        st.markdown(
+            "<span style='background:#16a34a;color:#fff;border-radius:4px;"
+            "padding:2px 8px;font-size:0.75rem;font-weight:600;'>🤖 Agent path</span>",
+            unsafe_allow_html=True,
+        )
+
+    # Truncated warning — agent hit a budget cap before synthesis completed
+    if brief.get("truncated"):
+        st.warning(
+            "⚠️ Answer may be incomplete — agent hit the budget cap.",
+            icon="⚠️",
+        )
+
     st.markdown(brief.get("answer", "(empty answer)"))
 
     citations = brief.get("citations", [])
@@ -203,6 +219,20 @@ def _render_brief(brief: dict, msg_index: int) -> None:
                     f"{c.get('summary', '')}"
                 )
                 st.caption("Contradiction detection is experimental — treat as a hint, not a verdict.")
+
+    # Coverage gaps — shown only for agent-path answers when evidence was partial
+    coverage_gaps = brief.get("coverage_gaps", [])
+    if coverage_gaps and source == "agent":
+        with st.expander(f"⚠️ Coverage gaps ({len(coverage_gaps)})", expanded=True):
+            st.markdown(
+                "<div style='background:#fef9c3;border-left:4px solid #ca8a04;"
+                "border-radius:4px;padding:10px 14px;'>"
+                "<strong>⚠️ Coverage gaps</strong><br/>"
+                "The agent could not find sufficient evidence for:<ul>"
+                + "".join(f"<li>{gap}</li>" for gap in coverage_gaps)
+                + "</ul></div>",
+                unsafe_allow_html=True,
+            )
 
     st.caption(CAVEAT)
 

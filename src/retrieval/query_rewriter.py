@@ -103,11 +103,7 @@ def rewrite_variants(query: str, n: int = 3, api_key: str | None = None) -> list
                 {"role": "user", "content": query},
             ],
         )
-        lines = [
-            line.strip()
-            for line in response.choices[0].message.content.splitlines()
-            if line.strip()
-        ]
+        lines = [line.strip() for line in response.choices[0].message.content.splitlines() if line.strip()]
         variants = [query] + lines[:n]
         # Deduplicate while preserving order
         seen: set[str] = set()

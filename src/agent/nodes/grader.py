@@ -108,7 +108,7 @@ def _build_grader_prompt(sub_questions: list, retrievals: dict) -> str:
             question = sq.get("question", "")
 
         chunks = retrievals.get(sq_id, [])
-        passages = " | ".join((c.get("text") or c.get("passage") or "")[:200] for c in chunks[:3])
+        passages = " | ".join((c.get("text") or c.get("passage") or "")[:300] for c in chunks[:5])
         lines.append(f"{sq_id}: Q={question!r}  PASSAGES={passages!r}")
 
     return "\n".join(lines)

@@ -13,11 +13,10 @@ from __future__ import annotations
 
 import logging
 
+import src.agent.policies as _policies
 from src.evidence.claims import SubQuestion
 
 logger = logging.getLogger(__name__)
-
-_DEFAULT_TOP_K = 5
 
 
 def run_retriever(state: dict) -> dict:
@@ -53,7 +52,7 @@ def run_retriever(state: dict) -> dict:
             continue
 
         try:
-            kwargs: dict = {"top_k": _DEFAULT_TOP_K}
+            kwargs: dict = {"top_k": _policies.RETRIEVER_TOP_K}
             if required_source:
                 kwargs["institutions"] = [required_source]
 

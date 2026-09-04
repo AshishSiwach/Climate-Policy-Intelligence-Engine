@@ -32,6 +32,7 @@ from src.agent.nodes.planner import run_planner
 from src.agent.nodes.retriever import run_retriever
 from src.agent.nodes.synthesiser import run_synthesiser
 from src.agent.nodes.verifier import run_verifier
+import src.agent.policies as _policies
 from src.agent.policies import MAX_COST_USD, MAX_STEPS, MAX_TIME_S, RETRY_LIMIT
 from src.agent.state import AgentState
 from src.evidence.claims import SubQuestion
@@ -134,7 +135,7 @@ def run_retry_retriever(state: AgentState) -> dict:
             new_retrievals[sq_id] = []
         else:
             try:
-                chunks = retriever.retrieve(refined_query, top_k=5)
+                chunks = retriever.retrieve(refined_query, top_k=_policies.RETRIEVER_TOP_K)
                 new_retrievals[sq_id] = chunks
                 logger.debug("run_retry_retriever: %s → %d chunks (refined)", sq_id, len(chunks))
             except Exception as exc:

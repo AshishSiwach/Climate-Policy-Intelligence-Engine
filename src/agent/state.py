@@ -37,3 +37,6 @@ class AgentState(TypedDict):
     # Terminal state
     result: Optional[dict]  # AnalystBrief dict; None in Phase 1
     termination_reason: Optional[str]  # complete | max_steps | max_cost | max_time | fallback_to_fast
+
+    # Runtime injection — not serialised, not part of eval output
+    _retriever: Optional[object]  # HybridRetriever instance injected by caller

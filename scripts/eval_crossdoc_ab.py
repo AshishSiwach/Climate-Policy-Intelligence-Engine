@@ -47,6 +47,10 @@ import sys
 import time
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Ensure src/ is on path when running as a script
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT / "src") not in sys.path:
@@ -79,15 +83,10 @@ def _load_cross_doc_queries(limit: int | None) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
-def _run_fast_path(query: str) -> dict:
+def _run_fast_path(query: str, hybrid, synth) -> dict:
     """Run the fast-path synthesiser and return timing + result."""
-    from retrieval.hybrid_retriever import HybridRetriever  # type: ignore[import]
-    from synthesis.synthesiser import Synthesiser
+    chunks = hybrid.retrieve(query, top_k=10)
 
-    retriever = HybridRetriever()
-    chunks = retriever.retrieve(query, top_k=10)
-
-    synth = Synthesiser()
     t0 = time.time()
     result = synth.synthesise(query, chunks)
     latency_s = time.time() - t0
@@ -107,7 +106,7 @@ def _run_fast_path(query: str) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _run_agent_path(query: str) -> dict:
+def _run_agent_path(query: str, hybrid) -> dict:
     """Run the Phase 2 agent graph and return timing + result."""
     import uuid
 
@@ -129,6 +128,7 @@ def _run_agent_path(query: str) -> dict:
         "retries_used": {},
         "result": None,
         "termination_reason": None,
+        "_retriever": hybrid,
     }
 
     t0 = time.time()
@@ -205,6 +205,12 @@ def _run_dry(queries: list[dict]) -> None:
 
 def _run_ab(queries: list[dict], use_judge: bool) -> None:
     """Run the A/B evaluation and write results to JSONL."""
+    from main import build_pipeline  # type: ignore[import]
+
+    print("Building pipeline (loading indices + embedding model)...")
+    hybrid, synth = build_pipeline()
+    print("Pipeline ready.\n")
+
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     records: list[dict] = []
@@ -219,7 +225,7 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
             print(f"[{i}/{len(queries)}] Running: {query_id!r} ...")
 
             try:
-                fast = _run_fast_path(question)
+                fast = _run_fast_path(question, hybrid, synth)
             except Exception as exc:
                 fast = {
                     "fast_answer": f"ERROR: {exc}",
@@ -230,7 +236,7 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 }
 
             try:
-                agent = _run_agent_path(question)
+                agent = _run_agent_path(question, hybrid)
             except Exception as exc:
                 agent = {
                     "agent_answer": f"ERROR: {exc}",

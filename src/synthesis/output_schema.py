@@ -19,6 +19,8 @@ signals are strong (semantic_sim + doc_aware_margin candidates, n>=100
 ground-truth data, AUC >= 0.75). See docs/week5_failure_analysis.md § 2d.
 """
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -72,3 +74,7 @@ class AnalystBrief(BaseModel):
     answer: str
     citations: list[Citation] = Field(default_factory=list)
     contradictions: list[Contradiction] = Field(default_factory=list)
+    # Phase 2+ fields
+    coverage_gaps: list[str] = Field(default_factory=list)  # sub-questions with partial/not_covered coverage
+    truncated: bool = False  # True if agent hit a budget cap before synthesis completed
+    termination_reason: Optional[str] = None  # complete | max_steps | max_cost | max_time | fallback_to_fast

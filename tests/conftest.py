@@ -1,9 +1,11 @@
 """
 Shared pytest fixtures + path setup.
 
-The editable install (`_editable_impl_cpie.pth`) already adds `src/` to
-sys.path, so `ingestion`, `retrieval`, `synthesis`, `monitoring` import
-directly. main.py sits at the repo root, so we add that too.
+The editable install (`_editable_impl_cpie.pth`) adds the MAIN repo's `src/`
+to sys.path.  When running in a worktree (e.g. phase-0-hardening), we must
+also insert the WORKTREE's `src/` at position 0 so new modules created in the
+worktree (``evidence``, ``config``) shadow the main repo's copies and are
+found first.  main.py sits at the repo root, so we add that too.
 """
 
 from __future__ import annotations
@@ -14,6 +16,9 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# Worktree's src/ must come first so new packages (evidence, config) are found
+# before the main-repo editable install on sys.path.
+sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT))
 
 
@@ -36,6 +41,7 @@ def _make_chunk(
     return {
         "text": text,
         "doc_id": doc_id,
+        "chunk_id": f"{doc_id}_{chunk_index}",  # matches dlt_pipeline format
         "institution": institution,
         "doc_type": "consultation",
         "jurisdiction": "UK",

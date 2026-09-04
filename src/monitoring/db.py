@@ -97,7 +97,7 @@ INSERT INTO cpie.query_logs (
     prompt_tokens, completion_tokens, cost_usd,
     answer, is_refusal, cited_doc_ids,
     citation_count, contradiction_count,
-    failure_reason
+    failure_reason, config_fingerprint
 ) VALUES (
     %(query_id)s, COALESCE(%(ts)s::timestamptz, now()), %(query)s,
     %(retrieved_doc_ids)s, %(retrieved_pages)s, %(rrf_scores)s,
@@ -106,7 +106,7 @@ INSERT INTO cpie.query_logs (
     %(prompt_tokens)s, %(completion_tokens)s, %(cost_usd)s,
     %(answer)s, %(is_refusal)s, %(cited_doc_ids)s,
     %(citation_count)s, %(contradiction_count)s,
-    %(failure_reason)s
+    %(failure_reason)s, %(config_fingerprint)s
 )
 ON CONFLICT (query_id) DO NOTHING
 """
@@ -171,6 +171,7 @@ def _normalise_record(record: dict) -> dict:
     out.setdefault("answer", None)
     out.setdefault("is_refusal", False)
     out.setdefault("failure_reason", None)
+    out.setdefault("config_fingerprint", None)
     return out
 
 

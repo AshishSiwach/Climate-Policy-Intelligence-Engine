@@ -35,7 +35,8 @@ services:
       - cpie_pgdata:/var/lib/postgresql/data
       # Init script — runs ONCE on first startup (empty volume). To re-run
       # after schema changes: docker compose down -v && docker compose up -d.
-      - ./monitoring/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./monitoring/postgres/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./monitoring/postgres/init_agent_traces.sql:/docker-entrypoint-initdb.d/02_agent_traces.sql:ro
     healthcheck:
       # pg_isready — postgres's own readiness probe. Compose won't consider
       # the service healthy until this passes; other services can depends_on

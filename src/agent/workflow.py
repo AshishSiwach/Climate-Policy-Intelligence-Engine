@@ -23,6 +23,8 @@ The retry loop refines queries for sub-questions with coverage gaps.
 from __future__ import annotations
 
 import logging
+import time
+from typing import Callable
 
 from langgraph.graph import END, StateGraph
 
@@ -38,6 +40,43 @@ from src.agent.state import AgentState
 from src.evidence.claims import SubQuestion
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Tracing wrapper
+# ---------------------------------------------------------------------------
+
+
+def _traced(node_fn: Callable[[dict], dict]) -> Callable[[dict], dict]:
+    """Wrap a node function to emit a span to agent_traces after each call."""
+    node_name = node_fn.__name__.removeprefix("run_")
+
+    def wrapper(state: dict) -> dict:
+        t0 = time.time()
+        result = node_fn(state)
+        latency_ms = int((time.time() - t0) * 1000)
+
+        try:
+            from src.observability.tracing import emit_span
+            cost = result.get("cost_used_usd", 0.0) - state.get("cost_used_usd", 0.0)
+            emit_span(
+                trace_id=state.get("request_id", ""),
+                step_no=state.get("steps_used", 0) + 1,
+                node_name=node_name,
+                input_summary={"query": state.get("query", ""), "steps_used": state.get("steps_used", 0)},
+                output_summary={"keys": list(result.keys())},
+                tool_called=None,
+                latency_ms=latency_ms,
+                cost_usd=max(cost, 0.0),
+                termination_reason=result.get("termination_reason"),
+            )
+        except Exception:
+            pass  # tracing is non-critical — never break the agent
+
+        return result
+
+    wrapper.__name__ = node_fn.__name__
+    return wrapper
 
 
 # ---------------------------------------------------------------------------
@@ -206,15 +245,15 @@ def build_graph():
     """
     graph = StateGraph(AgentState)
 
-    # Register all node functions
-    graph.add_node("planner", run_planner)
-    graph.add_node("retriever", run_retriever)
-    graph.add_node("grader", run_grader)
-    graph.add_node("retry_retriever", run_retry_retriever)
-    graph.add_node("claim_builder", run_claim_builder)
-    graph.add_node("verifier", run_verifier)
-    graph.add_node("synthesiser", run_synthesiser)
-    graph.add_node("handle_termination", handle_termination)
+    # Register all node functions — wrapped with tracing
+    graph.add_node("planner", _traced(run_planner))
+    graph.add_node("retriever", _traced(run_retriever))
+    graph.add_node("grader", _traced(run_grader))
+    graph.add_node("retry_retriever", _traced(run_retry_retriever))
+    graph.add_node("claim_builder", _traced(run_claim_builder))
+    graph.add_node("verifier", _traced(run_verifier))
+    graph.add_node("synthesiser", _traced(run_synthesiser))
+    graph.add_node("handle_termination", _traced(handle_termination))
 
     # Entry point
     graph.set_entry_point("planner")

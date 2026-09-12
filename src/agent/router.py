@@ -21,7 +21,20 @@ from enum import Enum
 logger = logging.getLogger(__name__)
 
 _VALID_TYPES = {"factual", "numeric", "cross_doc", "summary", "contradiction", "unsupported"}
-_AGENT_TYPES = {"cross_doc", "summary", "contradiction"}
+
+# Only cross_doc routes to agent in Phase 3.
+# summary and contradiction are Phase 5 routes — not yet built.
+_AGENT_TYPES = {"cross_doc"}
+
+
+def _agent_route_enabled() -> bool:
+    """Return True unless AGENT_ROUTE_ENABLED is explicitly disabled.
+
+    Reads the AGENT_ROUTE_ENABLED env var (default: true).
+    Set to 'false' / '0' / 'off' to force all queries to the fast path.
+    """
+    val = os.environ.get("AGENT_ROUTE_ENABLED", "true").lower().strip()
+    return val not in ("false", "0", "off", "no")
 
 _SYSTEM_PROMPT = """\
 You are classifying a climate policy question by query type. Respond with a JSON
@@ -56,6 +69,10 @@ def complexity_router(query: str, api_key: str | None = None) -> tuple[Path, str
     Returns:
         Tuple of (Path enum, task_type string).
     """
+    if not _agent_route_enabled():
+        logger.info("complexity_router: AGENT_ROUTE_ENABLED=false — all queries routed to FAST")
+        return Path.FAST, "factual"
+
     try:
         return _call_router(query, api_key)
     except Exception as exc:

@@ -88,7 +88,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      OPENAI_API_KEY:    ${OPENAI_API_KEY}
+      OPENAI_API_KEY:        ${OPENAI_API_KEY}
+      AGENT_ROUTE_ENABLED:   ${AGENT_ROUTE_ENABLED:-true}
       POSTGRES_HOST:     postgres          # docker-internal service name
       POSTGRES_PORT:     ${POSTGRES_PORT:-5432}
       POSTGRES_USER:     ${POSTGRES_USER:-cpie}

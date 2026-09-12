@@ -7,7 +7,6 @@ This tests src/agent/nodes/synthesiser.py — NOT the fast-path synthesiser.
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock, patch
 
 from src.agent.nodes.synthesiser import run_synthesiser
@@ -59,9 +58,17 @@ def _make_state(
     }
 
 
-def _mock_llm_response(content: str, prompt_tokens: int = 200, completion_tokens: int = 100):
+def _mock_parse_response(answer: str, citations: list | None = None, prompt_tokens: int = 200, completion_tokens: int = 100):
+    """Mock for client.beta.chat.completions.parse — returns message.parsed as LLMResponse."""
+    from src.synthesis.output_schema import LLMCitation, LLMResponse
+
+    parsed = LLMResponse(
+        answer=answer,
+        citations=[LLMCitation(**c) for c in (citations or [])],
+    )
     msg = MagicMock()
-    msg.content = content
+    msg.refusal = None
+    msg.parsed = parsed
     choice = MagicMock()
     choice.message = msg
     usage = MagicMock()
@@ -73,9 +80,9 @@ def _mock_llm_response(content: str, prompt_tokens: int = 200, completion_tokens
     return resp
 
 
-def _make_client(content: str):
+def _make_client(answer: str, citations: list | None = None):
     client = MagicMock()
-    client.chat.completions.create.return_value = _mock_llm_response(content)
+    client.beta.chat.completions.parse.return_value = _mock_parse_response(answer, citations)
     return client
 
 
@@ -90,13 +97,10 @@ class TestSynthesiserHappyPath:
         claims = [_make_claim("c_0", "BoE runs annual stress tests.", ["boe_0"], "boe")]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps(
-            {
-                "answer": "The BoE conducts annual climate stress tests.",
-                "coverage_gaps": [],
-            }
+        client = _make_client(
+            "The BoE conducts annual climate stress tests.",
+            citations=[{"chunk_id": "boe_0", "doc_id": "boe", "passage": "BoE runs climate stress tests annually.", "page": 1}],
         )
-        client = _make_client(llm_output)
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -112,8 +116,7 @@ class TestSynthesiserHappyPath:
         claims = [_make_claim("c_0", "BoE runs stress tests.", ["boe_0"], "boe")]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps({"answer": "BoE conducts stress tests.", "coverage_gaps": []})
-        client = _make_client(llm_output)
+        client = _make_client("BoE conducts stress tests.")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals, steps_used=5))
@@ -125,8 +128,7 @@ class TestSynthesiserHappyPath:
         claims = [_make_claim("c_0", "BoE runs stress tests.", ["boe_0"], "boe")]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps({"answer": "BoE conducts stress tests.", "coverage_gaps": []})
-        client = _make_client(llm_output)
+        client = _make_client("BoE conducts stress tests.")
         initial_cost = 0.02
 
         with patch("openai.OpenAI", return_value=client):
@@ -143,8 +145,10 @@ class TestSynthesiserHappyPath:
         ]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [chunk]}
-        llm_output = json.dumps({"answer": "BoE answer.", "coverage_gaps": []})
-        client = _make_client(llm_output)
+        client = _make_client(
+            "BoE answer.",
+            citations=[{"chunk_id": "boe_0", "doc_id": "boe", "passage": "BoE climate stress test findings from 2024.", "page": 1}],
+        )
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -172,13 +176,7 @@ class TestSynthesiserCoverageGaps:
             ),
         }
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps(
-            {
-                "answer": "BoE conducts stress tests.",
-                "coverage_gaps": ["No post-2020 emissions data found"],
-            }
-        )
-        client = _make_client(llm_output)
+        client = _make_client("BoE conducts stress tests.")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -195,13 +193,7 @@ class TestSynthesiserCoverageGaps:
             "sq_1": Coverage(sub_question_id="sq_1", status="not_covered", gap_reason="No relevant data"),
         }
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps(
-            {
-                "answer": "BoE conducts stress tests.",
-                "coverage_gaps": [],
-            }
-        )
-        client = _make_client(llm_output)
+        client = _make_client("BoE conducts stress tests.")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -215,8 +207,7 @@ class TestSynthesiserCoverageGaps:
         claims = [_make_claim("c_0", "BoE runs stress tests.", ["boe_0"], "boe")]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps({"answer": "BoE conducts stress tests.", "coverage_gaps": []})
-        client = _make_client(llm_output)
+        client = _make_client("BoE conducts stress tests.")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -236,8 +227,7 @@ class TestSynthesiserTermination:
         claims = [_make_claim("c_0", "BoE text.", ["boe_0"], "boe")]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps({"answer": "Answer here.", "coverage_gaps": []})
-        client = _make_client(llm_output)
+        client = _make_client("Answer here.")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -249,8 +239,7 @@ class TestSynthesiserTermination:
         claims = [_make_claim("c_0", "BoE text.", ["boe_0"], "boe")]
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
-        llm_output = json.dumps({"answer": "Answer here.", "coverage_gaps": []})
-        client = _make_client(llm_output)
+        client = _make_client("Answer here.")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))
@@ -265,7 +254,7 @@ class TestSynthesiserTermination:
         coverage = {"sq_0": Coverage(sub_question_id="sq_0", status="covered")}
         retrievals = {"sq_0": [_make_chunk("boe_0", "boe", "BoE runs climate stress tests annually.")]}
         client = MagicMock()
-        client.chat.completions.create.side_effect = ConnectionError("network down")
+        client.beta.chat.completions.parse.side_effect = ConnectionError("network down")
 
         with patch("openai.OpenAI", return_value=client):
             result = run_synthesiser(_make_state(claims, coverage, retrievals))

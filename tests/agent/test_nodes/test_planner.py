@@ -90,7 +90,7 @@ class TestRunPlannerViaCallPlanner:
         """First attempt returns None → retry (second call) is made."""
         call_count = [0]
 
-        def fake_call_planner(query, strict):
+        def fake_call_planner(query, system_prompt, use_json_mode):
             call_count[0] += 1
             if call_count[0] == 1:
                 return None  # first attempt fails

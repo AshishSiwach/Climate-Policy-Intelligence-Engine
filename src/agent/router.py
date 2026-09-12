@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 
 _VALID_TYPES = {"factual", "numeric", "cross_doc", "summary", "contradiction", "unsupported"}
 
-# Only cross_doc routes to agent in Phase 3.
-# summary and contradiction are Phase 5 routes — not yet built.
-_AGENT_TYPES = {"cross_doc"}
+# cross_doc and summary route to agent (Phase 5a adds summary).
+# contradiction is Phase 5b — not yet built.
+_AGENT_TYPES = {"cross_doc", "summary"}
 
 
 def _agent_route_enabled() -> bool:

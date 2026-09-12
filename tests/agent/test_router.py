@@ -76,8 +76,8 @@ def test_router_accuracy_mocked(router_labels):
 
 
 def test_router_agent_types_go_to_agent():
-    """cross_doc, summary, contradiction all route to AGENT."""
-    for task_type in ("cross_doc", "summary", "contradiction"):
+    """cross_doc and summary route to AGENT (contradiction is Phase 5b, not yet built)."""
+    for task_type in ("cross_doc", "summary"):
         mock_client = _make_mock_client(task_type)
         with patch("openai.OpenAI", return_value=mock_client):
             path, returned_type = complexity_router("any query")

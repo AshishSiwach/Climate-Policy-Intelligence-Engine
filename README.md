@@ -121,6 +121,77 @@ the model from inventing plausible-sounding but fabricated sources.
 
 ---
 
+### Stage 3b — Agent Route (cross-document queries)
+
+Cross-document queries — those requiring comparison or synthesis across multiple
+institutions — are routed to a 7-node LangGraph agent instead of the fast path.
+The agent decomposes the query into factual sub-questions, retrieves evidence per
+sub-question, grades coverage deterministically, and synthesises a verified brief.
+
+```
+Router → cross_doc? ──► Planner → Retriever → Grader ──► Claim Builder → Verifier → Synthesiser
+                                       ▲             |
+                                       └─ retry ◄────┘  (not_covered only, max 1 retry)
+```
+
+**Planner** (GPT-4o-mini): decomposes the query into ≤6 factual sub-questions.
+Comparison sub-questions are excluded — the synthesiser handles cross-source
+comparison from factual evidence.
+
+**Grader** (cross-encoder `ms-marco-MiniLM-L-6-v2`): scores each `(sub-question,
+passage)` pair; takes the maximum score across all retrieved passages. Deterministic
+— no LLM call. Thresholds calibrated on CPIE corpus via t-distribution (n=4 probe
+queries):
+
+| Score | Decision |
+|---|---|
+| ≥ 3.63 | covered — proceed |
+| ≥ −2.3 | partial — proceed with available evidence |
+| < −2.3 | not\_covered — retry with enriched query (parent + sub-question) |
+
+**Retry logic:** only `not_covered` sub-questions trigger a retry. `partial`
+proceeds to claim builder — evidence exists, the synthesiser notes gaps.
+`RETRY_LIMIT = 1`.
+
+**Claim Builder** (GPT-4o-mini): extracts structured claims from covered/partial
+sub-questions. Each claim must cite ≥1 chunk_id visible in the retrieved passages.
+
+**Verifier** (deterministic): drops claims whose `evidence_ids` are not present in
+`state["retrievals"]`. No semantic matching — a set-membership check against chunk_ids
+that were actually retrieved. Prevents chunk_id hallucination without an LLM call.
+
+**Synthesiser** (GPT-4o-mini): produces an `AnalystBrief` from verified claims.
+
+**Budget caps** (hard stops before each node):
+
+| Budget | Cap |
+|---|---|
+| Steps | 14 |
+| Wall time | 60s |
+| Cost | $0.05 |
+| Retries per sub-question | 1 |
+
+**Feature flag:** `AGENT_ROUTE_ENABLED=false` in `.env` forces all queries to the
+fast path. Default: `true`.
+
+#### Agent A/B results (n=3 cross-document queries, preliminary)
+
+| Metric | Fast path | Agent | Δ |
+|---|---|---|---|
+| Correctness (1–5) | 4.33 | **4.67** | +0.34 |
+| Completeness (1–5) | 3.67 | **4.67** | +1.00 |
+| Mean cost | $0.0076 | $0.0137 | 1.8× |
+| Mean latency | 6.1s | 24.5s | 4× |
+| Completion rate | — | **100%** | — |
+
+Baseline (52-question offline eval, fast path only): cross-doc Correctness 3.50,
+cross-doc Completeness 2.75. Agent A/B queries are a separate harder set.
+
+*n=3 is below the plan's n=30 target — treat as directional, not conclusive.
+Two-week canary soak underway.*
+
+---
+
 ### Stage 4 — Evaluation
 
 CPIE uses two complementary evaluation tracks: **offline evaluation** run
@@ -444,8 +515,9 @@ should answer from what exists without fabricating:
 - **CCC Progress traffic-light indicators** do not extract as text from PDF
   (PyMuPDF limitation). The surrounding prose restates the assessment and
   carries the retrieval signal.
-- **Single-turn RAG.** One retrieval pass + one LLM call. No Query decomposition,
-   or agentic loops.
+- **Agent route is cross-doc only (Phase 3).** Summary and contradiction routes
+  are planned for Phase 5 but not yet built. Queries classified as `summary` or
+  `contradiction` currently fall back to the fast path.
 - **Contradiction detection is experimental.** The `contradictions[]` field is
   LLM self-report, not cross-doc claim verification. Treat as a hint.
 
@@ -461,28 +533,43 @@ cpie/
                      institution_detector, reranker (evaluated, not active),
                      query_rewriter (evaluated, not active)
     synthesis/       synthesiser, output_schema, query_classifier (domain gate)
+    agent/
+      router.py            complexity router — fast vs agent path
+      workflow.py          LangGraph StateGraph (only file that imports langgraph)
+      state.py             AgentState TypedDict
+      policies.py          MAX_STEPS, MAX_COST, RETRY_LIMIT, RETRIEVER_TOP_K
+      nodes/
+        planner.py         decomposes query into factual sub-questions
+        retriever.py       per-sub-question hybrid retrieval
+        grader.py          cross-encoder coverage scoring (deterministic)
+        claim_builder.py   extract structured claims from covered passages
+        verifier.py        drop claims with hallucinated chunk_ids
+        synthesiser.py     produce AnalystBrief from verified claims
+    evidence/        Claim, Coverage, SubQuestion Pydantic models
+    observability/   tracing.py — emit_span() to agent_traces table
     evaluation/      judge, eval_runner, retrieval_metrics
     monitoring/      logger (JSONL), db (Postgres)
   tests/             unit + integration tests
   data/eval/
     ground_truth.json          52 hand-crafted QA pairs
+    cross_document_ground_truth.json  cross-doc A/B eval set
     results/                   eval run outputs + ablation tables
   monitoring/
     postgres/init.sql          schema DDL
-    grafana/dashboards/        provisioned JSON
+    postgres/init_agent_traces.sql  agent_traces table DDL
+    grafana/dashboards/        provisioned JSON (fast-path + agent dashboards)
     grafana/provisioning/      datasource + dashboard provider YAMLs
   docs/
+    AGENT_ROUTE_PLAN.md          phased build plan for all agent routes
+    AGENT_ROUTE_REASONING.md     why each route exists
     week5_failure_analysis.md    A/B evidence for every dropped component
     ai_engineering_decisions.md  full decision log with A/B results
-    ablation_tables_for_publishing.md
-    week4_evaluation_playbook.md
-    project_what_and_why.md
-    images/                      screenshots (Grafana dashboard)
-    diagrams/                    architecture SVGs
+    OPS_RUNBOOK.md               how to disable routing, inspect traces, reproduce queries
   scripts/
     ingest.py                  run dlt ingestion pipeline
     build_indices.py           build BM25 + Chroma from DuckDB
     download_data.py           fetch 12 corpus PDFs with SHA-256 verification
+    calibrate_grader_threshold.py  cross-encoder threshold calibration
   app.py                       Streamlit chat UI
   main.py                      CLI entry point
   docker-compose.yml           postgres + grafana + app services

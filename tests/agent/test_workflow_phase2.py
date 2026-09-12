@@ -10,10 +10,10 @@ injected via unittest.mock.patch, ensuring the correct conditional edges fire.
 
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from src.agent.policies import MAX_STEPS, RETRY_LIMIT
-from src.agent.workflow import build_graph, check_coverage
+from src.agent.workflow import _build_retry_query, build_graph, check_coverage, run_retry_retriever
 from src.evidence.claims import Claim, Coverage, SubQuestion
 from src.synthesis.output_schema import AnalystBrief
 
@@ -179,7 +179,7 @@ class TestHappyPath:
 
 class TestOneRetry:
     def test_one_retry_then_proceeds_to_claim_builder(self):
-        """grader finds gap → retry_retriever → grader (all covered) → claim builder."""
+        """A not-covered result retries once, then proceeds when covered."""
         sqs = [_make_sq("sq_0")]
         claim = _make_claim("c_0", "BoE text.", ["boe_0"])
         call_count = {"grader": 0}
@@ -192,9 +192,9 @@ class TestOneRetry:
 
         def mock_grader(s):
             call_count["grader"] += 1
-            # First call: partial; second call (after retry): covered
+            # First call: not covered; second call (after retry): covered
             if call_count["grader"] == 1:
-                cov = Coverage(sub_question_id="sq_0", status="partial", gap_reason="Need more data")
+                cov = Coverage(sub_question_id="sq_0", status="not_covered", gap_reason="Need more data")
             else:
                 cov = _make_coverage("sq_0", "covered")
             return {"coverage": {"sq_0": cov}, "steps_used": s["steps_used"] + 1}
@@ -247,9 +247,8 @@ class TestRetriesExhausted:
     def test_retries_exhausted_proceeds_to_claim_builder(self):
         """Grader always finds gaps; after RETRY_LIMIT retries, proceeds with partial coverage.
 
-        Note: claim_builder/verifier/synthesiser mocks do NOT increment steps_used so
-        the total step count stays within MAX_STEPS=8 for RETRY_LIMIT=2 retries.
-        Path: planner(1)+retriever(1)+grader*3(3)+retry*2(2)=7 steps, then proceed.
+        The retry limit is one, so an unresolved gap proceeds after the second
+        grader pass rather than repeating the same retrieval strategy.
         """
         sqs = [_make_sq("sq_0")]
         claim = _make_claim("c_0", "BoE text.", ["boe_0"])
@@ -261,8 +260,8 @@ class TestRetriesExhausted:
             return {"retrievals": {"sq_0": []}, "steps_used": s["steps_used"] + 1}
 
         def mock_grader(s):
-            # Always partial — forces retries until exhausted
-            cov = Coverage(sub_question_id="sq_0", status="partial", gap_reason="Still partial")
+            # Always not covered — forces retries until exhausted
+            cov = Coverage(sub_question_id="sq_0", status="not_covered", gap_reason="Still missing")
             return {"coverage": {"sq_0": cov}, "steps_used": s["steps_used"] + 1}
 
         retry_count = {"n": 0}
@@ -277,8 +276,6 @@ class TestRetriesExhausted:
                 "steps_used": s["steps_used"] + 1,
             }
 
-        # Downstream mocks do NOT increment steps to stay within MAX_STEPS=8
-        # (planner+retriever+grader*3+retry*2 = 7 steps already)
         def mock_claim_builder(s):
             return {"claims": [claim], "steps_used": s["steps_used"], "cost_used_usd": s["cost_used_usd"]}
 
@@ -308,6 +305,34 @@ class TestRetriesExhausted:
         # Retried exactly RETRY_LIMIT times then proceeded with partial coverage
         assert retry_count["n"] == RETRY_LIMIT
         assert final_state["termination_reason"] == "complete"
+
+
+class TestRetryQuery:
+    def test_contextual_retry_keeps_top_k_six_and_excludes_gap_reason(self):
+        retriever = MagicMock()
+        retriever.retrieve.return_value = [{"chunk_id": "doc_1", "text": "evidence"}]
+        gap_reason = "No retrieved passage scored above -2.3; topic not in corpus"
+        state = _base_state(
+            query="What role do financial institutions play and how does green finance regulation vary?",
+            sub_questions=[_make_sq("sq_0", "What regulations govern green finance?")],
+            coverage={"sq_0": Coverage(sub_question_id="sq_0", status="not_covered", gap_reason=gap_reason)},
+            retrievals={"sq_0": []},
+            retries_used={},
+            _retriever=retriever,
+        )
+
+        result = run_retry_retriever(state)
+
+        retry_query = retriever.retrieve.call_args.args[0]
+        assert state["query"] in retry_query
+        assert "What regulations govern green finance?" in retry_query
+        assert gap_reason not in retry_query
+        retriever.retrieve.assert_called_once_with(retry_query, top_k=6)
+        assert result["retries_used"] == {"sq_0": 1}
+
+    def test_retry_query_uses_focus_alone_when_parent_matches(self):
+        query = "What regulations govern green finance?"
+        assert _build_retry_query(query, query) == query
 
 
 # ---------------------------------------------------------------------------
@@ -388,16 +413,16 @@ class TestCheckCoverageRouting:
         )
         assert check_coverage(state) == "proceed"
 
-    def test_gap_with_retries_available_returns_retry(self):
-        """Gap exists, retries_used < RETRY_LIMIT → 'retry'."""
+    def test_partial_with_retries_available_returns_proceed(self):
+        """Partial evidence is usable and must not trigger retrieval retries."""
         state = _base_state(
             coverage={"sq_0": Coverage(sub_question_id="sq_0", status="partial", gap_reason="X")},
             retries_used={"sq_0": 0},
         )
-        assert check_coverage(state) == "retry"
+        assert check_coverage(state) == "proceed"
 
-    def test_gap_with_retries_exhausted_returns_proceed(self):
-        """Gap exists, retries_used == RETRY_LIMIT → 'proceed'."""
+    def test_partial_with_retries_exhausted_returns_proceed(self):
+        """Partial evidence proceeds regardless of the retry counter."""
         state = _base_state(
             coverage={"sq_0": Coverage(sub_question_id="sq_0", status="partial", gap_reason="X")},
             retries_used={"sq_0": RETRY_LIMIT},

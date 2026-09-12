@@ -1,55 +1,70 @@
 """
-Grader node — Phase 1 Foundations.
+Grader node — Phase 2 Cross-Document Route.
 
-Makes a single LLM call (GPT-4o-mini) to evaluate coverage across ALL
-sub-questions and their retrieved passages in one batch.
+Deterministic coverage grading via cross-encoder (ms-marco-MiniLM-L-6-v2).
 
-No langgraph imports. Takes a plain dict (AgentState) and returns a partial dict.
+For each sub-question, scores every retrieved passage with the cross-encoder
+and takes the maximum score. That single number drives the coverage decision:
 
-Fail-permissive: if the grader LLM returns unparseable output, all
-sub-questions are treated as "covered" so the workflow can continue.
+  score >= COVERED_THRESHOLD  → "covered"
+  score >= PARTIAL_THRESHOLD  → "partial"
+  else                        → "not_covered"
+
+Thresholds were chosen for the CPIE climate-policy corpus and should be
+re-calibrated if the corpus or retriever changes — run a small labelled set
+through _score_subquestion() and inspect the raw scores.
+
+No LLM call. No langgraph imports.
 """
 
 from __future__ import annotations
 
-import json
 import logging
-import os
 
 from src.evidence.claims import Coverage, SubQuestion
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """\
-You are a coverage grader for a climate policy retrieval system.
+# ---------------------------------------------------------------------------
+# Thresholds — tune against your corpus
+# ---------------------------------------------------------------------------
 
-Given a list of sub-questions and retrieved passages for each, classify
-the coverage of each sub-question.
+# Calibrated against CPIE corpus (scripts/calibrate_grader_threshold.py):
+#   SHOULD_BE_COVERED:  n=4  mean=+4.97  std=0.84 → t-interval lower bound = 3.63
+#   LIKELY_NOT_COVERED: n=3  mean=-6.77  std=5.33 → t-interval upper bound unreliable
+#     (high std driven by near-miss outlier; add more probe queries before trusting it)
+#   PARTIAL_THRESHOLD held at midpoint-of-means until not_covered group has n≥10.
+COVERED_THRESHOLD = 3.63  # t-based 95% lower bound of covered distribution
+PARTIAL_THRESHOLD = -2.3  # midpoint(mean_covered, mean_ooc) — pending larger probe set
 
-Coverage levels:
-  - "covered": the passages clearly answer the sub-question
-  - "partial": the passages partially address it but have gaps
-  - "not_covered": the passages do not address the sub-question
+# ---------------------------------------------------------------------------
+# Cross-encoder singleton — loaded once per process
+# ---------------------------------------------------------------------------
 
-Return a JSON object keyed by sub-question id. For each:
-  - "status": one of "covered", "partial", "not_covered"
-  - "gap_reason": string explaining the gap (required for "partial" and "not_covered"; null for "covered")
+_MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+_encoder = None
 
-Example:
-{
-  "sq_0": {"status": "covered", "gap_reason": null},
-  "sq_1": {"status": "partial", "gap_reason": "No data on post-2020 emissions targets"}
-}
 
-Return ONLY the JSON object.
-"""
+def _get_encoder():
+    global _encoder
+    if _encoder is None:
+        from sentence_transformers import CrossEncoder
+        logger.info("Grader: loading cross-encoder %s", _MODEL_NAME)
+        _encoder = CrossEncoder(_MODEL_NAME)
+        logger.info("Grader: cross-encoder ready")
+    return _encoder
+
+
+# ---------------------------------------------------------------------------
+# Node entry point
+# ---------------------------------------------------------------------------
 
 
 def run_grader(state: dict) -> dict:
-    """Grader node: assess coverage for all sub-questions given retrieved chunks.
+    """Grader node: score coverage for each sub-question via cross-encoder.
 
     Returns partial dict with "coverage" and incremented "steps_used".
-    On LLM/parse failure, defaults all sub-questions to "covered" (fail permissive).
+    Falls back to all-covered on any error (fail-permissive).
     """
     sub_questions: list = state.get("sub_questions", [])
     retrievals: dict = state.get("retrievals", {})
@@ -58,90 +73,94 @@ def run_grader(state: dict) -> dict:
     if not sub_questions:
         return {"coverage": {}, "steps_used": steps_used + 1}
 
-    # Build coverage — attempt LLM grading, fall back on any failure
-    coverage = _call_grader(sub_questions, retrievals)
-
-    if coverage is None:
-        logger.warning("Grader: LLM failed or returned unparseable output — defaulting all to 'covered'")
+    try:
+        coverage = _grade_all(sub_questions, retrievals)
+    except Exception as exc:
+        logger.warning("Grader: cross-encoder failed (%s) — defaulting all to 'covered'", exc)
         coverage = _default_coverage(sub_questions)
+
+    for sq_id, cov in coverage.items():
+        if cov.status != "covered":
+            logger.info("Grader gap [%s] status=%s reason=%r", sq_id, cov.status, cov.gap_reason)
 
     return {"coverage": coverage, "steps_used": steps_used + 1}
 
 
-def _call_grader(sub_questions: list, retrievals: dict) -> dict[str, Coverage] | None:
-    """Call LLM and parse coverage dict. Returns None on any failure."""
-    try:
-        from openai import OpenAI  # deferred import
+# ---------------------------------------------------------------------------
+# Scoring
+# ---------------------------------------------------------------------------
 
-        key = os.environ.get("OPENAI_API_KEY")
-        client = OpenAI(api_key=key)
 
-        user_content = _build_grader_prompt(sub_questions, retrievals)
+def _grade_all(sub_questions: list, retrievals: dict) -> dict[str, Coverage]:
+    encoder = _get_encoder()
+    coverage: dict[str, Coverage] = {}
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": _SYSTEM_PROMPT},
-                {"role": "user", "content": user_content},
-            ],
-            response_format={"type": "json_object"},
-            max_tokens=512,
-            temperature=0.0,
+    for sq in sub_questions:
+        sq_id = sq.id if isinstance(sq, SubQuestion) else sq.get("id", "sq_?")
+        question = sq.question if isinstance(sq, SubQuestion) else sq.get("question", "")
+        chunks = retrievals.get(sq_id, [])
+
+        max_score, status, gap_reason = _score_subquestion(encoder, question, chunks)
+
+        # Coverage decisions directly control the retry loop, so keep the raw
+        # score visible at the normal production log level.  Without this it is
+        # impossible to distinguish a threshold false-negative from a stale
+        # workflow deployment by looking at container logs.
+        logger.info(
+            "Grader score [%s] max_score=%.2f status=%s question=%r",
+            sq_id,
+            max_score,
+            status,
+            question,
+        )
+        coverage[sq_id] = Coverage(
+            sub_question_id=sq_id,
+            status=status,
+            gap_reason=gap_reason,
         )
 
-        raw = response.choices[0].message.content or "{}"
-        return _parse_coverage(raw, sub_questions)
-
-    except Exception as exc:
-        logger.warning("Grader LLM call failed: %s", exc)
-        return None
+    return coverage
 
 
-def _build_grader_prompt(sub_questions: list, retrievals: dict) -> str:
-    """Serialise sub-questions + retrieved passages for the grader prompt."""
-    lines: list[str] = []
-    for sq in sub_questions:
-        if isinstance(sq, SubQuestion):
-            sq_id, question = sq.id, sq.question
-        else:
-            sq_id = sq.get("id", "sq_?")
-            question = sq.get("question", "")
+def _score_subquestion(
+    encoder,
+    question: str,
+    chunks: list[dict],
+) -> tuple[float, str, str | None]:
+    """Return (max_score, status, gap_reason) for one sub-question."""
+    if not chunks:
+        return -999.0, "not_covered", "No passages retrieved for this sub-question"
 
-        chunks = retrievals.get(sq_id, [])
-        passages = " | ".join((c.get("text") or c.get("passage") or "")[:300] for c in chunks[:5])
-        lines.append(f"{sq_id}: Q={question!r}  PASSAGES={passages!r}")
+    passages = [(chunk.get("text") or chunk.get("passage") or "").strip() for chunk in chunks]
+    passages = [p for p in passages if p]
 
-    return "\n".join(lines)
+    if not passages:
+        return -999.0, "not_covered", "All retrieved passages are empty"
+
+    pairs = [(question, p) for p in passages]
+    scores = encoder.predict(pairs)
+    max_score = float(max(scores))
+
+    if max_score >= COVERED_THRESHOLD:
+        return max_score, "covered", None
+    elif max_score >= PARTIAL_THRESHOLD:
+        return max_score, "partial", (
+            f"Best passage relevance score {max_score:.1f} is below the coverage "
+            f"threshold ({COVERED_THRESHOLD}); key details may be missing"
+        )
+    else:
+        return max_score, "not_covered", (
+            f"No retrieved passage scored above {PARTIAL_THRESHOLD} "
+            f"(best: {max_score:.1f}); topic not in corpus"
+        )
 
 
-def _parse_coverage(raw: str, sub_questions: list) -> dict[str, Coverage] | None:
-    """Parse LLM JSON into Coverage objects. Returns None on failure."""
-    try:
-        parsed = json.loads(raw)
-        if not isinstance(parsed, dict):
-            return None
-
-        coverage: dict[str, Coverage] = {}
-        for sq in sub_questions:
-            sq_id = sq.id if isinstance(sq, SubQuestion) else sq.get("id", "sq_?")
-            entry = parsed.get(sq_id, {})
-            status = entry.get("status", "covered")
-            if status not in {"covered", "partial", "not_covered"}:
-                status = "covered"
-            coverage[sq_id] = Coverage(
-                sub_question_id=sq_id,
-                status=status,
-                gap_reason=entry.get("gap_reason"),
-            )
-        return coverage
-
-    except (json.JSONDecodeError, TypeError, ValueError) as exc:
-        logger.warning("Grader parse failed: %s", exc)
-        return None
+# ---------------------------------------------------------------------------
+# Fallback
+# ---------------------------------------------------------------------------
 
 
 def _default_coverage(sub_questions: list) -> dict[str, Coverage]:
-    """Return all-covered fallback for each sub-question."""
     coverage: dict[str, Coverage] = {}
     for sq in sub_questions:
         sq_id = sq.id if isinstance(sq, SubQuestion) else sq.get("id", "sq_?")

@@ -28,13 +28,13 @@ from typing import Callable
 
 from langgraph.graph import END, StateGraph
 
+import src.agent.policies as _policies
 from src.agent.nodes.claim_builder import run_claim_builder
 from src.agent.nodes.grader import run_grader
 from src.agent.nodes.planner import run_planner
 from src.agent.nodes.retriever import run_retriever
 from src.agent.nodes.synthesiser import run_synthesiser
 from src.agent.nodes.verifier import run_verifier
-import src.agent.policies as _policies
 from src.agent.policies import MAX_COST_USD, MAX_STEPS, MAX_TIME_S, RETRY_LIMIT
 from src.agent.state import AgentState
 from src.evidence.claims import SubQuestion
@@ -118,17 +118,20 @@ def check_coverage(state: AgentState) -> str:
     if check_budget(state) == "terminate":
         return "terminate"
 
-    # Find sub-questions with coverage gaps
-    gaps = [sq_id for sq_id, cov in coverage.items() if cov.status in ("partial", "not_covered")]
+    # Find sub-questions with coverage gaps — partial has evidence, only retry not_covered
+    gaps = [sq_id for sq_id, cov in coverage.items() if cov.status == "not_covered"]
 
     if not gaps:
+        logger.info("Coverage: no not_covered sub-questions; proceeding without retry")
         return "proceed"  # all covered → claim builder
 
     # Gaps exist — retry if any sub-question has retries remaining
     can_retry = any(retries.get(sq_id, 0) < RETRY_LIMIT for sq_id in gaps)
     if can_retry:
+        logger.info("Coverage: retrying not_covered sub-questions=%s retries=%s", gaps, retries)
         return "retry"
 
+    logger.info("Coverage: retries exhausted for sub-questions=%s; proceeding", gaps)
     return "proceed"  # gaps but retries exhausted → proceed with partial coverage
 
 
@@ -140,7 +143,9 @@ def check_coverage(state: AgentState) -> str:
 def run_retry_retriever(state: AgentState) -> dict:
     """Re-run retrieval only for sub-questions with coverage gaps.
 
-    Refines queries by appending the gap_reason from the Coverage object.
+    Gives retrieval one contextual second chance using the original user query
+    plus the focused factual sub-question. Grader diagnostics are deliberately
+    excluded because score/threshold text pollutes the retrieval query.
     Increments retries_used[sq_id] for each retried sub-question.
     """
     coverage = state.get("coverage", {})
@@ -149,12 +154,13 @@ def run_retry_retriever(state: AgentState) -> dict:
     retrievals = state.get("retrievals", {})
     steps_used = state.get("steps_used", 0)
     retriever = state.get("_retriever")
+    parent_query = state.get("query", "")
 
     # Determine which sub-questions to retry
     gap_sq_ids = {
         sq_id
         for sq_id, cov in coverage.items()
-        if cov.status in ("partial", "not_covered") and retries_used.get(sq_id, 0) < RETRY_LIMIT
+        if cov.status == "not_covered" and retries_used.get(sq_id, 0) < RETRY_LIMIT
     }
 
     new_retrievals = dict(retrievals)
@@ -166,8 +172,7 @@ def run_retry_retriever(state: AgentState) -> dict:
             continue
 
         question = sq.question if isinstance(sq, SubQuestion) else sq.get("question", "")
-        gap_reason = coverage[sq_id].gap_reason or ""
-        refined_query = f"{question} {gap_reason}".strip()
+        refined_query = _build_retry_query(parent_query, question)
 
         if retriever is None:
             logger.warning("run_retry_retriever: no retriever in state for %s", sq_id)
@@ -176,7 +181,12 @@ def run_retry_retriever(state: AgentState) -> dict:
             try:
                 chunks = retriever.retrieve(refined_query, top_k=_policies.RETRIEVER_TOP_K)
                 new_retrievals[sq_id] = chunks
-                logger.debug("run_retry_retriever: %s → %d chunks (refined)", sq_id, len(chunks))
+                logger.info(
+                    "run_retry_retriever: %s → %d chunks query=%r",
+                    sq_id,
+                    len(chunks),
+                    refined_query,
+                )
             except Exception as exc:
                 logger.warning("run_retry_retriever: failed for %s: %s", sq_id, exc)
                 new_retrievals[sq_id] = []
@@ -188,6 +198,18 @@ def run_retry_retriever(state: AgentState) -> dict:
         "retries_used": new_retries,
         "steps_used": steps_used + 1,
     }
+
+
+def _build_retry_query(parent_query: str, question: str) -> str:
+    """Build a contextual retry query without grader diagnostic text."""
+    parent = " ".join(parent_query.split())
+    focus = " ".join(question.split())
+
+    if not parent or parent.casefold() == focus.casefold():
+        return focus
+    if not focus:
+        return parent
+    return f"{parent} Focus specifically on: {focus}"
 
 
 # ---------------------------------------------------------------------------

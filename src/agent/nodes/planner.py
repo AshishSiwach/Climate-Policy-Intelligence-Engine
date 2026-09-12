@@ -24,15 +24,17 @@ _MAX_SUB_QUESTIONS = 6
 _SYSTEM_PROMPT = """\
 You are a research planner for a climate policy analysis engine.
 
-Given a complex query, decompose it into at most {max_sq} focused sub-questions
-that together cover the full scope of the query. Each sub-question should be
-answerable from a single document or a small set of related passages.
+Given a complex query, decompose it into at most {max_sq} focused factual sub-questions
+that together provide the evidence needed to answer the query. Each sub-question must be
+directly answerable from a retrieved passage — do NOT generate synthesis or comparison
+sub-questions ("How do X and Y compare?"). The synthesis step handles comparisons
+automatically once factual evidence is retrieved.
 
 Return a JSON array where each element has these exact keys:
   - "id": string like "sq_0", "sq_1", ... (sequential)
-  - "question": string — the sub-question text
+  - "question": string — the factual sub-question text
   - "required_source": string or null — institution name if a specific source is needed (e.g. "BoE", "Ofgem", "IPCC")
-  - "task_type": "factual" or "comparison"
+  - "task_type": "factual"
 
 Return ONLY the JSON array, no other text.
 """
@@ -40,9 +42,9 @@ Return ONLY the JSON array, no other text.
 _STRICT_SYSTEM_PROMPT = """\
 You are a research planner. Return a valid JSON array and NOTHING ELSE.
 
-Decompose the query into at most {max_sq} sub-questions. Each must have:
+Decompose the query into at most {max_sq} factual sub-questions (no comparison/synthesis questions). Each must have:
   "id" (sq_0, sq_1...), "question" (string), "required_source" (string or null),
-  "task_type" ("factual" or "comparison").
+  "task_type": "factual".
 
 Example: [{"id":"sq_0","question":"What is X?","required_source":null,"task_type":"factual"}]
 

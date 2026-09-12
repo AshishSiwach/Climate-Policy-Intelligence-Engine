@@ -152,6 +152,14 @@ joblib==1.5.3
     # via scikit-learn
 jsonpath-ng==1.8.0
     # via dlt
+langgraph==1.2.11
+    # via cpie
+langgraph-checkpoint==4.2.0
+    # via langgraph
+langgraph-prebuilt==1.1.0
+    # via langgraph
+langgraph-sdk==0.4.4
+    # via langgraph
 jsonschema==4.26.0
     # via
     #   altair

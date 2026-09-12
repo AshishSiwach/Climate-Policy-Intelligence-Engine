@@ -94,11 +94,12 @@ services:
       POSTGRES_USER:     ${POSTGRES_USER:-cpie}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cpie_dev_only}
       POSTGRES_DB:       ${POSTGRES_DB:-cpie}
+      PYTHONPATH:        /app/src          # expose src-layout packages (monitoring, retrieval, synthesis…)
     volumes:
       # Mount corpus PDFs and processed indices — run ingestion locally first,
       # then the container reads from data/processed/ at startup.
       - ./data/raw:/app/data/raw:ro
-      - ./data/processed:/app/data/processed:ro
+      - ./data/processed:/app/data/processed
       - ./logs:/app/logs
     ports:
       - "${APP_HOST_PORT:-8501}:8501"

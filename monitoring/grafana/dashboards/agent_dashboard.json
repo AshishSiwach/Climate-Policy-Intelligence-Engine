@@ -5,9 +5,9 @@
   "tags": ["cpie", "agent", "phase-3"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "30s",
-  "time": { "from": "now-24h", "to": "now" },
+  "time": { "from": "now-1h", "to": "now" },
   "panels": [
     {
       "id": 1,
@@ -91,8 +91,8 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "Coverage retry rate (%)",
-      "description": "Percentage of agent runs where at least one retry_retriever node was invoked — indicating a sub-question had a coverage gap that triggered a retry.",
+      "title": "Retry rate — selected time range (%)",
+      "description": "Percentage of agent runs in the selected dashboard time range where at least one retry_retriever node was invoked.",
       "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
       "targets": [
         {
@@ -157,6 +157,136 @@
         "textMode": "auto",
         "colorMode": "background",
         "graphMode": "none"
+      }
+    },
+
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Agent runs",
+      "description": "Distinct agent traces in the selected dashboard time range.",
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT COUNT(DISTINCT trace_id) AS agent_runs FROM cpie.agent_traces WHERE $__timeFilter(created_at)",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Runs with retries",
+      "description": "Distinct agent traces containing at least one retry_retriever step in the selected time range.",
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT COUNT(DISTINCT trace_id) AS runs_with_retries FROM cpie.agent_traces WHERE $__timeFilter(created_at) AND node_name = 'retry_retriever'",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+
+    {
+      "id": 8,
+      "type": "stat",
+      "title": "Total retry steps",
+      "description": "Number of retry_retriever node invocations in the selected time range.",
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT COUNT(*) AS retry_steps FROM cpie.agent_traces WHERE $__timeFilter(created_at) AND node_name = 'retry_retriever'",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none"
+      }
+    },
+
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Retry rate by hour",
+      "description": "Hourly percentage of agent runs that invoked retry_retriever. Each run is assigned to the hour in which its first step started.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "WITH runs AS (SELECT trace_id, date_trunc('hour', MIN(created_at)) AS time, BOOL_OR(node_name = 'retry_retriever') AS retried FROM cpie.agent_traces WHERE $__timeFilter(created_at) GROUP BY trace_id) SELECT time, 100.0 * COUNT(*) FILTER (WHERE retried)::float / NULLIF(COUNT(*), 0) AS retry_pct FROM runs GROUP BY time ORDER BY time",
+          "format": "time_series",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 40 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      }
+    },
+
+    {
+      "id": 10,
+      "type": "table",
+      "title": "Recent agent runs with retries",
+      "description": "Agent runs in the selected time range that invoked retry_retriever, including query text and workflow outcome.",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "datasource": { "type": "postgres", "uid": "cpie-postgres" },
+          "rawSql": "SELECT MIN(created_at) AS started_at, trace_id::text, MAX(input_summary->>'query') AS query, COUNT(*) FILTER (WHERE node_name = 'retry_retriever') AS retry_steps, MAX(step_no) AS total_steps, MAX(termination_reason) AS termination_reason FROM cpie.agent_traces WHERE $__timeFilter(created_at) GROUP BY trace_id HAVING COUNT(*) FILTER (WHERE node_name = 'retry_retriever') > 0 ORDER BY started_at DESC LIMIT 50",
+          "format": "table",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": { "show": false }
       }
     }
   ]

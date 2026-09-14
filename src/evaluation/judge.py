@@ -102,6 +102,9 @@ Score four dimensions, each 1-5, with a one-sentence rationale for each.
    3 = some factual differences or key details missing
    2 = multiple factual errors or major details missing
    1 = largely wrong or contradicts the reference
+   IMPORTANT: For a positive query (factual/cross_document/summarisation/numeric),
+   a refusal always scores 1 for CORRECTNESS, even if no false claims were made.
+   "No false claims" is not the same as "correct answer".
 
 2. FAITHFULNESS — is GENERATED_ANSWER grounded in RETRIEVED_CHUNKS (not fabricated)?
    5 = every claim traceable to a retrieved chunk
@@ -118,6 +121,8 @@ Score four dimensions, each 1-5, with a one-sentence rationale for each.
    2 = multiple key points missing
    1 = misses most of what the reference covers
    For negative queries where REFERENCE_ANSWER is a canonical refusal, score 5 if GENERATED_ANSWER is also a refusal.
+   IMPORTANT: For a positive query (factual/cross_document/summarisation/numeric),
+   a refusal always scores 1 for COMPLETENESS.
 
 4. REFUSAL_APPROPRIATENESS — did the system's refusal or non-refusal match what it should have done?
    For QUERY_TYPE == "negative":

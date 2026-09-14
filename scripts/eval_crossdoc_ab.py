@@ -85,16 +85,16 @@ def _load_cross_doc_queries(limit: int | None) -> list[dict]:
 
 def _run_fast_path(query: str, hybrid, synth) -> dict:
     """Run the fast-path synthesiser and return timing + result."""
-    chunks = hybrid.retrieve(query, top_k=10)
-
-    t0 = time.time()
+    t0 = time.time()  # start before retrieval — apples-to-apples with agent timing
+    chunks = hybrid.retrieve(query, top_k=5)  # production default
     result = synth.synthesise(query, chunks)
     latency_s = time.time() - t0
 
     brief = result["brief"]
     return {
         "fast_answer": brief.answer,
-        "fast_citations": len(brief.citations),
+        "fast_citation_count": len(brief.citations),
+        "fast_doc_ids": [c.doc_id for c in brief.citations],
         "fast_cost": result.get("cost_usd", 0.0),
         "fast_latency_s": latency_s,
         "_fast_chunks": chunks,  # kept for judge; stripped from output record
@@ -113,6 +113,7 @@ def _run_agent_path(query: str, hybrid) -> dict:
     from src.agent.workflow import agent_graph
     from src.synthesis.output_schema import AnalystBrief
 
+    t0_mono = time.monotonic()
     initial_state = {
         "request_id": str(uuid.uuid4()),
         "query": query,
@@ -129,6 +130,7 @@ def _run_agent_path(query: str, hybrid) -> dict:
         "result": None,
         "termination_reason": None,
         "_retriever": hybrid,
+        "_start_time": t0_mono,  # enables wall-clock budget enforcement
     }
 
     t0 = time.time()
@@ -138,14 +140,27 @@ def _run_agent_path(query: str, hybrid) -> dict:
     result_dict = final_state.get("result") or {}
     brief = AnalystBrief(**result_dict) if result_dict else None
 
+    # Flatten per-sub-question retrievals so the judge can score faithfulness
+    agent_retrievals: dict = final_state.get("retrievals", {})
+    agent_chunks: list[dict] = []
+    seen_cids: set[str] = set()
+    for chunk_list in agent_retrievals.values():
+        for chunk in chunk_list:
+            cid = chunk.get("chunk_id")
+            if cid and cid not in seen_cids:
+                seen_cids.add(cid)
+                agent_chunks.append(chunk)
+
     return {
         "agent_answer": brief.answer if brief else "",
-        "agent_citations": len(brief.citations) if brief else 0,
+        "agent_citation_count": len(brief.citations) if brief else 0,
+        "agent_doc_ids": [c.doc_id for c in brief.citations] if brief else [],
         "agent_cost": final_state.get("cost_used_usd", 0.0),
         "agent_latency_s": latency_s,
         "agent_termination_reason": final_state.get("termination_reason"),
         "agent_coverage_gaps": (brief.coverage_gaps if brief else []),
         "agent_truncated": (brief.truncated if brief else False),
+        "_agent_chunks": agent_chunks,  # kept for judge; stripped from output record
     }
 
 
@@ -176,14 +191,29 @@ def _judge_answer(
         )
         scores = result.get("scores")
         if scores is None:
-            return {"correctness": None, "completeness": None}
+            return _null_scores()
         return {
             "correctness": scores.correctness,
+            "faithfulness": scores.faithfulness,
             "completeness": scores.completeness,
+            "refusal_appropriateness": scores.refusal_appropriateness,
+            "correctness_rationale": scores.correctness_rationale,
+            "faithfulness_rationale": scores.faithfulness_rationale,
+            "completeness_rationale": scores.completeness_rationale,
+            "refusal_rationale": scores.refusal_appropriateness_rationale,
         }
     except Exception as exc:
         print(f"    [judge error] {exc}")
-        return {"correctness": None, "completeness": None}
+        return _null_scores()
+
+
+def _null_scores() -> dict:
+    return {
+        "correctness": None, "faithfulness": None,
+        "completeness": None, "refusal_appropriateness": None,
+        "correctness_rationale": None, "faithfulness_rationale": None,
+        "completeness_rationale": None, "refusal_rationale": None,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -196,6 +226,18 @@ def _run_dry(queries: list[dict]) -> None:
     print(f"DRY RUN — {len(queries)} cross-doc quer{'y' if len(queries) == 1 else 'ies'}:")
     for i, q in enumerate(queries, 1):
         print(f"  [{i}] {q.get('id', '?')}: {q.get('question', '')[:80]}")
+
+
+# ---------------------------------------------------------------------------
+# Source recall helper
+# ---------------------------------------------------------------------------
+
+
+def _source_recall(cited_doc_ids: set[str], expected_sources: set[str]) -> float | None:
+    """Fraction of expected source documents that appear in cited doc IDs."""
+    if not expected_sources:
+        return None
+    return len(cited_doc_ids & expected_sources) / len(expected_sources)
 
 
 # ---------------------------------------------------------------------------
@@ -248,9 +290,14 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                     "agent_truncated": False,
                 }
 
+            # Source recall (independent of judge)
+            expected_sources = set(q.get("expected_sources", []))
+            fast_source_recall = _source_recall(set(fast.get("fast_doc_ids", [])), expected_sources)
+            agent_source_recall = _source_recall(set(agent.get("agent_doc_ids", [])), expected_sources)
+
             # Judge scoring (optional)
-            fast_correctness = fast_completeness = None
-            agent_correctness = agent_completeness = None
+            fast_scores = _null_scores()
+            agent_scores = _null_scores()
 
             if use_judge:
                 print("    [judge] scoring fast path ...")
@@ -261,8 +308,6 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                     generated_answer=fast["fast_answer"],
                     chunks=fast.get("_fast_chunks", []),
                 )
-                fast_correctness = fast_scores["correctness"]
-                fast_completeness = fast_scores["completeness"]
 
                 print("    [judge] scoring agent path ...")
                 agent_scores = _judge_answer(
@@ -270,25 +315,44 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                     query_type=query_type,
                     expected_answer=expected_answer,
                     generated_answer=agent["agent_answer"],
-                    chunks=[],  # agent retrieves per sub-question; no single chunk list
+                    chunks=agent.get("_agent_chunks", []),
                 )
-                agent_correctness = agent_scores["correctness"]
-                agent_completeness = agent_scores["completeness"]
 
             record = {
                 "id": query_id,
                 "question": question,
                 "expected_answer": expected_answer,
+                "expected_sources": list(expected_sources),
+                # fast path
                 "fast_answer": fast["fast_answer"],
+                "fast_citation_count": fast.get("fast_citation_count", 0),
+                "fast_doc_ids": fast.get("fast_doc_ids", []),
+                "fast_source_recall": fast_source_recall,
                 "fast_cost": fast["fast_cost"],
                 "fast_latency_s": fast["fast_latency_s"],
-                "fast_correctness": fast_correctness,
-                "fast_completeness": fast_completeness,
+                "fast_correctness": fast_scores["correctness"],
+                "fast_faithfulness": fast_scores["faithfulness"],
+                "fast_completeness": fast_scores["completeness"],
+                "fast_refusal_appropriateness": fast_scores["refusal_appropriateness"],
+                "fast_correctness_rationale": fast_scores["correctness_rationale"],
+                "fast_faithfulness_rationale": fast_scores["faithfulness_rationale"],
+                "fast_completeness_rationale": fast_scores["completeness_rationale"],
+                "fast_refusal_rationale": fast_scores["refusal_rationale"],
+                # agent path
                 "agent_answer": agent["agent_answer"],
+                "agent_citation_count": agent.get("agent_citation_count", 0),
+                "agent_doc_ids": agent.get("agent_doc_ids", []),
+                "agent_source_recall": agent_source_recall,
                 "agent_cost": agent["agent_cost"],
                 "agent_latency_s": agent["agent_latency_s"],
-                "agent_correctness": agent_correctness,
-                "agent_completeness": agent_completeness,
+                "agent_correctness": agent_scores["correctness"],
+                "agent_faithfulness": agent_scores["faithfulness"],
+                "agent_completeness": agent_scores["completeness"],
+                "agent_refusal_appropriateness": agent_scores["refusal_appropriateness"],
+                "agent_correctness_rationale": agent_scores["correctness_rationale"],
+                "agent_faithfulness_rationale": agent_scores["faithfulness_rationale"],
+                "agent_completeness_rationale": agent_scores["completeness_rationale"],
+                "agent_refusal_rationale": agent_scores["refusal_rationale"],
                 "agent_termination_reason": agent["agent_termination_reason"],
                 "agent_coverage_gaps": agent["agent_coverage_gaps"],
                 "agent_truncated": agent["agent_truncated"],
@@ -321,6 +385,15 @@ def _mean(values: list) -> float | None:
     return sum(clean) / len(clean) if clean else None
 
 
+def _p95(values: list) -> float | None:
+    """95th-percentile of a list, ignoring None."""
+    clean = sorted(v for v in values if v is not None)
+    if not clean:
+        return None
+    idx = int(len(clean) * 0.95)
+    return clean[min(idx, len(clean) - 1)]
+
+
 def _fmt(v: float | None, precision: int = 2) -> str:
     return f"{v:.{precision}f}" if v is not None else "N/A"
 
@@ -335,37 +408,52 @@ def _delta(fast_v: float | None, agent_v: float | None) -> str:
 def _print_summary(records: list[dict]) -> None:
     n = len(records)
 
-    fast_correctness = _mean([r["fast_correctness"] for r in records])
-    fast_completeness = _mean([r["fast_completeness"] for r in records])
+    fast_correctness = _mean([r.get("fast_correctness") for r in records])
+    fast_faithfulness = _mean([r.get("fast_faithfulness") for r in records])
+    fast_completeness = _mean([r.get("fast_completeness") for r in records])
+    fast_refusal = _mean([r.get("fast_refusal_appropriateness") for r in records])
+    fast_source_recall = _mean([r.get("fast_source_recall") for r in records])
     fast_cost = _mean([r["fast_cost"] for r in records])
     fast_latency = _mean([r["fast_latency_s"] for r in records])
+    fast_p95 = _p95([r["fast_latency_s"] for r in records])
 
-    agent_correctness = _mean([r["agent_correctness"] for r in records])
-    agent_completeness = _mean([r["agent_completeness"] for r in records])
+    agent_correctness = _mean([r.get("agent_correctness") for r in records])
+    agent_faithfulness = _mean([r.get("agent_faithfulness") for r in records])
+    agent_completeness = _mean([r.get("agent_completeness") for r in records])
+    agent_refusal = _mean([r.get("agent_refusal_appropriateness") for r in records])
+    agent_source_recall = _mean([r.get("agent_source_recall") for r in records])
     agent_cost = _mean([r["agent_cost"] for r in records])
     agent_latency = _mean([r["agent_latency_s"] for r in records])
+    agent_p95 = _p95([r["agent_latency_s"] for r in records])
 
-    # Gates from AGENT_ROUTE_REASONING.md
+    # Gates from AGENT_ROUTE_REASONING.md / AGENT_ROUTE_PLAN.md
     CORRECTNESS_GATE = 3.50
     COMPLETENESS_GATE = 3.25
+    LATENCY_P95_KILL = 15.0
 
-    def _gate(v: float | None, threshold: float) -> str:
+    def _gate(v: float | None, threshold: float, fail_above: bool = False) -> str:
         if v is None:
             return "N/A"
-        return "PASS" if v >= threshold else "FAIL"
+        passing = (v <= threshold) if fail_above else (v >= threshold)
+        return "PASS" if passing else "FAIL"
 
-    ruler = "─" * 43
+    ruler = "-" * 52
     print(f"\nCross-doc A/B Results (N={n})")
     print(ruler)
-    print(f"{'Metric':<20} {'Fast':>6}  {'Agent':>6}  {'Δ':>6}")
+    print(f"{'Metric':<24} {'Fast':>7}  {'Agent':>7}  {'Delta':>7}")
     print(ruler)
-    print(f"{'Correctness mean':<20} {_fmt(fast_correctness):>6}  {_fmt(agent_correctness):>6}  {_delta(fast_correctness, agent_correctness):>6}")
-    print(f"{'Completeness mean':<20} {_fmt(fast_completeness):>6}  {_fmt(agent_completeness):>6}  {_delta(fast_completeness, agent_completeness):>6}")
-    print(f"{'Cost mean ($)':<20} {_fmt(fast_cost, 3):>6}  {_fmt(agent_cost, 3):>6}  {_delta(fast_cost, agent_cost):>6}")
-    print(f"{'Latency mean (s)':<20} {_fmt(fast_latency, 1):>6}  {_fmt(agent_latency, 1):>6}  {_delta(fast_latency, agent_latency):>6}")
+    print(f"{'Correctness mean':<24} {_fmt(fast_correctness):>7}  {_fmt(agent_correctness):>7}  {_delta(fast_correctness, agent_correctness):>7}")
+    print(f"{'Faithfulness mean':<24} {_fmt(fast_faithfulness):>7}  {_fmt(agent_faithfulness):>7}  {_delta(fast_faithfulness, agent_faithfulness):>7}")
+    print(f"{'Completeness mean':<24} {_fmt(fast_completeness):>7}  {_fmt(agent_completeness):>7}  {_delta(fast_completeness, agent_completeness):>7}")
+    print(f"{'Refusal approp. mean':<24} {_fmt(fast_refusal):>7}  {_fmt(agent_refusal):>7}  {_delta(fast_refusal, agent_refusal):>7}")
+    print(f"{'Source recall mean':<24} {_fmt(fast_source_recall):>7}  {_fmt(agent_source_recall):>7}  {_delta(fast_source_recall, agent_source_recall):>7}")
+    print(f"{'Cost mean ($)':<24} {_fmt(fast_cost, 3):>7}  {_fmt(agent_cost, 3):>7}  {_delta(fast_cost, agent_cost):>7}")
+    print(f"{'Latency mean (s)':<24} {_fmt(fast_latency, 1):>7}  {_fmt(agent_latency, 1):>7}  {_delta(fast_latency, agent_latency):>7}")
+    print(f"{'Latency P95 (s)':<24} {_fmt(fast_p95, 1):>7}  {_fmt(agent_p95, 1):>7}  {_delta(fast_p95, agent_p95):>7}")
     print(ruler)
-    print(f"Gate: Correctness  ≥{CORRECTNESS_GATE}  → {_gate(agent_correctness, CORRECTNESS_GATE)}")
-    print(f"Gate: Completeness ≥{COMPLETENESS_GATE}  → {_gate(agent_completeness, COMPLETENESS_GATE)}")
+    print(f"Gate: Agent Correctness  >=3.50 -> {_gate(agent_correctness, CORRECTNESS_GATE)}")
+    print(f"Gate: Agent Completeness >=3.25 -> {_gate(agent_completeness, COMPLETENESS_GATE)}")
+    print(f"Gate: Agent Latency P95  <=15s  -> {_gate(agent_p95, LATENCY_P95_KILL, fail_above=True)}")
 
 
 # ---------------------------------------------------------------------------

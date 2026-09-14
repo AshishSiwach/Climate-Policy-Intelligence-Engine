@@ -20,7 +20,7 @@ import logging
 import os
 
 from src.evidence.claims import Claim, Coverage
-from src.synthesis.output_schema import AnalystBrief, Citation, LLMCitation, LLMResponse
+from synthesis.output_schema import AnalystBrief, Citation, LLMCitation, LLMResponse
 
 logger = logging.getLogger(__name__)
 
@@ -237,7 +237,7 @@ def _format_claims(claims: list) -> str:
 
 
 def _verify_citations(llm_citations: list[LLMCitation], chunks: list[dict]) -> list[Citation]:
-    from src.evidence.citations import verify_citations
+    from evidence.citations import verify_citations
     return verify_citations(llm_citations, chunks)
 
 

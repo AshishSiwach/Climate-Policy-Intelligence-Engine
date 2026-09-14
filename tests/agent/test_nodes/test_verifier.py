@@ -19,8 +19,9 @@ def _make_claim(
     text: str,
     evidence_ids: list[str],
     source_doc_id: str = "doc",
+    sub_question_id: str | None = None,
 ) -> Claim:
-    return Claim(id=id_, text=text, evidence_ids=evidence_ids, source_doc_id=source_doc_id)
+    return Claim(id=id_, text=text, evidence_ids=evidence_ids, source_doc_id=source_doc_id, sub_question_id=sub_question_id)
 
 
 def _make_chunk(chunk_id: str, doc_id: str, text: str, page: int = 1) -> dict:
@@ -61,7 +62,7 @@ def _make_state(claims: list, retrievals: dict, steps_used: int = 4) -> dict:
 def test_valid_claim_kept():
     """Claim whose evidence_id resolves to a unique chunk → claim is kept."""
     chunk = _make_chunk("boe_0", "boe", "The BoE runs annual climate stress tests under CBES.")
-    claim = _make_claim("c_0", "BoE runs stress tests.", ["boe_0"], "boe")
+    claim = _make_claim("c_0", "BoE runs stress tests.", ["boe_0"], "boe", sub_question_id="sq_0")
 
     result = run_verifier(_make_state([claim], {"sq_0": [chunk]}))
 
@@ -131,7 +132,7 @@ def test_claim_partial_evidence_kept_with_verified_subset():
     """Claim with 2 evidence_ids: one valid, one missing → kept with only the valid id."""
     chunk = _make_chunk("boe_0", "boe", "The Bank of England published its climate stress results for 2024.")
     # "ghost_99" does not exist in retrievals
-    claim = _make_claim("c_0", "BoE published stress results.", ["boe_0", "ghost_99"], "boe")
+    claim = _make_claim("c_0", "BoE published stress results.", ["boe_0", "ghost_99"], "boe", sub_question_id="sq_0")
 
     result = run_verifier(_make_state([claim], {"sq_0": [chunk]}))
 
@@ -152,9 +153,9 @@ def test_multiple_claims_mixed_outcome():
     chunk_a = _make_chunk("ofg_0", "ofgem", "Ofgem proposes new licensing for load controllers in 2026.")
     chunk_b = _make_chunk("boe_0", "boe", "BoE published the Climate Biennial Exploratory Scenario results.")
 
-    valid_claim = _make_claim("c_0", "Ofgem licensing proposal.", ["ofg_0"], "ofgem")
+    valid_claim = _make_claim("c_0", "Ofgem licensing proposal.", ["ofg_0"], "ofgem", sub_question_id="sq_0")
     invalid_claim = _make_claim("c_1", "Ghost reference.", ["ghost_x"], "boe")
-    another_valid = _make_claim("c_2", "BoE CBES results.", ["boe_0"], "boe")
+    another_valid = _make_claim("c_2", "BoE CBES results.", ["boe_0"], "boe", sub_question_id="sq_1")
 
     retrievals = {"sq_0": [chunk_a], "sq_1": [chunk_b]}
     result = run_verifier(_make_state([valid_claim, invalid_claim, another_valid], retrievals))
@@ -201,7 +202,7 @@ def test_source_doc_id_corrected_to_chunk_doc():
     """When evidence_id resolves to a chunk from a different doc, source_doc_id is corrected."""
     # Chunk is from 'ofgem' but claim claims 'boe'
     chunk = _make_chunk("ofg_5", "ofgem", "Electricity grid balancing costs reached two billion pounds in 2024.")
-    claim = _make_claim("c_0", "Grid balancing costs.", ["ofg_5"], source_doc_id="boe")
+    claim = _make_claim("c_0", "Grid balancing costs.", ["ofg_5"], source_doc_id="boe", sub_question_id="sq_0")
 
     result = run_verifier(_make_state([claim], {"sq_0": [chunk]}))
 
@@ -222,6 +223,7 @@ def test_claim_dict_accepted():
         "text": "BoE scenario findings.",
         "evidence_ids": ["boe_0"],
         "source_doc_id": "boe",
+        "sub_question_id": "sq_0",
     }
 
     result = run_verifier(_make_state([claim_dict], {"sq_0": [chunk]}))

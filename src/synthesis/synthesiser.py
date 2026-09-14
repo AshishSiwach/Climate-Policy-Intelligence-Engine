@@ -36,7 +36,7 @@ from typing import Any
 
 from openai import LengthFinishReasonError, OpenAI
 
-from .output_schema import AnalystBrief, Citation, LLMCitation, LLMResponse
+from synthesis.output_schema import AnalystBrief, Citation, LLMCitation, LLMResponse
 
 logger = logging.getLogger(__name__)
 
@@ -345,7 +345,7 @@ def _verify_citations(citations: list[LLMCitation], chunks: list[dict]) -> list[
     try to import ``evidence.citations`` at module level — a circular dependency.
     The lazy import breaks the cycle.
     """
-    from src.evidence.citations import verify_citations  # lazy — avoids circular import
+    from evidence.citations import verify_citations  # lazy — avoids circular import
 
     return verify_citations(citations, chunks)
 

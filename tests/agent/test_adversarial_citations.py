@@ -34,9 +34,14 @@ def _chunk(chunk_id: str, doc_id: str, text: str, page: int = 1) -> dict:
 
 
 def _claim(
-    id_: str, text: str, evidence_ids: list[str], doc_id: str = "doc", source_doc_id: str | None = None
+    id_: str,
+    text: str,
+    evidence_ids: list[str],
+    doc_id: str = "doc",
+    source_doc_id: str | None = None,
+    sub_question_id: str | None = None,
 ) -> Claim:
-    return Claim(id=id_, text=text, evidence_ids=evidence_ids, source_doc_id=source_doc_id or doc_id)
+    return Claim(id=id_, text=text, evidence_ids=evidence_ids, source_doc_id=source_doc_id or doc_id, sub_question_id=sub_question_id)
 
 
 def _verifier_state(claims: list, retrievals: dict) -> dict:
@@ -158,7 +163,7 @@ def test_case_04_no_evidence_ids_dropped_by_claim_builder():
 def test_case_05_partial_evidence_claim_kept_verified_subset():
     """Claim with 2 evidence_ids: one real chunk, one ghost → kept with only real id."""
     chunk = _chunk("boe_0", "boe", "BoE stress test outcomes were published in the annual report 2024.")
-    claim = _claim("c_0", "BoE published stress test outcomes.", ["boe_0", "ghost_x"], "boe")
+    claim = _claim("c_0", "BoE published stress test outcomes.", ["boe_0", "ghost_x"], "boe", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim], {"sq_0": [chunk]}))
 
@@ -224,7 +229,7 @@ def test_case_07_empty_claim_text_dropped():
 def test_case_08_wrong_source_doc_id_corrected():
     """evidence_id resolves to 'ofgem' chunk; claim says 'boe' → kept, source_doc_id='ofgem'."""
     chunk = _chunk("ofg_5", "ofgem", "Ofgem proposes new licensing requirements for energy storage systems.")
-    claim = _claim("c_0", "New licensing requirements proposed.", ["ofg_5"], source_doc_id="boe")
+    claim = _claim("c_0", "New licensing requirements proposed.", ["ofg_5"], source_doc_id="boe", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim], {"sq_0": [chunk]}))
 
@@ -246,7 +251,7 @@ def test_case_09_truncated_passage_with_long_anchor_kept():
         "financial institutions operating in G20 jurisdictions."
     )
     chunk = _chunk("fsb_0", "fsb", long_text)
-    claim = _claim("c_0", "FSB mandates climate risk reporting.", ["fsb_0"], "fsb")
+    claim = _claim("c_0", "FSB mandates climate risk reporting.", ["fsb_0"], "fsb", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim], {"sq_0": [chunk]}))
     assert len(result["verified_claims"]) == 1
@@ -265,7 +270,7 @@ def test_case_10_unicode_passage_handled():
         "spécifiques pour les banques systémiques."
     )
     chunk = _chunk("boe_fr_0", "boe_fr", unicode_text)
-    claim = _claim("c_0", "French BoE climate report.", ["boe_fr_0"], "boe_fr")
+    claim = _claim("c_0", "French BoE climate report.", ["boe_fr_0"], "boe_fr", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim], {"sq_0": [chunk]}))
     assert len(result["verified_claims"]) == 1
@@ -292,7 +297,7 @@ def test_case_11_very_long_passage_handled():
         "six-fold increase in annual climate investment by 2030 compared to 2019 levels."
     )
     chunk = _chunk("ipcc_0", "ipcc", long_text)
-    claim = _claim("c_0", "IPCC report on mitigation.", ["ipcc_0"], "ipcc")
+    claim = _claim("c_0", "IPCC report on mitigation.", ["ipcc_0"], "ipcc", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim], {"sq_0": [chunk]}))
     assert len(result["verified_claims"]) == 1
@@ -393,7 +398,7 @@ def test_case_17_duplicate_evidence_id_in_claim():
     """Claim listing the same evidence_id twice → verifier keeps it once."""
     chunk = _chunk("boe_0", "boe", "BoE climate scenario: banks showed resilience to 3-degree warming path.")
     # evidence_ids has a duplicate
-    claim = Claim(id="c_0", text="BoE resilience.", evidence_ids=["boe_0", "boe_0"], source_doc_id="boe")
+    claim = Claim(id="c_0", text="BoE resilience.", evidence_ids=["boe_0", "boe_0"], source_doc_id="boe", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim], {"sq_0": [chunk]}))
 
@@ -415,8 +420,8 @@ def test_case_18_two_claims_same_unique_chunk_both_kept():
         "ofgem",
         "Ofgem's consultation on load control licensing received 147 responses from industry stakeholders.",
     )
-    claim_a = _claim("c_0", "Ofgem received 147 responses.", ["ofg_0"], "ofgem")
-    claim_b = _claim("c_1", "Ofgem consultation had industry stakeholders.", ["ofg_0"], "ofgem")
+    claim_a = _claim("c_0", "Ofgem received 147 responses.", ["ofg_0"], "ofgem", sub_question_id="sq_0")
+    claim_b = _claim("c_1", "Ofgem consultation had industry stakeholders.", ["ofg_0"], "ofgem", sub_question_id="sq_0")
 
     result = run_verifier(_verifier_state([claim_a, claim_b], {"sq_0": [chunk]}))
 
@@ -442,7 +447,7 @@ def test_case_19_mixed_claims_correct_subset_kept():
     boilerplate_b = _chunk("bp_1", "doc_b", boilerplate + " Document B additional text.")
 
     claims = [
-        _claim("c_0", "CCC carbon budget 6 claim.", ["valid_0"], "ccc"),  # valid
+        _claim("c_0", "CCC carbon budget 6 claim.", ["valid_0"], "ccc", sub_question_id="sq_0"),  # valid
         _claim("c_1", "Ghost chunk reference.", ["ghost_999"], "boe"),  # chunk missing
         _claim("c_2", "Boilerplate claim.", ["bp_0"], "doc_a"),  # ambiguous
     ]

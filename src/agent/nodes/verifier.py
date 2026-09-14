@@ -37,6 +37,15 @@ def run_verifier(state: dict) -> dict:
         for sq_id, chunks in retrievals.items()
     }
 
+    # Build chunk_id → doc_id map for source_doc_id correction
+    chunk_to_doc: dict[str, str] = {}
+    for chunks in retrievals.values():
+        for chunk in chunks:
+            cid = chunk.get("chunk_id")
+            did = chunk.get("doc_id")
+            if cid and did:
+                chunk_to_doc[cid] = did
+
     verified: list[Claim] = []
 
     for raw_claim in claims:
@@ -63,12 +72,13 @@ def run_verifier(state: dict) -> dict:
             )
             continue
 
+        corrected_doc_id = chunk_to_doc.get(valid_eids[0], claim.source_doc_id)
         verified.append(Claim(
             id=claim.id,
             text=claim.text,
             sub_question_id=claim.sub_question_id,
             evidence_ids=valid_eids,
-            source_doc_id=claim.source_doc_id,
+            source_doc_id=corrected_doc_id,
         ))
 
     logger.info("Verifier: %d/%d claims passed", len(verified), len(claims))

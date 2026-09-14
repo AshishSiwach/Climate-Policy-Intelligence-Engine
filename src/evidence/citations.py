@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 
-from src.synthesis.output_schema import Citation, LLMCitation
+from synthesis.output_schema import Citation, LLMCitation
 
 logger = logging.getLogger(__name__)
 

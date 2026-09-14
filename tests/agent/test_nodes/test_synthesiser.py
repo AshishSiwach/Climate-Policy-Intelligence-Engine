@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 from src.agent.nodes.synthesiser import run_synthesiser
 from src.evidence.claims import Claim, Coverage
-from src.synthesis.output_schema import AnalystBrief
+from synthesis.output_schema import AnalystBrief
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -60,7 +60,7 @@ def _make_state(
 
 def _mock_parse_response(answer: str, citations: list | None = None, prompt_tokens: int = 200, completion_tokens: int = 100):
     """Mock for client.beta.chat.completions.parse — returns message.parsed as LLMResponse."""
-    from src.synthesis.output_schema import LLMCitation, LLMResponse
+    from synthesis.output_schema import LLMCitation, LLMResponse
 
     parsed = LLMResponse(
         answer=answer,

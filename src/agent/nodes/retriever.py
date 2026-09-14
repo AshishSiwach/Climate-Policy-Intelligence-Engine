@@ -41,10 +41,12 @@ def run_retriever(state: dict) -> dict:
             sq_id = sq.id
             question = sq.question
             required_source = sq.required_source
+            required_doc_id = sq.required_doc_id
         else:
             sq_id = sq.get("id", "sq_unknown")
             question = sq.get("question", "")
             required_source = sq.get("required_source")
+            required_doc_id = sq.get("required_doc_id")
 
         if retriever is None:
             logger.warning("run_retriever: no retriever in state — returning empty results for %s", sq_id)
@@ -57,6 +59,22 @@ def run_retriever(state: dict) -> dict:
                 kwargs["institutions"] = [required_source]
 
             chunks = retriever.retrieve(question, **kwargs)
+
+            # Post-filter to exact doc_id when resolver has identified one.
+            # This prevents a broader institution retrieval from pulling in
+            # the wrong report (e.g. WEO 2025 when WEO 2023 was requested).
+            if required_doc_id:
+                before = len(chunks)
+                chunks = [c for c in chunks if c.get("doc_id") == required_doc_id]
+                if len(chunks) < before:
+                    logger.debug(
+                        "run_retriever: %s doc_id filter %r: %d → %d chunks",
+                        sq_id,
+                        required_doc_id,
+                        before,
+                        len(chunks),
+                    )
+
             retrievals[sq_id] = chunks
             logger.debug("run_retriever: %s → %d chunks", sq_id, len(chunks))
 

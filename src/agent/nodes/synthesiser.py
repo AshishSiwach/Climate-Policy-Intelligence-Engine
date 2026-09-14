@@ -58,16 +58,21 @@ Rules:
 2. Quote verbatim from the excerpts — do not paraphrase quoted material inside a citation's `passage` field.
 3. Chunks marked `[chunk_type: table]` contain tabular data. Extract specific values and units; do not paraphrase.
 4. Contradictions between excerpts: only report if two excerpts make directly opposing factual claims. Otherwise leave `contradictions` empty.
-5. Structure your answer as a document summary using EXACTLY these section headers (## prefix):
-   ## Overview — scope, purpose, and key context of the document
-   ## Key Findings — headline conclusions and metrics
-   ## Sectoral Analysis — findings by sector, technology, or region (omit if not applicable)
-   ## Policy Recommendations — proposed actions, targets, or policies
-   ## Evidence Gaps — what the document does not address or where evidence is thin
-   Write each section in full sentences. Do not collapse multiple sections into one.
+5. Coverage obligations are listed below under three groups:
+   - FULLY SUPPORTED themes: address these in full, citing the provided evidence.
+   - PARTIALLY SUPPORTED themes: address only the portion the evidence supports;
+     end the discussion of that theme with a one-sentence disclosure of what is missing
+     (use the gap_reason if provided).
+   - UNSUPPORTED themes: do NOT make substantive claims. Instead, list them once under
+     a final "Coverage Limitations" paragraph in plain prose — e.g.
+     "The retrieved evidence did not contain explicit policy recommendations, so this
+     summary does not attribute recommendations to the document."
+     This keeps the summary auditable without silently omitting known gaps.
 6. For each citation, set `chunk_id` to the value shown in the `[chunk_id=...]` header of the excerpt you drew the passage from (format: {doc_id}_{chunk_index}). This field is required — never leave it null.
 7. Summarise faithfully from the target document — do NOT compare across multiple documents.
-8. The sub-question analysis below identifies key verified facts — ensure your answer addresses each one, but draw your citations from the full excerpts above, not from the claim list.
+8. Organise the answer naturally around the coverage obligations; they are requirements,
+   not mandatory section headings. Do not force the content into a rigid template.
+9. The sub-question analysis below identifies key verified facts — ensure your answer addresses each one, but draw your citations from the full excerpts above, not from the claim list.
 
 If the excerpts genuinely do not contain enough information to answer the question, refuse the request rather than fabricating an answer.
 
@@ -117,6 +122,65 @@ def run_synthesiser(state: dict) -> dict:
         if isinstance(cov, Coverage) and cov.status in ("partial", "not_covered")
     ]
 
+    # For summary: build three-group theme obligations grounded in verified claims.
+    #
+    # The grader marks coverage based on retrieval scores, but the verifier may
+    # subsequently reject all claims for a sub-question. Theme support is
+    # recalculated here from verified_claims so the synthesiser's obligations
+    # reflect what the verification step confirmed, not just retrieval relevance.
+    #
+    # Groups:
+    #   fully_supported  — grader=covered AND at least one verified claim in sq's chunks
+    #   partially_supported — grader=partial OR (grader=covered but no verified claims)
+    #   unsupported      — grader=not_covered OR grader=covered/partial but zero verified claims
+    supported_themes: list[dict] = []    # {theme, status, claim_ids, gap_reason}
+    unsupported_themes: list[str] = []
+    if task_type == "summary":
+        sub_questions = state.get("sub_questions", [])
+
+        # Build sq_id → question text
+        sq_text: dict[str, str] = {}
+        for sq in sub_questions:
+            if hasattr(sq, "id") and hasattr(sq, "question"):
+                sq_text[sq.id] = sq.question
+            elif isinstance(sq, dict):
+                sq_text[sq.get("id", "")] = sq.get("question", "")
+
+        # Build chunk_id → [claim_id] from verified claims
+        chunk_to_claims: dict[str, list[str]] = {}
+        for claim in verified_claims:
+            claim_id = claim.id if hasattr(claim, "id") else claim.get("id", "")
+            evidence_ids = claim.evidence_ids if hasattr(claim, "evidence_ids") else claim.get("evidence_ids", [])
+            for cid in evidence_ids:
+                chunk_to_claims.setdefault(cid, []).append(claim_id)
+
+        for sq_id, cov in coverage.items():
+            if not isinstance(cov, Coverage):
+                continue
+            question = sq_text.get(sq_id, sq_id)
+
+            # Which claim_ids are supported by chunks from this sub-question?
+            sq_chunk_ids = {c.get("chunk_id") for c in retrievals.get(sq_id, []) if c.get("chunk_id")}
+            verified_claim_ids: list[str] = []
+            for cid in sq_chunk_ids:
+                verified_claim_ids.extend(chunk_to_claims.get(cid, []))
+            # Deduplicate preserving order
+            seen: set[str] = set()
+            verified_claim_ids = [c for c in verified_claim_ids if not (c in seen or seen.add(c))]  # type: ignore[func-returns-value]
+
+            has_verified = bool(verified_claim_ids)
+
+            if cov.status == "not_covered" or not has_verified:
+                unsupported_themes.append(question)
+            elif cov.status == "covered" and has_verified:
+                supported_themes.append(
+                    {"theme": question, "status": "covered", "claim_ids": verified_claim_ids, "gap_reason": None}
+                )
+            else:  # partial
+                supported_themes.append(
+                    {"theme": question, "status": "partial", "claim_ids": verified_claim_ids, "gap_reason": cov.gap_reason}
+                )
+
     # LLM call: full chunks + verified claims as supplemental context
     brief_data, call_cost = _call_synthesiser(
         query=query,
@@ -124,6 +188,8 @@ def run_synthesiser(state: dict) -> dict:
         verified_claims=verified_claims,
         coverage_gaps=coverage_gaps,
         task_type=task_type,
+        supported_themes=supported_themes,
+        unsupported_themes=unsupported_themes,
     )
 
     # Merge grader-detected gaps with LLM-identified gaps
@@ -162,6 +228,8 @@ def _call_synthesiser(
     verified_claims: list,
     coverage_gaps: list[str],
     task_type: str = "cross_doc",
+    supported_themes: list[dict] | None = None,
+    unsupported_themes: list[str] | None = None,
 ) -> tuple[dict, float]:
     """Call LLM with full chunks + claim context. Returns (brief_data, cost_usd).
 
@@ -177,11 +245,39 @@ def _call_synthesiser(
     claims_block = _format_claims(verified_claims)
     gap_note = f"\nKnown coverage gaps: {coverage_gaps}" if coverage_gaps else ""
 
+    # For summary: append three-group theme obligations tied to verified claims.
+    # This grounds the LLM's synthesis obligations in what verification confirmed,
+    # rather than a fixed template or free-form organisation.
+    theme_note = ""
+    if task_type == "summary" and (supported_themes or unsupported_themes):
+        fully = [t for t in (supported_themes or []) if t.get("status") == "covered"]
+        partial = [t for t in (supported_themes or []) if t.get("status") == "partial"]
+        unsupported = unsupported_themes or []
+
+        if fully:
+            lines = []
+            for t in fully:
+                claim_ids = t.get("claim_ids") or []
+                lines.append(f"  - {t['theme']}  [verified claim_ids: {', '.join(claim_ids)}]")
+            theme_note += "\nFULLY SUPPORTED themes (address in full):\n" + "\n".join(lines)
+
+        if partial:
+            lines = []
+            for t in partial:
+                claim_ids = t.get("claim_ids") or []
+                gap = f"  gap: {t['gap_reason']}" if t.get("gap_reason") else ""
+                lines.append(f"  - {t['theme']}  [verified claim_ids: {', '.join(claim_ids)}]{gap}")
+            theme_note += "\nPARTIALLY SUPPORTED themes (address supported portion only; disclose limitation):\n" + "\n".join(lines)
+
+        if unsupported:
+            theme_note += "\nUNSUPPORTED themes (list in Coverage Limitations only — no substantive claims):\n" + "\n".join(f"  - {t}" for t in unsupported)
+
     user_content = (
         f"Question: {query}\n\n"
         f"Retrieved excerpts:\n{context_block}\n\n"
         f"Verified sub-question claims (supplemental context):\n{claims_block}"
         f"{gap_note}"
+        f"{theme_note}"
     )
 
     try:

@@ -30,6 +30,7 @@ from langgraph.graph import END, StateGraph
 
 import src.agent.policies as _policies
 from src.agent.nodes.claim_builder import run_claim_builder
+from src.agent.nodes.document_resolver import run_document_resolver
 from src.agent.nodes.grader import run_grader
 from src.agent.nodes.planner import run_planner
 from src.agent.nodes.retriever import run_retriever
@@ -95,8 +96,8 @@ def check_budget(state: AgentState) -> str:
     if state.get("time_used_s", 0.0) >= MAX_TIME_S:
         logger.info("Budget: MAX_TIME_S reached (%.1fs)", MAX_TIME_S)
         return "terminate"
-    if state.get("termination_reason") == "fallback_to_fast":
-        logger.info("Budget: fallback_to_fast triggered")
+    if state.get("termination_reason") in ("fallback_to_fast", "corpus_gap"):
+        logger.info("Budget: termination_reason=%s", state.get("termination_reason"))
         return "terminate"
     return "continue"
 
@@ -268,6 +269,7 @@ def build_graph():
     graph = StateGraph(AgentState)
 
     # Register all node functions — wrapped with tracing
+    graph.add_node("document_resolver", _traced(run_document_resolver))
     graph.add_node("planner", _traced(run_planner))
     graph.add_node("retriever", _traced(run_retriever))
     graph.add_node("grader", _traced(run_grader))
@@ -277,8 +279,20 @@ def build_graph():
     graph.add_node("synthesiser", _traced(run_synthesiser))
     graph.add_node("handle_termination", _traced(handle_termination))
 
-    # Entry point
-    graph.set_entry_point("planner")
+    # Entry point: document_resolver runs first.
+    # For non-summary queries it is a no-op; for summary it resolves the target
+    # doc_id or sets termination_reason=corpus_gap before the planner runs.
+    graph.set_entry_point("document_resolver")
+
+    # After document_resolver: budget/corpus_gap check → planner or termination
+    graph.add_conditional_edges(
+        "document_resolver",
+        check_budget,
+        {
+            "continue": "planner",
+            "terminate": "handle_termination",
+        },
+    )
 
     # After planner: budget check → retriever or termination
     graph.add_conditional_edges(

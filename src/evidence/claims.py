@@ -18,6 +18,7 @@ class SubQuestion(BaseModel):
     id: str  # e.g. "sq_0", "sq_1"
     question: str
     required_source: Optional[str] = None  # institution filter e.g. "BoE", "Ofgem"
+    required_doc_id: Optional[str] = None  # exact doc_id filter e.g. "IEA_WEO_2025" (summary route)
     task_type: str = "factual"
 
 

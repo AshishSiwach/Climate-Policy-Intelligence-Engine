@@ -69,13 +69,16 @@ Generate sub-questions covering these standard report sections (adapt to the que
   4. Policy recommendations — what actions or policies does it propose?
   5. Identified risks, barriers, or evidence gaps
 
-If the query names a specific institution, set "required_source" to that institution for
-all sub-questions so retrieval is targeted to that document set.
+The resolved document identifier is provided below (if available). Set "required_doc_id" to
+that value for ALL sub-questions so retrieval is scoped to exactly that document.
+
+Resolved document ID: __RESOLVED_DOC_ID__
 
 Return a JSON array where each element has these exact keys:
   - "id": string like "sq_0", "sq_1", ... (sequential)
   - "question": string — the factual sub-question text
   - "required_source": string or null — institution name if a specific source is needed
+  - "required_doc_id": string or null — exact doc_id from "Resolved document ID" above, or null if none provided
   - "task_type": "factual"
 
 Return ONLY the JSON array, no other text.
@@ -87,9 +90,10 @@ You are a research planner. Return a valid JSON array and NOTHING ELSE.
 Decompose the summary request into at most {max_sq} section-covering factual sub-questions.
 Cover: objectives, key findings, sectoral analysis, policy recommendations, evidence gaps.
 Each must have: "id" (sq_0, sq_1...), "question" (string), "required_source" (string or null),
+"required_doc_id": string or null (use __RESOLVED_DOC_ID__ if provided, else null),
 "task_type": "factual".
 
-Example: [{"id":"sq_0","question":"What are the main objectives?","required_source":"IEA","task_type":"factual"}]
+Example: [{{"id":"sq_0","question":"What are the main objectives?","required_source":"IEA","required_doc_id":"IEA_WEO_2025","task_type":"factual"}}]
 
 Return ONLY the JSON array.
 """
@@ -113,13 +117,17 @@ def run_planner(state: dict) -> dict:
     steps_used = state.get("steps_used", 0)
 
     if task_type == "summary":
-        normal_prompt = _SUMMARY_SYSTEM_PROMPT
-        strict_prompt = _SUMMARY_STRICT_SYSTEM_PROMPT
+        # Inject resolved_doc_id so sub-questions carry the exact document filter.
+        # The {{resolved_doc_id}} placeholder in the prompt uses Python .format_map
+        # so we pass it as a separate substitution after the max_sq substitution.
+        resolved_doc_id = state.get("resolved_doc_id") or "null"
+        normal_prompt = _SUMMARY_SYSTEM_PROMPT.replace("__RESOLVED_DOC_ID__", resolved_doc_id)
+        strict_prompt = _SUMMARY_STRICT_SYSTEM_PROMPT.replace("__RESOLVED_DOC_ID__", resolved_doc_id)
     else:
         normal_prompt = _CROSSDOC_SYSTEM_PROMPT
         strict_prompt = _CROSSDOC_STRICT_SYSTEM_PROMPT
 
-    logger.info("Planner: task_type=%s", task_type)
+    logger.info("Planner: task_type=%s resolved_doc_id=%s", task_type, state.get("resolved_doc_id"))
 
     result = _call_planner(query, system_prompt=normal_prompt, use_json_mode=True)
     if result is None:

@@ -64,9 +64,10 @@ sub-question must be directly answerable from a retrieved passage.
 
 Generate sub-questions covering these standard report sections (adapt to the query's subject):
   1. Overall objectives and scope — what does this report set out to do?
-  2. Key findings and headline metrics — what are the main numbers or conclusions?
-  3. Sectoral or thematic analysis — what does it say about specific sectors, technologies, or regions?
-  4. Policy recommendations — what actions or policies does it propose?
+  2. Key quantitative findings — what are the specific numbers, projections, investment figures,
+     capacity targets, or measurable outcomes? (ask for concrete values, not just themes)
+  3. Thematic or sectoral analysis — what does it say about specific sectors, technologies, or policy areas?
+  4. Policy recommendations and proposed actions — what concrete actions or policies does it recommend?
   5. Identified risks, barriers, or evidence gaps
 
 The resolved document identifier is provided below (if available). Set "required_doc_id" to

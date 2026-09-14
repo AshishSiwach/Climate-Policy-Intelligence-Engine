@@ -5,9 +5,8 @@ Classifies a query into one of six task types using GPT-4o-mini and routes it
 to either the fast path or the agent path.
 
 Routing rule:
-  cross_doc            →  Path.AGENT  (LangGraph multi-doc workflow)
-  summary              →  Path.SUMMARY (flat single-doc pipeline)
-  factual | numeric | unsupported  →  Path.FAST
+  cross_doc                           →  Path.AGENT
+  factual | numeric | summary | unsupported  →  Path.FAST
 
 Fail-open: any error returns (Path.FAST, "factual").
 """
@@ -24,10 +23,8 @@ logger = logging.getLogger(__name__)
 _VALID_TYPES = {"factual", "numeric", "cross_doc", "summary", "contradiction", "unsupported"}
 
 # Only cross_doc uses the LangGraph agent workflow.
-# summary has its own flat pipeline in src/summary/route.py.
 # contradiction is Phase 5b — not yet built.
 _AGENT_TYPES = {"cross_doc"}
-_SUMMARY_TYPES = {"summary"}
 
 
 def _agent_route_enabled() -> bool:
@@ -57,7 +54,6 @@ Return only: {"task_type": "<value>"}
 class Path(str, Enum):
     FAST = "fast"
     AGENT = "agent"
-    SUMMARY = "summary"
 
 
 def complexity_router(query: str, api_key: str | None = None) -> tuple[Path, str]:
@@ -110,10 +106,5 @@ def _call_router(query: str, api_key: str | None) -> tuple[Path, str]:
         logger.warning("Router returned unknown task_type %r — defaulting to factual", task_type)
         task_type = "factual"
 
-    if task_type in _AGENT_TYPES:
-        path = Path.AGENT
-    elif task_type in _SUMMARY_TYPES:
-        path = Path.SUMMARY
-    else:
-        path = Path.FAST
+    path = Path.AGENT if task_type in _AGENT_TYPES else Path.FAST
     return path, task_type

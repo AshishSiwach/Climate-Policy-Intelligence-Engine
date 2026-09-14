@@ -12,7 +12,3 @@ RETRY_LIMIT: int = 1  # one contextual retry; repeated identical retrieval did n
 # Determined by scripts/sweep_retriever_k.py: k=6 is the lowest value clearing
 # correctness >= 3.50 and completeness >= 3.25; k=10 regressed due to noise.
 RETRIEVER_TOP_K: int = 6
-# For summary sub-questions the retriever fetches globally then filters to a single
-# doc_id. With RETRIEVER_TOP_K=6 only 1-3 doc-specific chunks survive the filter.
-# Fetching 25 globally before filtering keeps ≥8-10 on-target chunks per sub-question.
-SUMMARY_RETRIEVER_TOP_K: int = 25

@@ -37,13 +37,6 @@ logger = logging.getLogger(__name__)
 COVERED_THRESHOLD = 3.63  # t-based 95% lower bound of covered distribution
 PARTIAL_THRESHOLD = -2.3  # midpoint(mean_covered, mean_ooc) — pending larger probe set
 
-# Summary sub-questions are broader and more thematic than cross-doc factual questions.
-# The cross-encoder scores them lower even against correct content, so the calibrated
-# cross-doc thresholds reject too many genuinely-covered summary themes. Lowered
-# empirically to pass scores of 2.0–3.2 that human inspection confirmed as relevant.
-SUMMARY_COVERED_THRESHOLD = 2.0
-SUMMARY_PARTIAL_THRESHOLD = -1.0
-
 # ---------------------------------------------------------------------------
 # Cross-encoder singleton — loaded once per process
 # ---------------------------------------------------------------------------
@@ -80,10 +73,8 @@ def run_grader(state: dict) -> dict:
     if not sub_questions:
         return {"coverage": {}, "steps_used": steps_used + 1}
 
-    task_type: str = state.get("task_type", "cross_doc")
-
     try:
-        coverage = _grade_all(sub_questions, retrievals, task_type=task_type)
+        coverage = _grade_all(sub_questions, retrievals)
     except Exception as exc:
         logger.warning("Grader: cross-encoder failed (%s) — defaulting all to 'covered'", exc)
         coverage = _default_coverage(sub_questions)
@@ -100,7 +91,7 @@ def run_grader(state: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _grade_all(sub_questions: list, retrievals: dict, task_type: str = "cross_doc") -> dict[str, Coverage]:
+def _grade_all(sub_questions: list, retrievals: dict) -> dict[str, Coverage]:
     encoder = _get_encoder()
     coverage: dict[str, Coverage] = {}
 
@@ -109,7 +100,7 @@ def _grade_all(sub_questions: list, retrievals: dict, task_type: str = "cross_do
         question = sq.question if isinstance(sq, SubQuestion) else sq.get("question", "")
         chunks = retrievals.get(sq_id, [])
 
-        max_score, status, gap_reason = _score_subquestion(encoder, question, chunks, task_type=task_type)
+        max_score, status, gap_reason = _score_subquestion(encoder, question, chunks)
 
         # Coverage decisions directly control the retry loop, so keep the raw
         # score visible at the normal production log level.  Without this it is
@@ -135,7 +126,6 @@ def _score_subquestion(
     encoder,
     question: str,
     chunks: list[dict],
-    task_type: str = "cross_doc",
 ) -> tuple[float, str, str | None]:
     """Return (max_score, status, gap_reason) for one sub-question."""
     if not chunks:
@@ -151,8 +141,8 @@ def _score_subquestion(
     scores = encoder.predict(pairs)
     max_score = float(max(scores))
 
-    covered_thresh = SUMMARY_COVERED_THRESHOLD if task_type == "summary" else COVERED_THRESHOLD
-    partial_thresh = SUMMARY_PARTIAL_THRESHOLD if task_type == "summary" else PARTIAL_THRESHOLD
+    covered_thresh = COVERED_THRESHOLD
+    partial_thresh = PARTIAL_THRESHOLD
 
     if max_score >= covered_thresh:
         return max_score, "covered", None

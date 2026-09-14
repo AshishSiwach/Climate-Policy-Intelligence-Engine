@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
 
 _MAX_SUB_QUESTIONS = 6
 
-# --- cross_doc prompts (Phase 3) ---
-
 _CROSSDOC_SYSTEM_PROMPT = """\
 You are a research planner for a climate policy analysis engine.
 
@@ -53,52 +51,6 @@ Example: [{"id":"sq_0","question":"What is X?","required_source":null,"task_type
 Return ONLY the JSON array.
 """
 
-# --- summary prompts (Phase 5a) ---
-
-_SUMMARY_SYSTEM_PROMPT = """\
-You are a research planner for a climate policy analysis engine.
-
-Given a request to summarise a document or report, decompose it into at most {max_sq}
-focused factual sub-questions that together cover the report's main sections. Each
-sub-question must be directly answerable from a retrieved passage.
-
-Generate sub-questions covering these standard report sections (adapt to the query's subject):
-  1. Overall objectives and scope — what does this report set out to do?
-  2. Key quantitative findings — what are the specific numbers, projections, investment figures,
-     capacity targets, or measurable outcomes? (ask for concrete values, not just themes)
-  3. Thematic or sectoral analysis — what does it say about specific sectors, technologies, or policy areas?
-  4. Policy recommendations and proposed actions — what concrete actions or policies does it recommend?
-  5. Identified risks, barriers, or evidence gaps
-
-The resolved document identifier is provided below (if available). Set "required_doc_id" to
-that value for ALL sub-questions so retrieval is scoped to exactly that document.
-
-Resolved document ID: __RESOLVED_DOC_ID__
-
-Return a JSON array where each element has these exact keys:
-  - "id": string like "sq_0", "sq_1", ... (sequential)
-  - "question": string — the factual sub-question text
-  - "required_source": string or null — institution name if a specific source is needed
-  - "required_doc_id": string or null — exact doc_id from "Resolved document ID" above, or null if none provided
-  - "task_type": "factual"
-
-Return ONLY the JSON array, no other text.
-"""
-
-_SUMMARY_STRICT_SYSTEM_PROMPT = """\
-You are a research planner. Return a valid JSON array and NOTHING ELSE.
-
-Decompose the summary request into at most {max_sq} section-covering factual sub-questions.
-Cover: objectives, key findings, sectoral analysis, policy recommendations, evidence gaps.
-Each must have: "id" (sq_0, sq_1...), "question" (string), "required_source" (string or null),
-"required_doc_id": string or null (use __RESOLVED_DOC_ID__ if provided, else null),
-"task_type": "factual".
-
-Example: [{{"id":"sq_0","question":"What are the main objectives?","required_source":"IEA","required_doc_id":"IEA_WEO_2025","task_type":"factual"}}]
-
-Return ONLY the JSON array.
-"""
-
 # Backward-compatible aliases kept for any external tests that reference them
 _SYSTEM_PROMPT = _CROSSDOC_SYSTEM_PROMPT
 _STRICT_SYSTEM_PROMPT = _CROSSDOC_STRICT_SYSTEM_PROMPT
@@ -107,33 +59,18 @@ _STRICT_SYSTEM_PROMPT = _CROSSDOC_STRICT_SYSTEM_PROMPT
 def run_planner(state: dict) -> dict:
     """Planner node: decomposes state["query"] into SubQuestion objects.
 
-    Selects prompt based on state["task_type"]: summary queries get section-covering
-    sub-questions; cross_doc and all others get factual evidence sub-questions.
-
     Returns partial dict with "sub_questions" and incremented "steps_used".
     On repeated failure returns {"termination_reason": "fallback_to_fast"}.
     """
     query = state.get("query", "")
-    task_type = state.get("task_type", "cross_doc")
     steps_used = state.get("steps_used", 0)
 
-    if task_type == "summary":
-        # Inject resolved_doc_id so sub-questions carry the exact document filter.
-        # The {{resolved_doc_id}} placeholder in the prompt uses Python .format_map
-        # so we pass it as a separate substitution after the max_sq substitution.
-        resolved_doc_id = state.get("resolved_doc_id") or "null"
-        normal_prompt = _SUMMARY_SYSTEM_PROMPT.replace("__RESOLVED_DOC_ID__", resolved_doc_id)
-        strict_prompt = _SUMMARY_STRICT_SYSTEM_PROMPT.replace("__RESOLVED_DOC_ID__", resolved_doc_id)
-    else:
-        normal_prompt = _CROSSDOC_SYSTEM_PROMPT
-        strict_prompt = _CROSSDOC_STRICT_SYSTEM_PROMPT
+    logger.info("Planner: task_type=%s", state.get("task_type", "cross_doc"))
 
-    logger.info("Planner: task_type=%s resolved_doc_id=%s", task_type, state.get("resolved_doc_id"))
-
-    result = _call_planner(query, system_prompt=normal_prompt, use_json_mode=True)
+    result = _call_planner(query, system_prompt=_CROSSDOC_SYSTEM_PROMPT, use_json_mode=True)
     if result is None:
         logger.warning("Planner: first attempt failed — retrying with strict prompt")
-        result = _call_planner(query, system_prompt=strict_prompt, use_json_mode=False)
+        result = _call_planner(query, system_prompt=_CROSSDOC_STRICT_SYSTEM_PROMPT, use_json_mode=False)
 
     if result is None:
         logger.error("Planner: both attempts failed — falling back to fast path")

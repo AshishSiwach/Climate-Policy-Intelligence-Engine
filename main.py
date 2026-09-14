@@ -43,6 +43,7 @@ from retrieval.institution_detector import detect_institutions
 from src.agent.router import Path as RoutePath
 from src.agent.router import complexity_router
 from src.agent.workflow import agent_graph
+from src.summary.route import run_summary
 from src.config.settings import get_settings
 from src.synthesis.output_schema import AnalystBrief as AgentAnalystBrief
 from synthesis import AnalystBrief, Synthesiser
@@ -264,6 +265,80 @@ def _run_agent_path(
     return result
 
 
+# ---------------------------------------------------------------------------
+# Summary route
+# ---------------------------------------------------------------------------
+
+_corpus_doc_ids_cache: list[str] | None = None
+
+
+def _get_corpus_doc_ids() -> list[str]:
+    """Lazy-load corpus doc_ids from ChromaDB once per process."""
+    global _corpus_doc_ids_cache
+    if _corpus_doc_ids_cache is not None:
+        return _corpus_doc_ids_cache
+    try:
+        import chromadb
+        client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+        collection = client.get_collection("cpie")
+        results = collection.get(include=["metadatas"])
+        _corpus_doc_ids_cache = sorted({
+            m.get("doc_id", "")
+            for m in (results["metadatas"] or [])
+            if m.get("doc_id")
+        })
+        logger.info("Corpus doc_ids loaded: %d documents", len(_corpus_doc_ids_cache))
+    except Exception as exc:
+        logger.warning("Could not load corpus doc_ids: %s", exc)
+        _corpus_doc_ids_cache = []
+    return _corpus_doc_ids_cache
+
+
+def _run_summary_path(
+    query: str,
+    hybrid: HybridRetriever,
+    qlogger: QueryLogger,
+    query_id: str,
+    log_path: Path,
+) -> dict:
+    """Execute the flat summary pipeline (resolver + retrieval + synthesis)."""
+    t_start = time.time()
+
+    corpus_doc_ids = _get_corpus_doc_ids()
+    result = run_summary(query=query, retriever=hybrid, corpus_doc_ids=corpus_doc_ids)
+    latency_ms = (time.time() - t_start) * 1000
+
+    brief = AgentAnalystBrief(
+        answer=result.get("answer", ""),
+        citations=result.get("citations", []),
+        coverage_gaps=result.get("coverage_gaps", []),
+        contradictions=result.get("contradictions", []),
+        truncated=result.get("truncated", False),
+        termination_reason=result.get("termination_reason", "complete"),
+    )
+
+    record = build_query_record(
+        query=query,
+        retrieved_chunks=[],
+        retrieval_latency_ms=0.0,
+        synthesis_result={
+            "brief": brief,
+            "latency_ms": latency_ms,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "cost_usd": 0.0,
+        },
+        model_used="summary",
+        failure_reason=None,
+        query_id=query_id,
+    )
+    qlogger.log(record)
+    _safe_db_write(record)
+
+    result["query_id"] = query_id
+    return result
+
+
 def _run_agent_shadow(
     query: str,
     task_type: str,
@@ -436,6 +511,15 @@ def run_query(
 
     path, task_type = complexity_router(query)
 
+    # Summary route — flat single-document pipeline (no LangGraph)
+    if path == RoutePath.SUMMARY:
+        try:
+            return _run_summary_path(query, hybrid, qlogger, query_id, log_path)
+        except Exception:
+            logger.exception(
+                "Summary path failed for query: %r — falling back to fast path", query
+            )
+
     use_agent = (
         _should_use_agent(agent_enabled, settings.agent.canary_pct)
         if (path == RoutePath.AGENT and task_type == "cross_doc")
@@ -532,6 +616,18 @@ def run_query_with_progress(
     settings = get_settings()
     agent_enabled = settings.agent.route_enabled
     path, task_type = complexity_router(query)
+
+    # Summary route — flat single-document pipeline
+    if path == RoutePath.SUMMARY:
+        yield {"type": "routing", "path": "summary"}
+        try:
+            result = _run_summary_path(query, hybrid, qlogger, query_id, log_path)
+        except Exception:
+            logger.exception("Summary path failed for query_id=%s — falling back to fast path", query_id)
+            result = _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
+        yield {"type": "result", "brief": result}
+        return
+
     use_agent = (
         _should_use_agent(agent_enabled, settings.agent.canary_pct)
         if (path == RoutePath.AGENT and task_type == "cross_doc")

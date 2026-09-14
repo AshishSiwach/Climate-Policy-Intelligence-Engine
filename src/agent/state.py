@@ -17,10 +17,7 @@ class AgentState(TypedDict):
     # Immutable input
     request_id: str
     query: str
-    task_type: Literal["cross_doc", "summary", "contradiction", "weak_evidence"]
-
-    # Populated by document_resolver (summary route only)
-    resolved_doc_id: Optional[str]  # exact corpus doc_id e.g. "IEA_WEO_2025"
+    task_type: Literal["cross_doc", "contradiction", "weak_evidence"]
 
     # Populated during workflow
     sub_questions: list[SubQuestion]
@@ -43,4 +40,3 @@ class AgentState(TypedDict):
 
     # Runtime injection — not serialised, not part of eval output
     _retriever: Optional[object]  # HybridRetriever instance injected by caller
-    _corpus_doc_ids: Optional[list]  # list[str] of available doc_ids injected by caller (summary resolver)

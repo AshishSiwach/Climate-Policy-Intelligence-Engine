@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.agent.router import _AGENT_TYPES, complexity_router
+from src.agent.router import _AGENT_TYPES, _SUMMARY_TYPES, complexity_router
 from src.agent.router import Path as RoutePath
 
 LABELS_PATH = Path("data/eval/router_labels.json")
@@ -61,7 +61,12 @@ def test_router_accuracy_mocked(router_labels):
 
     for item in router_labels:
         expected_task = item["expected"]
-        expected_path = RoutePath.AGENT if expected_task in _AGENT_TYPES else RoutePath.FAST
+        if expected_task in _AGENT_TYPES:
+            expected_path = RoutePath.AGENT
+        elif expected_task in _SUMMARY_TYPES:
+            expected_path = RoutePath.SUMMARY
+        else:
+            expected_path = RoutePath.FAST
 
         mock_client = _make_mock_client(expected_task)
 
@@ -76,13 +81,21 @@ def test_router_accuracy_mocked(router_labels):
 
 
 def test_router_agent_types_go_to_agent():
-    """cross_doc and summary route to AGENT (contradiction is Phase 5b, not yet built)."""
-    for task_type in ("cross_doc", "summary"):
-        mock_client = _make_mock_client(task_type)
-        with patch("openai.OpenAI", return_value=mock_client):
-            path, returned_type = complexity_router("any query")
-        assert path == RoutePath.AGENT, f"{task_type} should route to AGENT"
-        assert returned_type == task_type
+    """cross_doc routes to AGENT (LangGraph workflow)."""
+    mock_client = _make_mock_client("cross_doc")
+    with patch("openai.OpenAI", return_value=mock_client):
+        path, returned_type = complexity_router("any query")
+    assert path == RoutePath.AGENT
+    assert returned_type == "cross_doc"
+
+
+def test_router_summary_goes_to_summary():
+    """summary routes to SUMMARY (flat single-doc pipeline, not the agent)."""
+    mock_client = _make_mock_client("summary")
+    with patch("openai.OpenAI", return_value=mock_client):
+        path, returned_type = complexity_router("any query")
+    assert path == RoutePath.SUMMARY
+    assert returned_type == "summary"
 
 
 def test_router_fast_types_go_to_fast():

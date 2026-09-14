@@ -74,6 +74,9 @@ Rules:
 8. Organise the answer naturally around the coverage obligations; they are requirements,
    not mandatory section headings. Do not force the content into a rigid template.
 9. The sub-question analysis below identifies key verified facts — ensure your answer addresses each one, but draw your citations from the full excerpts above, not from the claim list.
+10. LENGTH: Keep the answer field to at most 500 words total. For each FULLY SUPPORTED
+    theme write 2-3 tight sentences of analysis plus a citation. Be specific and direct;
+    do not repeat context from the question or write preamble.
 
 If the excerpts genuinely do not contain enough information to answer the question, refuse the request rather than fabricating an answer.
 
@@ -283,6 +286,11 @@ def _call_synthesiser(
     )
 
     try:
+        from openai import LengthFinishReasonError
+    except ImportError:
+        LengthFinishReasonError = None  # type: ignore[assignment,misc]  # older SDK
+
+    try:
         response = client.beta.chat.completions.parse(
             model=_MODEL,
             messages=[
@@ -304,9 +312,9 @@ def _call_synthesiser(
 
         llm_response: LLMResponse = message.parsed
         if llm_response is None:
-            # Structured output parse failed — typically mid-JSON truncation from token limit.
-            logger.warning("Agent synthesiser: parsed=None (likely truncated output); returning empty answer")
-            return {"answer": "Synthesis failed: response was truncated before a complete answer could be parsed.", "citations": [], "contradictions": [], "llm_gaps": []}, cost
+            # Structured output parse failed — mid-JSON truncation despite token budget.
+            logger.warning("Agent synthesiser: parsed=None (truncated output)")
+            return {"answer": "Synthesis was truncated before completing — reduce prompt or increase token budget.", "citations": [], "contradictions": [], "llm_gaps": ["synthesis truncated"]}, cost
 
         # Verify citations against the aggregated chunks (hardened verifier)
         verified_citations = _verify_citations(llm_response.citations, chunks)
@@ -319,6 +327,20 @@ def _call_synthesiser(
         }, cost
 
     except Exception as exc:
+        # LengthFinishReasonError: SDK raises this when finish_reason=="length" in structured-output mode.
+        # The model hit its output cap mid-JSON so the response cannot be parsed.
+        if LengthFinishReasonError and isinstance(exc, LengthFinishReasonError):
+            raw_usage = getattr(getattr(exc, "response", None), "usage", None)
+            cost = _estimate_cost(
+                raw_usage.prompt_tokens if raw_usage else 0,
+                raw_usage.completion_tokens if raw_usage else 0,
+            )
+            logger.warning(
+                "Agent synthesiser: output truncated at %d tokens — add rule 10 to prompt or raise model limit",
+                raw_usage.completion_tokens if raw_usage else 0,
+            )
+            return {"answer": "Synthesis was truncated — the model hit its output token limit before completing the JSON.", "citations": [], "contradictions": [], "llm_gaps": ["synthesis truncated"]}, cost
+
         logger.warning("Agent synthesiser LLM call failed: %s", exc)
         return {"answer": "Synthesis failed due to an internal error.", "citations": [], "contradictions": [], "llm_gaps": []}, 0.0
 

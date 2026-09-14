@@ -77,6 +77,19 @@ def run_synthesiser(state: dict) -> dict:
                 seen_chunk_ids.add(cid)
                 aggregated_chunks.append(chunk)
 
+    # Filter to only chunks referenced by at least one verified claim.
+    # This keeps the synthesis context tight and grounded — the claims act as
+    # a selector, not a second input channel. Fall back to all chunks only if
+    # the verifier dropped everything (shouldn't happen in normal operation).
+    evidenced_ids: set[str] = set()
+    for claim in verified_claims:
+        if isinstance(claim, Claim):
+            evidenced_ids.update(claim.evidence_ids)
+        elif isinstance(claim, dict):
+            evidenced_ids.update(claim.get("evidence_ids", []))
+    evidence_chunks = [c for c in aggregated_chunks if c.get("chunk_id") in evidenced_ids]
+    synthesis_chunks = evidence_chunks if evidence_chunks else aggregated_chunks
+
     # Identify coverage gaps from grader output
     coverage_gaps: list[str] = [
         (cov.gap_reason or sq_id)
@@ -84,11 +97,10 @@ def run_synthesiser(state: dict) -> dict:
         if isinstance(cov, Coverage) and cov.status in ("partial", "not_covered")
     ]
 
-    # LLM call: full chunks + verified claims as supplemental context
+    # LLM call: evidence-filtered chunks only (no separate claims block)
     brief_data, call_cost = _call_synthesiser(
         query=query,
-        chunks=aggregated_chunks,
-        verified_claims=verified_claims,
+        chunks=synthesis_chunks,
         coverage_gaps=coverage_gaps,
     )
 
@@ -125,10 +137,9 @@ def run_synthesiser(state: dict) -> dict:
 def _call_synthesiser(
     query: str,
     chunks: list[dict],
-    verified_claims: list,
     coverage_gaps: list[str],
 ) -> tuple[dict, float]:
-    """Call LLM with full chunks + claim context. Returns (brief_data, cost_usd).
+    """Call LLM with evidence-filtered chunks. Returns (brief_data, cost_usd).
 
     brief_data keys: answer, citations, contradictions, llm_gaps
     """
@@ -138,13 +149,11 @@ def _call_synthesiser(
     client = OpenAI(api_key=key)
 
     context_block = _format_chunks(chunks)
-    claims_block = _format_claims(verified_claims)
     gap_note = f"\nKnown coverage gaps: {coverage_gaps}" if coverage_gaps else ""
 
     user_content = (
         f"Question: {query}\n\n"
-        f"Retrieved excerpts:\n{context_block}\n\n"
-        f"Verified sub-question claims (supplemental context):\n{claims_block}"
+        f"Retrieved excerpts:\n{context_block}"
         f"{gap_note}"
     )
 
@@ -221,19 +230,6 @@ def _format_chunks(chunks: list[dict]) -> str:
         lines.append("")
     return "\n".join(lines)
 
-
-def _format_claims(claims: list) -> str:
-    """Format verified claims as supplemental context lines."""
-    lines = []
-    for i, claim in enumerate(claims):
-        if isinstance(claim, Claim):
-            text = claim.text
-            doc = claim.source_doc_id
-        else:
-            text = claim.get("text", "")
-            doc = claim.get("source_doc_id", "")
-        lines.append(f"  [{i}] (source={doc}) {text}")
-    return "\n".join(lines) if lines else "  (none)"
 
 
 def _verify_citations(llm_citations: list[LLMCitation], chunks: list[dict]) -> list[Citation]:

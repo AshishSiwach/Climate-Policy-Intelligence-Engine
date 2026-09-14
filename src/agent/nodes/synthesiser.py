@@ -26,7 +26,8 @@ logger = logging.getLogger(__name__)
 
 # Same model as fast path (shipped Week 5 Step 3b)
 _MODEL = "gpt-5.4-mini"
-_MAX_TOKENS = 2000
+_MAX_TOKENS = 2000          # cross-doc: focused comparison answer
+_SUMMARY_MAX_TOKENS = 4000  # summary: multi-theme narrative — larger to avoid mid-JSON truncation
 
 # v2_crossdoc: explicitly instructs the LLM to compare/contrast sources in multi-doc answers.
 # Measured +0.23 Completeness vs v1 on cross-doc queries.
@@ -241,6 +242,7 @@ def _call_synthesiser(
     client = OpenAI(api_key=key)
 
     system_prompt = _SUMMARY_SYSTEM_PROMPT if task_type == "summary" else _CROSSDOC_SYSTEM_PROMPT
+    max_tokens = _SUMMARY_MAX_TOKENS if task_type == "summary" else _MAX_TOKENS
     context_block = _format_chunks(chunks)
     claims_block = _format_claims(verified_claims)
     gap_note = f"\nKnown coverage gaps: {coverage_gaps}" if coverage_gaps else ""
@@ -288,7 +290,7 @@ def _call_synthesiser(
                 {"role": "user", "content": user_content},
             ],
             response_format=LLMResponse,
-            max_completion_tokens=_MAX_TOKENS,
+            max_completion_tokens=max_tokens,
             temperature=0.0,
         )
 
@@ -301,6 +303,10 @@ def _call_synthesiser(
             return {"answer": "Insufficient evidence to compose an answer.", "citations": [], "contradictions": [], "llm_gaps": []}, cost
 
         llm_response: LLMResponse = message.parsed
+        if llm_response is None:
+            # Structured output parse failed — typically mid-JSON truncation from token limit.
+            logger.warning("Agent synthesiser: parsed=None (likely truncated output); returning empty answer")
+            return {"answer": "Synthesis failed: response was truncated before a complete answer could be parsed.", "citations": [], "contradictions": [], "llm_gaps": []}, cost
 
         # Verify citations against the aggregated chunks (hardened verifier)
         verified_citations = _verify_citations(llm_response.citations, chunks)

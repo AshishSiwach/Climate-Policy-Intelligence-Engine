@@ -54,7 +54,13 @@ def run_retriever(state: dict) -> dict:
             continue
 
         try:
-            kwargs: dict = {"top_k": _policies.RETRIEVER_TOP_K}
+            # When filtering to a single doc_id, fetch more chunks globally so
+            # the filter leaves enough on-target chunks for the grader to assess.
+            top_k = (
+                _policies.SUMMARY_RETRIEVER_TOP_K if required_doc_id
+                else _policies.RETRIEVER_TOP_K
+            )
+            kwargs: dict = {"top_k": top_k}
             if required_source:
                 kwargs["institutions"] = [required_source]
 

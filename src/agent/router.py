@@ -26,16 +26,6 @@ _VALID_TYPES = {"factual", "numeric", "cross_doc", "summary", "contradiction", "
 # contradiction is Phase 5b — not yet built.
 _AGENT_TYPES = {"cross_doc"}
 
-
-def _agent_route_enabled() -> bool:
-    """Return True unless AGENT_ROUTE_ENABLED is explicitly disabled.
-
-    Reads the AGENT_ROUTE_ENABLED env var (default: true).
-    Set to 'false' / '0' / 'off' to force all queries to the fast path.
-    """
-    val = os.environ.get("AGENT_ROUTE_ENABLED", "true").lower().strip()
-    return val not in ("false", "0", "off", "no")
-
 _SYSTEM_PROMPT = """\
 You are classifying a climate policy question by query type. Respond with a JSON
 object containing exactly one key "task_type" with one of these values:
@@ -59,20 +49,12 @@ class Path(str, Enum):
 def complexity_router(query: str, api_key: str | None = None) -> tuple[Path, str]:
     """Classify query and return (Path, task_type_str).
 
+    Pure classifier — does not inspect AGENT_ROUTE_ENABLED. Callers decide
+    whether to act on the returned path.
+
     On any error returns (Path.FAST, "factual") — fail-open so the pipeline
     always has a route even when the router LLM is unavailable.
-
-    Args:
-        query: The user's question.
-        api_key: OpenAI API key. Falls back to OPENAI_API_KEY env var.
-
-    Returns:
-        Tuple of (Path enum, task_type string).
     """
-    if not _agent_route_enabled():
-        logger.info("complexity_router: AGENT_ROUTE_ENABLED=false — all queries routed to FAST")
-        return Path.FAST, "factual"
-
     try:
         return _call_router(query, api_key)
     except Exception as exc:

@@ -224,6 +224,9 @@ def _run_agent_path(
     final_state = agent_graph.invoke(initial_state)
     latency_s = time.time() - t_start
 
+    if final_state.get("termination_reason") == "fallback_to_fast":
+        raise RuntimeError("Planner requested fallback_to_fast — routing to fast path")
+
     result_dict = final_state.get("result") or {}
     if result_dict:
         brief = AgentAnalystBrief(**result_dict)
@@ -232,7 +235,7 @@ def _run_agent_path(
             answer="The agent could not produce an answer for this query.",
             citations=[],
             truncated=True,
-            termination_reason=final_state.get("termination_reason", "fallback_to_fast"),
+            termination_reason=final_state.get("termination_reason", "max_steps"),
         )
 
     agent_cost = final_state.get("cost_used_usd", 0.0)
@@ -577,6 +580,14 @@ def run_query_with_progress(
             return
 
         latency_s = time.time() - t_start
+
+        if accumulated.get("termination_reason") == "fallback_to_fast":
+            logger.info("Agent streaming: planner requested fallback_to_fast — routing to fast path")
+            yield {"type": "routing", "path": "fast"}
+            result = _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
+            yield {"type": "result", "brief": result}
+            return
+
         result_dict = accumulated.get("result") or {}
         if result_dict:
             brief_agent = AgentAnalystBrief(**result_dict)
@@ -585,7 +596,7 @@ def run_query_with_progress(
                 answer="The agent could not produce an answer for this query.",
                 citations=[],
                 truncated=True,
-                termination_reason=accumulated.get("termination_reason", "fallback_to_fast"),
+                termination_reason=accumulated.get("termination_reason", "max_steps"),
             )
 
         agent_cost = accumulated.get("cost_used_usd", 0.0)

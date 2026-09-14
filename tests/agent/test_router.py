@@ -94,6 +94,17 @@ def test_router_fast_types_go_to_fast():
         assert returned_type == task_type
 
 
+def test_router_classifies_regardless_of_agent_route_enabled_env(monkeypatch):
+    """complexity_router is a pure classifier — AGENT_ROUTE_ENABLED has no effect on it.
+    The caller (main.py) decides whether to act on the returned path."""
+    monkeypatch.setenv("AGENT_ROUTE_ENABLED", "false")
+    mock_client = _make_mock_client("cross_doc")
+    with patch("openai.OpenAI", return_value=mock_client):
+        path, task_type = complexity_router("any query")
+    assert path == RoutePath.AGENT
+    assert task_type == "cross_doc"
+
+
 def test_router_fail_open_on_exception():
     """Any exception returns (FAST, 'factual') — fail-open."""
     with patch("openai.OpenAI", side_effect=RuntimeError("network down")):

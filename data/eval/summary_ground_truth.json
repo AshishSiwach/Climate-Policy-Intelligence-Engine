@@ -1,0 +1,194 @@
+[
+  {
+    "id": "sum_eval_001_iea_weo_overview",
+    "query_type": "summary",
+    "question": "Summarise the IEA World Energy Outlook 2025: its main objectives, headline findings, and the core differences between the STEPS and NZE scenarios.",
+    "expected_answer": "The World Energy Outlook 2025 provides a data-driven analysis of global energy systems and maps plausible futures to 2050. Its central purpose is to inform policy decisions by modelling the consequences of different policy choices across three scenarios: STEPS (Stated Policies Scenario, reflecting current enacted policies), APS (Announced Pledges Scenario, adding countries' net-zero commitments), and NZE (Net Zero Emissions by 2050 Scenario, a pathway consistent with limiting warming to 1.5°C). Key headline findings include global clean energy investment surpassing fossil fuel investment for the first time, exceeding $3 trillion in 2025; electricity becoming the dominant energy carrier across all scenarios; and peak oil demand expected around 2030 in STEPS at roughly 102 mb/d before declining. Under NZE, oil demand falls steeply and coal use phases out by mid-century, requiring tripling of renewables capacity by 2030. In STEPS, renewables grow strongly but fossil fuels remain substantial through 2050. Both scenarios show accelerating EV adoption, but NZE requires EV sales to dominate by 2030 globally. The critical divergence is pace: STEPS reflects incremental progress under current policy ambition, whereas NZE demands a fundamental transformation of energy systems within a single decade.",
+    "expected_sources": [
+      {"doc_id": "IEA_WEO_2025", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "IEA_WEO_2025", "pages": [1, 30], "supports": "Objectives, scenario framework, headline investment and demand figures, key scenario differences."}
+    ]
+  },
+  {
+    "id": "sum_eval_002_iea_weo_clean_energy",
+    "query_type": "summary",
+    "question": "What does the IEA WEO 2025 say about clean energy investment trends, technology costs, and the role of solar and wind in the energy transition?",
+    "expected_answer": "The IEA WEO 2025 reports that global clean energy investment exceeded $3 trillion in 2025 for the first time, surpassing investment in fossil fuels. Solar PV dominates new capacity additions and its costs have fallen dramatically, making it the cheapest source of new electricity generation in most markets. Wind—both onshore and offshore—is the other major growth technology, with offshore wind becoming increasingly cost-competitive. The report highlights that clean energy deployment is accelerating but remains uneven across geographies: advanced economies and China account for the bulk of investment, while many emerging and developing economies face financing constraints and higher capital costs. The WEO stresses that to stay on an NZE pathway, annual clean energy investment must reach approximately $4 trillion by 2030 and continue to scale. Policy frameworks, carbon pricing, and public finance support are identified as critical enablers to bridge the investment gap, particularly in the Global South.",
+    "expected_sources": [
+      {"doc_id": "IEA_WEO_2025", "page_range": [31, 100]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "IEA_WEO_2025", "pages": [31, 100], "supports": "Investment figures, solar and wind technology trends, geographic distribution, NZE investment requirements."}
+    ]
+  },
+  {
+    "id": "sum_eval_003_ccc_progress_2025_overview",
+    "query_type": "summary",
+    "question": "Summarise the CCC Progress Report 2025: overall assessment of UK progress toward net zero, which sectors are on track, and which sectors show the biggest gaps.",
+    "expected_answer": "The CCC Progress Report 2025 assesses the UK's progress toward its legally binding carbon targets. Overall the assessment is mixed: some sectors show encouraging momentum while others have significant delivery gaps. Surface transport is a relative bright spot, with emissions falling for two consecutive years and electric vehicle numbers roughly doubling every two years. Surface transport is on course to provide close to 30% of the emissions reduction needed by 2030. Electricity generation has made strong structural progress with high shares of renewables. The biggest gaps are in buildings and heating: low-carbon heat pump installations are running well below the rate needed to phase out gas boilers by the 2030s, and insulation rollout has stalled. Industry decarbonisation progress is limited by the slow uptake of hydrogen and CCUS. Land use and agriculture have not delivered sustained emissions reductions. The report flags insufficient policy ambition and implementation as the central barrier, not technology availability, and recommends accelerating heat pump deployment incentives, energy efficiency support, and strengthened industrial strategy commitments.",
+    "expected_sources": [
+      {"doc_id": "CCC_PROGRESS_2025", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "CCC_PROGRESS_2025", "pages": [1, 30], "supports": "Overall assessment, sector ratings, EV and transport data, buildings gap, policy recommendations."}
+    ]
+  },
+  {
+    "id": "sum_eval_004_ccc_progress_2025_transport",
+    "query_type": "summary",
+    "question": "What does the CCC Progress Report 2025 say about the UK's transport decarbonisation progress, including electric vehicles, ZEV mandate delivery, and remaining challenges?",
+    "expected_answer": "The CCC Progress Report 2025 provides a positive assessment of UK transport decarbonisation relative to other sectors. Surface transport emissions have fallen for two consecutive years, and electric car numbers are roughly doubling every two years. The ZEV mandate is credited as a key policy driver, setting binding sales targets for zero-emission vehicles on manufacturers. Surface transport is expected to contribute close to 30% of the total emissions reduction needed by 2030. Challenges remain in heavier transport: HGV electrification lags behind passenger cars, and aviation and shipping are identified as harder-to-abate sectors where progress is slower. Public charging infrastructure expansion is identified as essential to sustain EV uptake, particularly for households without home charging. The report notes that the pace of new EV registrations must be maintained and the second-hand EV market needs to develop for lower-income households to transition.",
+    "expected_sources": [
+      {"doc_id": "CCC_PROGRESS_2025", "page_range": [10, 20]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "CCC_PROGRESS_2025", "pages": [10, 20], "supports": "EV growth rates, ZEV mandate role, 30% contribution figure, HGV and aviation challenges."}
+    ]
+  },
+  {
+    "id": "sum_eval_005_ccc_seventh_carbon_budget",
+    "query_type": "summary",
+    "question": "Summarise the CCC's Seventh Carbon Budget 2025: its scope, the emissions envelope it sets, the key pathways to achieve it, and the most important policy recommendations.",
+    "expected_answer": "The Seventh Carbon Budget covers the period 2038–2042 and sets the UK's total greenhouse gas emission limit consistent with the UK's net zero 2050 target. It represents the tightest carbon budget to date, requiring emissions to fall by approximately 87% below 1990 levels by 2040. The budget is framed around four broad pathways—broadly reflecting different speeds and mixes of electrification, hydrogen, and engineered removals—all of which require deep decarbonisation across buildings, transport, industry, and land use. Key elements include: virtually complete decarbonisation of electricity supply before 2035; near-complete transition to heat pumps and away from gas boilers in buildings; continued rapid scaling of EVs; industrial transformation via hydrogen, CCUS, and fuel switching; and land-use change delivering significant carbon sequestration. The CCC stresses that the UK must start closing the policy gap immediately since the actions taken in the late 2020s and early 2030s will determine whether the Seventh Budget is achievable. The report calls for a comprehensive net zero delivery plan that coordinates investment, regulation, and market design across all sectors.",
+    "expected_sources": [
+      {"doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025", "page_range": [1, 40]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025", "pages": [1, 40], "supports": "Budget period, emissions envelope, pathway descriptions, key sector requirements, policy recommendations."}
+    ]
+  },
+  {
+    "id": "sum_eval_006_ofgem_smart_secure_overview",
+    "query_type": "summary",
+    "question": "Summarise the Ofgem Smart and Secure Electricity Systems consultation 2025: its objectives, the main proposed reforms, and the roles it defines for load controllers and flexibility service providers.",
+    "expected_answer": "The Ofgem Smart and Secure Electricity Systems consultation sets out a framework for ensuring that the growing fleet of smart devices—electric vehicles, heat pumps, and batteries—operates safely and in support of system efficiency. The central reform is the introduction of a licensing regime for two new market participants: Load Controllers (entities that remotely control aggregated loads) and Flexibility Service Providers (entities that offer demand flexibility into system markets). Both would be subject to security, consumer protection, and compliance obligations to prevent unauthorised control and ensure data protection. The consultation proposes minimum technical standards for smart device communications, interoperability requirements, and obligations to respond to emergency system signals from the system operator. A key policy driver is the recognition that uncoordinated smart device operation could stress distribution networks during peak periods; the framework aims to align device operation with both consumer interests and system needs. Ofgem also addresses the transition from voluntary smart charging commitments to binding obligations and outlines how flexibility services interact with existing balancing mechanism rules.",
+    "expected_sources": [
+      {"doc_id": "OFGEM_SMART_SECURE_2025", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "OFGEM_SMART_SECURE_2025", "pages": [1, 30], "supports": "Licensing framework, Load Controller and FSP roles, security obligations, smart device standards, system-level coordination."}
+    ]
+  },
+  {
+    "id": "sum_eval_007_eso_beyond2030_overview",
+    "query_type": "summary",
+    "question": "Summarise the ESO Beyond 2030 report 2024: its vision for the UK electricity system, the key investment and flexibility needs it identifies, and the main recommendations.",
+    "expected_answer": "The ESO Beyond 2030 report examines the electricity system infrastructure and market changes required to support a clean, flexible, and reliable electricity system through the 2030s and beyond. It identifies a significant need for new flexibility resources—including large-scale battery storage, demand response, and pumped hydro—to balance an electricity system dominated by variable renewables. The report recommends development of new flexibility markets that can signal long-duration storage needs and procure diverse flexibility assets, not only short-duration batteries. Interconnection with neighbouring systems is highlighted as a cost-effective source of flexibility. On system planning, the report recommends a more proactive approach to strategic network investment that anticipates demand growth from electrification of heat and transport rather than reacting to connection requests. It also stresses the importance of accelerating offshore wind connections and resolving consenting and grid connection backlogs that are delaying new capacity. The report's headline finding is that without coordinated investment in flexibility and networks, the system faces growing balancing costs and potential reliability risks in the late 2020s and 2030s.",
+    "expected_sources": [
+      {"doc_id": "ESO_BEYOND2030_2024", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "ESO_BEYOND2030_2024", "pages": [1, 30], "supports": "Flexibility needs, storage requirements, interconnection role, network investment recommendations, reliability risks."}
+    ]
+  },
+  {
+    "id": "sum_eval_008_boe_cbes_results_overview",
+    "query_type": "summary",
+    "question": "Summarise the Bank of England Climate Biennial Exploratory Scenario (CBES) 2021 Results report: its purpose, the scenarios tested, and the main findings on financial system vulnerabilities.",
+    "expected_answer": "The CBES Results 2021 report presents the outcomes of the Bank of England's first climate stress test for major UK banks and insurers. Its purpose is to assess the resilience of the financial system to physical and transition climate risks over a 30-year horizon. Three scenarios were explored: Early Action (orderly transition beginning now), Late Action (delayed but abrupt transition), and No Additional Action (physical risks dominate). The key finding is that all three scenarios generate material financial losses for participants, with Late Action producing the largest losses because it combines both transition costs and residual physical risks. Banks and insurers collectively face potential losses of hundreds of billions of pounds across scenarios, concentrated in carbon-intensive lending and in insurance portfolios exposed to flooding, wildfires, and extreme weather. The results reveal that current risk management frameworks are insufficient for the scale and time horizon of climate risks: most participants have limited data on borrower-level climate exposures and rely heavily on simplifying assumptions. The Bank concludes that early, orderly transition is materially less costly to the financial system than delayed action, reinforcing the financial system case for near-term climate policy.",
+    "expected_sources": [
+      {"doc_id": "BOE_CBES_RESULTS_2021", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "BOE_CBES_RESULTS_2021", "pages": [1, 30], "supports": "Purpose, three scenarios, financial losses, concentration of risk, risk management gaps, early action conclusion."}
+    ]
+  },
+  {
+    "id": "sum_eval_009_boe_cbes_key_elements",
+    "query_type": "summary",
+    "question": "What are the key methodological elements of the Bank of England's Climate Biennial Exploratory Scenario (CBES) 2021, including its scenario design, participating institutions, and analytical approach?",
+    "expected_answer": "The CBES Key Elements document sets out the design and methodology of the Bank of England's 2021 climate stress test. The exercise covered the UK's largest banks (including Barclays, HSBC, Lloyds, NatWest, Santander UK, Standard Chartered) and major insurers. Three scenarios spanning 30 years were designed: Early Action, Late Action, and No Additional Action. These were developed in collaboration with the Network for Greening the Financial System (NGFS) and tailored to UK-specific economic and regulatory context. The analytical approach required participants to map their entire balance sheets to climate-sensitive economic sectors and geographies, model how transition risk would affect counterparty creditworthiness over the scenario horizon, and estimate physical risk losses from flooding, storms, and chronic climate changes in their underwriting portfolios. A key methodological challenge was the absence of robust historical data for model calibration, requiring extensive use of forward-looking assumptions. Participants submitted data to the Bank for independent assessment, and a top-down overlay was applied to validate bottom-up firm submissions. The exercise was exploratory rather than pass/fail, meaning results informed supervisory dialogue rather than triggering automatic capital add-ons.",
+    "expected_sources": [
+      {"doc_id": "BOE_CBES_KEY_ELEMENTS_2021", "page_range": [1, 20]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "BOE_CBES_KEY_ELEMENTS_2021", "pages": [1, 20], "supports": "Participating institutions, scenario design, analytical methodology, data challenges, exploratory nature of exercise."}
+    ]
+  },
+  {
+    "id": "sum_eval_010_boe_disclosure",
+    "query_type": "summary",
+    "question": "Summarise the Bank of England's 2024 climate disclosure report: what it discloses, the key climate risks the Bank faces, and its approach to managing those risks.",
+    "expected_answer": "The Bank of England's 2024 Climate Disclosure report provides the institution's own climate-related financial disclosures aligned with the TCFD (Task Force on Climate-related Financial Disclosures) framework. It covers the Bank's governance of climate risk, strategy, risk management practices, and metrics and targets. The Bank identifies physical climate risks—primarily to its staff and operational sites from extreme weather—and transition risks affecting the value of its balance sheet, particularly the corporate bond holdings in the Asset Purchase Facility and the climate-related implications of its own investment portfolios. The report discloses the carbon footprint of the Bank's operations (Scopes 1, 2, and 3) and progress against its internal net zero commitment. On the financial portfolio side, it presents scenario analysis showing how different transition pathways could affect asset valuations. The Bank acknowledges the challenge of measuring climate risk at the full balance sheet level given data limitations and notes ongoing work to improve methodology. The disclosure also covers the Bank's role as a supervisor—particularly through PRA guidance requiring regulated firms to embed climate risk in governance and risk management—and its research contributions to understanding systemic climate financial risks.",
+    "expected_sources": [
+      {"doc_id": "BOE_DISCLOSURE_2024", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "BOE_DISCLOSURE_2024", "pages": [1, 30], "supports": "TCFD alignment, physical and transition risks, operational carbon footprint, portfolio scenario analysis, PRA supervisory role."}
+    ]
+  },
+  {
+    "id": "sum_eval_011_boe_macro_implications",
+    "query_type": "summary",
+    "question": "Summarise the Bank of England paper on macroeconomic implications of climate change: its main analytical framework, findings on GDP impacts, and policy conclusions.",
+    "expected_answer": "The Bank of England's paper on macroeconomic implications of climate change examines how physical and transition climate risks affect the macro-economy through multiple channels: productivity shocks from extreme weather, stranded asset losses, energy price volatility, and shifts in investment and consumption. The paper finds that unmitigated climate change (high-emissions scenarios) poses severe long-run GDP losses—particularly through agricultural productivity declines, sea level rise, and increased frequency of extreme weather events—but that these losses materialise over decades, creating a potential mismatch with near-term monetary policy frameworks. Transition risks create near-term economic volatility: abrupt policy tightening or carbon price increases could trigger asset repricing and credit losses. The paper argues for integrating climate risk into central bank macroeconomic models and stress-testing frameworks. Key policy conclusions include the importance of an orderly, credible transition path to minimise both physical and transition risks, the need for central banks to understand climate-macro interactions in setting monetary policy, and the value of coordinating fiscal and monetary policy to manage transition costs without triggering stagflation.",
+    "expected_sources": [
+      {"doc_id": "BOE_MACRO_IMPLICATIONS", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "BOE_MACRO_IMPLICATIONS", "pages": [1, 30], "supports": "GDP impact channels, physical vs transition risk trade-offs, monetary policy implications, orderly transition importance."}
+    ]
+  },
+  {
+    "id": "sum_eval_012_boe_measuring_climate_risks",
+    "query_type": "summary",
+    "question": "Summarise the Bank of England paper on measuring and managing climate risks: the measurement challenges it identifies, the data gaps, and how it proposes to improve climate risk metrics.",
+    "expected_answer": "The Bank of England's paper on measuring and managing climate risks examines the methodological challenges of quantifying physical and transition climate risks in financial portfolios. The paper identifies three core measurement challenges: long time horizons that exceed conventional risk model calibration windows; non-linearity and tail risk in climate outcomes that standard Value-at-Risk frameworks underestimate; and data gaps in borrower-level physical exposure and asset-level carbon intensity. For physical risk, the paper highlights the lack of granular geographic data linking financial exposures to property-level flood, drought, or heat risk maps. For transition risk, it identifies inconsistent carbon accounting standards across jurisdictions and the forward-looking nature of stranded asset risk as key barriers. Proposed improvements include: development of scenario-consistent climate risk metrics aligned with NGFS pathways; integration of satellite and geospatial data to improve physical risk mapping; standardisation of Scope 3 emissions reporting; and development of climate stress test methodologies that account for second-round macro-financial feedback. The paper concludes that improving climate risk measurement is a prerequisite for effective risk management and calls for international coordination on data standards.",
+    "expected_sources": [
+      {"doc_id": "BOE_MEASURING_CLIMATE_RISKS", "page_range": [1, 20]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "BOE_MEASURING_CLIMATE_RISKS", "pages": [1, 20], "supports": "Measurement challenges, time horizon problem, data gaps, proposed improvements to metrics and standards."}
+    ]
+  },
+  {
+    "id": "sum_eval_013_desnz_zev_mandate",
+    "query_type": "summary",
+    "question": "Summarise the DESNZ ZEV Mandate 2023 consultation: its objectives, the sales trajectory it proposes for zero-emission vehicles, the proposed flexibilities and compliance mechanisms, and the key risks identified.",
+    "expected_answer": "The DESNZ ZEV Mandate 2023 sets out the UK Government's policy for mandating a trajectory of increasing zero-emission vehicle sales by vehicle manufacturers. The objective is to phase out new petrol and diesel car and van sales by 2035 and to ensure the UK car fleet transitions to zero-emission vehicles in line with net zero commitments. The mandate specifies annual ZEV percentage targets for manufacturers, starting at relatively modest levels before ramping up sharply through the late 2020s and into the 2030s. Compliance flexibility mechanisms proposed include: trading of over-performance credits between manufacturers; banking and borrowing of credits across years; a compliance deficit limit that triggers penalties; and separate treatment of small volume manufacturers. The mandate applies to both cars and vans, with separate trajectories for each. Identified risks include: potential for manufacturers to prioritise higher-margin EVs in premium segments, making affordable EVs scarcer; charging infrastructure insufficiency as a barrier to consumer adoption; grid capacity constraints; and the risk that some manufacturers may prefer to pay penalties rather than meet targets if the economics are unfavourable. The consultation seeks views on how to calibrate flexibility provisions to support industrial competitiveness while ensuring credible decarbonisation ambition.",
+    "expected_sources": [
+      {"doc_id": "DESNZ_ZEV_MANDATE_2023", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "DESNZ_ZEV_MANDATE_2023", "pages": [1, 30], "supports": "Mandate objectives, sales trajectory, flexibility mechanisms, compliance structure, identified risks."}
+    ]
+  },
+  {
+    "id": "sum_eval_014_ccc_progress_2024_buildings",
+    "query_type": "summary",
+    "question": "What does the CCC Progress Report 2024 say about UK buildings decarbonisation, including heat pump deployment rates, energy efficiency progress, and the policy actions needed?",
+    "expected_answer": "The CCC Progress Report 2024 finds that buildings decarbonisation is one of the UK's most significant delivery gaps. Heat pump installation rates are running well below the trajectory needed to phase out new gas boiler sales by the late 2020s and the full stock by mid-century. The report notes that around 60,000–70,000 heat pumps were installed annually in the early 2020s, far short of the 600,000 per year needed by the end of the decade. Energy efficiency improvements—insulation of walls, lofts, and windows—are similarly lagging, with the Energy Company Obligation delivering well below the scale required. The report attributes the shortfall to a combination of upfront cost barriers for consumers, insufficient installer workforce capacity, and the absence of a clear long-term policy commitment that would give industry confidence to invest in supply chains and training. Policy recommendations include expanding and simplifying heat pump incentive schemes (building on the Boiler Upgrade Scheme), mandating minimum energy efficiency standards for landlords and new builds, and investing in training thousands of additional heat pump engineers. Without acceleration, the CCC warns that the UK will miss its legally binding Carbon Budget 6 targets.",
+    "expected_sources": [
+      {"doc_id": "CCC_PROGRESS_2024", "page_range": [1, 30]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "CCC_PROGRESS_2024", "pages": [1, 30], "supports": "Heat pump deployment rates, energy efficiency gap, installation targets, policy recommendations, Carbon Budget 6 risk."}
+    ]
+  },
+  {
+    "id": "sum_eval_015_iea_weo_oil_demand",
+    "query_type": "summary",
+    "question": "What does the IEA WEO 2025 say about global oil demand trajectories, the role of EVs in demand displacement, and what the peak demand outlook means for energy security?",
+    "expected_answer": "The IEA WEO 2025 projects that under STEPS, global oil demand peaks at roughly 102 million barrels per day around 2030 before entering a gradual decline phase as EV adoption accelerates and efficiency improvements compound. EV sales exceeding 50% of global new car sales by 2035 in STEPS are a key driver of demand displacement, particularly for road transport which historically drove oil demand growth. Under NZE, oil demand falls steeply from current levels, reaching under 25 mb/d by 2050. The report identifies energy security implications of peak oil: producing countries face long-run revenue risk and an incentive to accelerate extraction while demand remains, creating a potential supply glut that compresses prices; importing countries face transition risk in existing infrastructure as demand falls. The WEO notes that even under STEPS, sustained investment in fossil fuel production remains above levels compatible with NZE, highlighting a misalignment between investment decisions and climate goals. The report argues that demand-side policy (efficiency standards, EV incentives, clean heat mandates) is now the most important lever for aligning supply investment with climate commitments.",
+    "expected_sources": [
+      {"doc_id": "IEA_WEO_2025", "page_range": [160, 195]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "IEA_WEO_2025", "pages": [160, 195], "supports": "Oil demand peak in STEPS, EV displacement role, NZE oil demand trajectory, energy security implications, investment misalignment."}
+    ]
+  },
+  {
+    "id": "sum_eval_016_eso_beyond2030_flexibility",
+    "query_type": "summary",
+    "question": "What does the ESO Beyond 2030 report say about the UK's flexibility needs, including the role of storage, demand response, and new market mechanisms needed to balance a renewables-dominated system?",
+    "expected_answer": "The ESO Beyond 2030 report identifies flexibility as the central challenge for a system where variable wind and solar provide the majority of electricity generation. The report quantifies growing balancing requirements as renewable penetration increases: periods of surplus generation requiring curtailment will increase unless storage and demand response absorb them, and periods of low wind and solar output will require dispatchable backup. Battery storage—both grid-scale and distributed—is identified as the fastest-growing flexibility resource, but current market signals and contract durations favour short-duration batteries (2–4 hours) over the longer-duration storage (8–24 hours) the system will increasingly need as renewable penetration deepens. Demand response from electric vehicles, heat pumps, and industrial loads is identified as a cost-effective flexibility resource that is currently underutilised due to market access barriers and aggregation complexity. The report recommends creating specific long-duration storage contracts or capacity market provisions that reward duration, reforming balancing mechanism rules to enable distributed assets to participate directly, and investing in digital infrastructure for real-time demand response dispatch. Interconnectors with Europe and with the Irish and Scottish systems are also highlighted as lower-cost flexibility options than additional domestic storage in many scenarios.",
+    "expected_sources": [
+      {"doc_id": "ESO_BEYOND2030_2024", "page_range": [20, 60]}
+    ],
+    "evidence_notes": [
+      {"doc_id": "ESO_BEYOND2030_2024", "pages": [20, 60], "supports": "Flexibility quantification, storage duration gap, demand response potential, market reform recommendations, interconnector value."}
+    ]
+  }
+]

@@ -74,6 +74,7 @@ def run_claim_builder(state: dict) -> dict:
         return {"claims": [], "steps_used": steps_used + 1, "cost_used_usd": cost_used_usd}
 
     claims, call_cost = _call_claim_builder(eligible_sqs, retrievals, coverage)
+    claims = _assign_sub_question_ids(claims, retrievals)
 
     return {
         "claims": claims,
@@ -200,6 +201,40 @@ def _parse_claims(raw: str) -> list[Claim]:
     except (json.JSONDecodeError, TypeError, ValueError) as exc:
         logger.warning("ClaimBuilder parse failed: %s", exc)
         return []
+
+
+def _assign_sub_question_ids(claims: list[Claim], retrievals: dict) -> list[Claim]:
+    """Annotate each claim with the sub_question_id that owns most of its evidence.
+
+    Builds a reverse map chunk_id → sq_id from retrievals, then for each claim
+    takes a plurality vote over its evidence_ids.  Claims whose evidence_ids are
+    all hallucinated (no matching chunk anywhere) keep sub_question_id=None.
+    """
+    chunk_to_sq: dict[str, str] = {}
+    for sq_id, chunks in retrievals.items():
+        for chunk in chunks:
+            cid = chunk.get("chunk_id")
+            if cid:
+                chunk_to_sq[cid] = sq_id
+
+    annotated: list[Claim] = []
+    for claim in claims:
+        votes: dict[str, int] = {}
+        for eid in claim.evidence_ids:
+            sq = chunk_to_sq.get(eid)
+            if sq:
+                votes[sq] = votes.get(sq, 0) + 1
+
+        winner = max(votes, key=votes.__getitem__) if votes else None
+        annotated.append(Claim(
+            id=claim.id,
+            text=claim.text,
+            sub_question_id=winner,
+            evidence_ids=claim.evidence_ids,
+            source_doc_id=claim.source_doc_id,
+        ))
+
+    return annotated
 
 
 def _estimate_cost(prompt_tokens: int, completion_tokens: int) -> float:

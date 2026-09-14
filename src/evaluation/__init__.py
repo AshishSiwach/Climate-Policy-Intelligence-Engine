@@ -13,7 +13,7 @@ Or import directly from the module:
     from evaluation.judge import LLMJudge
 """
 
-from evaluation.retrieval_metrics import (
+from .retrieval_metrics import (
     aggregate_metrics,
     evaluate_query,
     hit_at_k,
@@ -42,7 +42,7 @@ __all__ = [
 
 def __getattr__(name: str):
     if name in ("LLMJudge", "JudgeScore"):
-        from evaluation.judge import JudgeScore, LLMJudge
+        from .judge import JudgeScore, LLMJudge
 
         return {"LLMJudge": LLMJudge, "JudgeScore": JudgeScore}[name]
     raise AttributeError(f"module 'evaluation' has no attribute {name!r}")

@@ -24,12 +24,12 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from evaluation.retrieval_metrics import (
+from .retrieval_metrics import (
     aggregate_metrics,
     evaluate_query,
 )
-from retrieval import BM25Retriever, HybridRetriever
-from retrieval.institution_detector import detect_institutions
+from src.retrieval import BM25Retriever, HybridRetriever
+from src.retrieval.institution_detector import detect_institutions
 
 # NOTE: evaluation.judge is deliberately NOT imported here. It pulls in openai,
 # which on Windows breaks a later `from retrieval import DenseRetriever` (torch
@@ -66,7 +66,7 @@ def _load_ground_truth() -> list[dict]:
 def _build_pipeline():
     """Load indices + build HybridRetriever + Synthesiser. Deferred DenseRetriever
     import to avoid Windows torch-import hang (same fix as retrieval_eval_runner)."""
-    from retrieval import DenseRetriever
+    from src.retrieval import DenseRetriever
 
     if not BM25_PATH.exists() or not CHROMA_DIR.exists():
         raise SystemExit("Indices missing. Run: uv run python scripts/build_indices.py")
@@ -75,8 +75,8 @@ def _build_pipeline():
     hybrid = HybridRetriever(bm25=bm25, dense=dense, rrf_k=60)
 
     # Synthesiser import must happen AFTER DenseRetriever, same Windows quirk.
-    from synthesis import Synthesiser
-    from synthesis.synthesiser import PROMPT_VERSION as _DEFAULT_PROMPT_VERSION
+    from src.synthesis import Synthesiser
+    from src.synthesis.synthesiser import PROMPT_VERSION as _DEFAULT_PROMPT_VERSION
 
     version = PROMPT_VERSION_OVERRIDE or _DEFAULT_PROMPT_VERSION
     synth = Synthesiser(prompt_version=version)
@@ -222,7 +222,7 @@ def run(output_path: Path | None = None) -> Path:
     hybrid, synth = _build_pipeline()
 
     # Deferred import — pulling openai in earlier breaks DenseRetriever load on Windows.
-    from evaluation.judge import LLMJudge
+    from .judge import LLMJudge
 
     judge = LLMJudge()
     logger.info(

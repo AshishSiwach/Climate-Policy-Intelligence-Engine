@@ -1,13 +1,15 @@
 """
 Tests for the complexity router — Phase 1 Foundations.
 
-Mocks the OpenAI client so no real API calls are made.
-Loads router_labels.json and asserts ≥ 85% accuracy on the 30-query set.
+Unit tests mock the OpenAI client so no real API calls are made.
+The integration test (pytest -m integration) calls the live LLM and measures
+true classifier accuracy against the hand-labelled eval set.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -54,25 +56,84 @@ def test_router_labels_loaded(router_labels):
         assert "expected" in item
 
 
-def test_router_accuracy_mocked(router_labels):
-    """Router achieves ≥ 85% accuracy when the LLM is mocked to return the expected label."""
-    correct = 0
-    total = len(router_labels)
+def test_label_to_path_contract(router_labels):
+    """Every task_type in the eval set maps to the correct Path enum value.
 
+    This is a contract test for the routing table (_AGENT_TYPES), not a
+    classifier accuracy test.  The LLM is mocked to return the expected
+    task_type so the test is deterministic and requires no API key.  It
+    should always pass 100% — a failure means _AGENT_TYPES is misconfigured.
+    """
     for item in router_labels:
         expected_task = item["expected"]
         expected_path = RoutePath.AGENT if expected_task in _AGENT_TYPES else RoutePath.FAST
 
         mock_client = _make_mock_client(expected_task)
-
         with patch("openai.OpenAI", return_value=mock_client):
             path, task_type = complexity_router(item["query"])
 
-        if path == expected_path and task_type == expected_task:
-            correct += 1
+        assert path == expected_path, (
+            f"task_type={expected_task!r} should map to {expected_path!r}, got {path!r}"
+        )
+        assert task_type == expected_task
 
+
+@pytest.mark.integration
+def test_router_accuracy_live(router_labels):
+    """Measure true LLM classifier accuracy against the hand-labelled eval set.
+
+    Calls the real OpenAI API — requires OPENAI_API_KEY.
+    Run with:  pytest -m integration
+
+    Fails with a confusion matrix if accuracy < 85%, highlighting cross_doc
+    false negatives (queries that should route to AGENT but reach FAST).
+    """
+    if not os.environ.get("OPENAI_API_KEY"):
+        pytest.skip("OPENAI_API_KEY not set — skipping live router eval")
+
+    results = []
+    for item in router_labels:
+        expected_task = item["expected"]
+        expected_path = RoutePath.AGENT if expected_task in _AGENT_TYPES else RoutePath.FAST
+        actual_path, actual_task = complexity_router(item["query"])
+        results.append({
+            "query": item["query"],
+            "expected_task": expected_task,
+            "expected_path": expected_path,
+            "actual_task": actual_task,
+            "actual_path": actual_path,
+            "correct": actual_path == expected_path,
+        })
+
+    total = len(results)
+    correct = sum(1 for r in results if r["correct"])
     accuracy = correct / total
-    assert accuracy >= 0.85, f"Router accuracy {accuracy:.1%} < 85% ({correct}/{total})"
+
+    if accuracy < 0.85:
+        lines = [f"\nRouter accuracy {accuracy:.1%} < 85% ({correct}/{total})"]
+
+        cross_doc_fn = [
+            r for r in results
+            if r["expected_task"] == "cross_doc" and r["actual_path"] == RoutePath.FAST
+        ]
+        if cross_doc_fn:
+            lines.append(f"\ncross_doc FALSE NEGATIVES — routed to FAST (n={len(cross_doc_fn)}):")
+            for r in cross_doc_fn:
+                lines.append(f"  [classified as {r['actual_task']!r}] {r['query'][:120]}")
+
+        other_wrong = [
+            r for r in results
+            if not r["correct"] and r["expected_task"] != "cross_doc"
+        ]
+        if other_wrong:
+            lines.append(f"\nOther misclassifications (n={len(other_wrong)}):")
+            for r in other_wrong:
+                lines.append(
+                    f"  [expected={r['expected_task']!r} actual={r['actual_task']!r}]"
+                    f" {r['query'][:120]}"
+                )
+
+        pytest.fail("\n".join(lines))
 
 
 def test_router_agent_types_go_to_agent():

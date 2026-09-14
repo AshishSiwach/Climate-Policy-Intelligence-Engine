@@ -92,8 +92,9 @@ def check_budget(state: AgentState) -> str:
     if state.get("cost_used_usd", 0.0) >= MAX_COST_USD:
         logger.info("Budget: MAX_COST_USD reached ($%.4f)", MAX_COST_USD)
         return "terminate"
-    if state.get("time_used_s", 0.0) >= MAX_TIME_S:
-        logger.info("Budget: MAX_TIME_S reached (%.1fs)", MAX_TIME_S)
+    start = state.get("_start_time")
+    if start is not None and (time.monotonic() - start) >= MAX_TIME_S:
+        logger.info("Budget: MAX_TIME_S reached (%.1fs elapsed)", time.monotonic() - start)
         return "terminate"
     if state.get("termination_reason") == "fallback_to_fast":
         logger.info("Budget: termination_reason=%s", state.get("termination_reason"))
@@ -222,16 +223,16 @@ def handle_termination(state: AgentState) -> dict:
     existing_reason = state.get("termination_reason")
 
     # Determine breach reason if not already set
+    _start = state.get("_start_time")
+    _elapsed = (time.monotonic() - _start) if _start is not None else 0.0
     if existing_reason and existing_reason not in ("complete",):
         reason = existing_reason
     elif state.get("steps_used", 0) >= MAX_STEPS:
         reason = "max_steps"
     elif state.get("cost_used_usd", 0.0) >= MAX_COST_USD:
         reason = "max_cost"
-    elif state.get("time_used_s", 0.0) >= MAX_TIME_S:
+    elif _elapsed >= MAX_TIME_S:
         reason = "max_time"
-    elif existing_reason == "fallback_to_fast":
-        reason = "fallback_to_fast"
     else:
         reason = "max_steps"  # safe default
 

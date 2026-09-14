@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # Falls back gracefully if the settings module is not yet importable.
 def _get_config_fingerprint() -> str:
     try:
-        from config.settings import settings_fingerprint
+        from src.config.settings import settings_fingerprint
 
         return settings_fingerprint()
     except Exception:

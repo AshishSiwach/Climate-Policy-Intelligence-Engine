@@ -46,7 +46,17 @@ url = "https://download.pytorch.org/whl/cu124"
 explicit = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ingestion", "src/retrieval", "src/synthesis", "src/evaluation", "src/monitoring"]
+packages = [
+    "src/agent",
+    "src/config",
+    "src/evaluation",
+    "src/evidence",
+    "src/ingestion",
+    "src/monitoring",
+    "src/observability",
+    "src/retrieval",
+    "src/synthesis",
+]
 
 [tool.ruff]
 line-length = 120
@@ -60,3 +70,6 @@ select = ["E", "F", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "integration: requires live API keys; deselect with -m 'not integration'",
+]

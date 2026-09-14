@@ -37,5 +37,6 @@ class EvidenceRef(BaseModel):
 class Claim(BaseModel):
     id: str
     text: str
+    sub_question_id: Optional[str] = None  # which sub-question this claim answers
     evidence_ids: list[str]  # chunk_ids
     source_doc_id: str

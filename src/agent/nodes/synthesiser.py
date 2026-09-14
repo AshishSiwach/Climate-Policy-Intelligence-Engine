@@ -237,16 +237,8 @@ def _format_claims(claims: list) -> str:
 
 
 def _verify_citations(llm_citations: list[LLMCitation], chunks: list[dict]) -> list[Citation]:
-    """Delegate to hardened verifier, then re-instantiate under src.synthesis.output_schema.Citation.
-
-    evidence.citations imports from 'synthesis.output_schema' (no src. prefix) while this
-    module imports from 'src.synthesis.output_schema'. When both paths are on sys.path they
-    resolve to different module objects, so Pydantic rejects the raw return value. Rebuilding
-    via model_dump() bridges the two module identities.
-    """
     from src.evidence.citations import verify_citations
-    raw = verify_citations(llm_citations, chunks)
-    return [Citation(**c.model_dump()) for c in raw]
+    return verify_citations(llm_citations, chunks)
 
 
 def _estimate_cost(prompt_tokens: int, completion_tokens: int) -> float:

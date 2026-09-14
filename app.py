@@ -31,8 +31,8 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from main import build_pipeline, run_query, run_query_with_progress
-from monitoring import QueryLogger
-from monitoring.db import fetch_recent_queries, insert_feedback
+from src.monitoring import QueryLogger
+from src.monitoring.db import fetch_recent_queries, insert_feedback
 
 load_dotenv()
 logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s %(message)s")

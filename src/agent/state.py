@@ -31,7 +31,6 @@ class AgentState(TypedDict):
     # Budget tracking (checked before each node)
     steps_used: int
     cost_used_usd: float
-    time_used_s: float
     retries_used: dict[str, int]  # sub_question_id → retry count
 
     # Terminal state
@@ -40,3 +39,4 @@ class AgentState(TypedDict):
 
     # Runtime injection — not serialised, not part of eval output
     _retriever: Optional[object]  # HybridRetriever instance injected by caller
+    _start_time: Optional[float]  # monotonic wall-clock set by caller; used by check_budget

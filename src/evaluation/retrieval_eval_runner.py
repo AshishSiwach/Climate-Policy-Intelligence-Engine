@@ -21,9 +21,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from evaluation.retrieval_metrics import aggregate_metrics, evaluate_query, table_fraction_at_k
-from retrieval import BM25Retriever, HybridRetriever
-from retrieval.institution_detector import detect_institutions
+from .retrieval_metrics import aggregate_metrics, evaluate_query, table_fraction_at_k
+from src.retrieval import BM25Retriever, HybridRetriever
+from src.retrieval.institution_detector import detect_institutions
 
 # NOTE: synthesis.synthesiser is deliberately NOT imported at module load.
 # On Windows, importing it before DenseRetriever causes a downstream torch
@@ -50,7 +50,7 @@ def _load_ground_truth() -> list[dict]:
 
 
 def _build_hybrid() -> HybridRetriever:
-    from retrieval import DenseRetriever  # lazy — heavy import
+    from src.retrieval import DenseRetriever  # lazy — heavy import
 
     if not BM25_PATH.exists() or not CHROMA_DIR.exists():
         raise SystemExit("Indices missing. Run: uv run python scripts/build_indices.py")

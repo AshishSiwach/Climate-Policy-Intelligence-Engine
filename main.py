@@ -36,18 +36,18 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from monitoring import QueryLogger, build_query_record
-from monitoring.db import insert_query_record as db_insert_query_record
-from retrieval import BM25Retriever, HybridRetriever
-from retrieval.institution_detector import detect_institutions
 from src.agent.router import Path as RoutePath
 from src.agent.router import complexity_router
 from src.agent.workflow import agent_graph
 from src.config.settings import get_settings
+from src.monitoring import QueryLogger, build_query_record
+from src.monitoring.db import insert_query_record as db_insert_query_record
+from src.retrieval import BM25Retriever, HybridRetriever
+from src.retrieval.institution_detector import detect_institutions
+from src.synthesis import AnalystBrief, Synthesiser
 from src.synthesis.output_schema import AnalystBrief as AgentAnalystBrief
-from synthesis import AnalystBrief, Synthesiser
-from synthesis.query_classifier import classify_query
-from synthesis.synthesiser import OUT_OF_CORPUS_ANSWER
+from src.synthesis.query_classifier import classify_query
+from src.synthesis.synthesiser import OUT_OF_CORPUS_ANSWER
 
 # DenseRetriever imported lazily inside build_pipeline() — its dep
 # (sentence_transformers/torch) is heavy and crashes some Windows setups
@@ -186,24 +186,14 @@ def _run_fast_path(
     return result
 
 
-def _run_agent_path(
+def _make_agent_initial_state(
+    query_id: str,
     query: str,
     task_type: str,
     hybrid: HybridRetriever,
-    synth: Synthesiser,
-    qlogger: QueryLogger,
-    query_id: str,
-    log_path: Path,
 ) -> dict:
-    """Execute the agent path (LangGraph workflow → AnalystBrief → log).
-
-    Returns a dict in the same shape as the fast path.  Raises on any
-    unhandled error so the caller can fall back to the fast path.
-    Adds ``source: "agent"`` to the returned dict.
-    """
-    t_start = time.time()
-
-    initial_state: dict = {
+    """Construct the initial LangGraph state dict."""
+    return {
         "request_id": query_id,
         "query": query,
         "task_type": task_type,
@@ -214,35 +204,36 @@ def _run_agent_path(
         "verified_claims": [],
         "steps_used": 0,
         "cost_used_usd": 0.0,
-        "time_used_s": 0.0,
+        "_start_time": time.monotonic(),
         "retries_used": {},
         "result": None,
         "termination_reason": None,
-        "_retriever": hybrid,  # injected for the retriever node
+        "_retriever": hybrid,
     }
 
-    final_state = agent_graph.invoke(initial_state)
-    latency_s = time.time() - t_start
 
-    if final_state.get("termination_reason") == "fallback_to_fast":
-        raise RuntimeError("Planner requested fallback_to_fast — routing to fast path")
-
-    result_dict = final_state.get("result") or {}
+def _agent_state_to_brief(state: dict) -> AgentAnalystBrief:
+    """Convert a finished agent state dict to an AgentAnalystBrief."""
+    result_dict = state.get("result") or {}
     if result_dict:
-        brief = AgentAnalystBrief(**result_dict)
-    else:
-        brief = AgentAnalystBrief(
-            answer="The agent could not produce an answer for this query.",
-            citations=[],
-            truncated=True,
-            termination_reason=final_state.get("termination_reason", "max_steps"),
-        )
+        return AgentAnalystBrief(**result_dict)
+    return AgentAnalystBrief(
+        answer="The agent could not produce an answer for this query.",
+        citations=[],
+        truncated=True,
+        termination_reason=state.get("termination_reason", "max_steps"),
+    )
 
-    agent_cost = final_state.get("cost_used_usd", 0.0)
 
-    # Log the agent run using the same record shape as the fast path.
-    # retrieved_chunks is empty — retrieval happened per sub-question, not
-    # as a single pass; cost comes from the final_state budget tracker.
+def _log_agent_run(
+    query: str,
+    query_id: str,
+    brief: AgentAnalystBrief,
+    latency_s: float,
+    cost_usd: float,
+    qlogger: QueryLogger,
+) -> None:
+    """Log a completed agent run to JSONL + Postgres."""
     record = build_query_record(
         query=query,
         retrieved_chunks=[],
@@ -252,7 +243,7 @@ def _run_agent_path(
             "latency_ms": latency_s * 1000,
             "prompt_tokens": 0,
             "completion_tokens": 0,
-            "cost_usd": agent_cost,
+            "cost_usd": cost_usd,
         },
         model_used="agent",
         failure_reason=None,
@@ -260,6 +251,107 @@ def _run_agent_path(
     )
     qlogger.log(record)
     _safe_db_write(record)
+
+
+def _evaluate_route(query: str, settings) -> tuple[RoutePath, str, bool]:
+    """Classify the query and decide whether to use the agent path.
+
+    Returns (path, task_type, use_agent).
+    """
+    path, task_type = complexity_router(query)
+    use_agent = (
+        _should_use_agent(settings.agent.route_enabled, settings.agent.canary_pct)
+        if (path == RoutePath.AGENT and task_type == "cross_doc")
+        else False
+    )
+    return path, task_type, use_agent
+
+
+def _check_guardrails(
+    query: str,
+    log_path: Path,
+) -> tuple[AnalystBrief, str] | None:
+    """Evaluate all three input guardrails.
+
+    Returns (brief, failure_reason) if one fires, else None.
+    """
+    if len(query) > MAX_QUERY_CHARS:
+        return (
+            _canonical_refusal(QUERY_TOO_LONG_MSG),
+            f"guardrail: query_too_long ({len(query)} chars)",
+        )
+    daily_cost = _daily_cost_so_far(log_path)
+    if daily_cost >= DAILY_COST_LIMIT_USD:
+        return (
+            _canonical_refusal(COST_LIMIT_MSG),
+            f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)",
+        )
+    if QUERY_CLASSIFIER_ENABLED:
+        classification = classify_query(query)
+        if not classification.in_domain:
+            return (
+                _canonical_refusal(OUT_OF_CORPUS_ANSWER),
+                f"guardrail: out_of_domain ({classification.reason})",
+            )
+    return None
+
+
+def _log_guardrail_refusal(
+    query: str,
+    query_id: str,
+    brief: AnalystBrief,
+    failure_reason: str,
+    synth: Synthesiser,
+    qlogger: QueryLogger,
+) -> None:
+    """Log a guardrail refusal to JSONL + Postgres."""
+    query_to_log = (
+        query[:MAX_QUERY_CHARS] + "...(truncated for log)"
+        if len(query) > MAX_QUERY_CHARS
+        else query
+    )
+    record = build_query_record(
+        query=query_to_log,
+        retrieved_chunks=[],
+        retrieval_latency_ms=0.0,
+        synthesis_result={
+            "brief": brief,
+            "latency_ms": 0.0,
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "cost_usd": 0.0,
+        },
+        model_used=synth.model,
+        failure_reason=failure_reason,
+        query_id=query_id,
+    )
+    qlogger.log(record)
+    _safe_db_write(record)
+
+
+def _run_agent_path(
+    query: str,
+    task_type: str,
+    hybrid: HybridRetriever,
+    qlogger: QueryLogger,
+    query_id: str,
+) -> dict:
+    """Execute the agent path (LangGraph workflow → AnalystBrief → log).
+
+    Returns a dict in the same shape as the fast path.  Raises on any
+    unhandled error so the caller can fall back to the fast path.
+    Adds ``source: "agent"`` to the returned dict.
+    """
+    t_start = time.time()
+    initial_state = _make_agent_initial_state(query_id, query, task_type, hybrid)
+    final_state = agent_graph.invoke(initial_state)
+    latency_s = time.time() - t_start
+
+    if final_state.get("termination_reason") == "fallback_to_fast":
+        raise RuntimeError("Planner requested fallback_to_fast — routing to fast path")
+
+    brief = _agent_state_to_brief(final_state)
+    _log_agent_run(query, query_id, brief, latency_s, final_state.get("cost_used_usd", 0.0), qlogger)
 
     result = brief.model_dump()
     result["query_id"] = query_id
@@ -282,23 +374,7 @@ def _run_agent_shadow(
 
     def _shadow_task() -> None:
         try:
-            initial_state: dict = {
-                "request_id": query_id,
-                "query": query,
-                "task_type": task_type,
-                "sub_questions": [],
-                "retrievals": {},
-                "coverage": {},
-                "claims": [],
-                "verified_claims": [],
-                "steps_used": 0,
-                "cost_used_usd": 0.0,
-                "time_used_s": 0.0,
-                "retries_used": {},
-                "result": None,
-                "termination_reason": None,
-                "_retriever": hybrid,
-            }
+            initial_state = _make_agent_initial_state(query_id, query, task_type, hybrid)
             final_state = agent_graph.invoke(initial_state)
             logger.info(
                 "Shadow agent run complete: query_id=%s termination=%s cost=$%.4f steps=%d",
@@ -324,7 +400,7 @@ def build_pipeline() -> tuple[HybridRetriever, Synthesiser]:
         raise FileNotFoundError(f"Chroma index not found at {CHROMA_DIR}. Run: uv run python scripts/build_indices.py")
 
     # Lazy import — see module-level note.
-    from retrieval import DenseRetriever
+    from src.retrieval import DenseRetriever
 
     bm25 = BM25Retriever.load(BM25_PATH)
     dense = DenseRetriever(persist_dir=CHROMA_DIR)
@@ -359,95 +435,23 @@ def run_query(
     # (in 4d) the Streamlit UI feedback widget — all reference the same ID.
     query_id = str(uuid.uuid4())
 
-    # Guardrail 1 — query length limit
-    if len(query) > MAX_QUERY_CHARS:
-        brief = _canonical_refusal(QUERY_TOO_LONG_MSG)
-        record = build_query_record(
-            query=query[:MAX_QUERY_CHARS] + "...(truncated for log)",
-            retrieved_chunks=[],
-            retrieval_latency_ms=0.0,
-            synthesis_result={
-                "brief": brief,
-                "latency_ms": 0.0,
-                "prompt_tokens": 0,
-                "completion_tokens": 0,
-                "cost_usd": 0.0,
-            },
-            model_used=synth.model,
-            failure_reason=f"guardrail: query_too_long ({len(query)} chars)",
-            query_id=query_id,
-        )
-        qlogger.log(record)
-        _safe_db_write(record)
+    # Guardrails — length limit, daily cost, and domain gate
+    refusal = _check_guardrails(query, log_path)
+    if refusal is not None:
+        brief, failure_reason = refusal
+        _log_guardrail_refusal(query, query_id, brief, failure_reason, synth, qlogger)
         return {**brief.model_dump(), "query_id": query_id, "source": "fast"}
-
-    # Guardrail 2 — daily cost circuit breaker
-    daily_cost = _daily_cost_so_far(log_path)
-    if daily_cost >= DAILY_COST_LIMIT_USD:
-        brief = _canonical_refusal(COST_LIMIT_MSG)
-        record = build_query_record(
-            query=query,
-            retrieved_chunks=[],
-            retrieval_latency_ms=0.0,
-            synthesis_result={
-                "brief": brief,
-                "latency_ms": 0.0,
-                "prompt_tokens": 0,
-                "completion_tokens": 0,
-                "cost_usd": 0.0,
-            },
-            model_used=synth.model,
-            failure_reason=f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)",
-            query_id=query_id,
-        )
-        qlogger.log(record)
-        _safe_db_write(record)
-        return {**brief.model_dump(), "query_id": query_id, "source": "fast"}
-
-    # Guardrail 3 — pre-retrieval domain gate
-    # Classifies the query cheaply (GPT-4o-mini, ~$0.00003) before spending
-    # retrieval + synthesis tokens (~$0.003). Fails-open on any API error.
-    if QUERY_CLASSIFIER_ENABLED:
-        classification = classify_query(query)
-        if not classification.in_domain:
-            brief = _canonical_refusal(OUT_OF_CORPUS_ANSWER)
-            record = build_query_record(
-                query=query,
-                retrieved_chunks=[],
-                retrieval_latency_ms=0.0,
-                synthesis_result={
-                    "brief": brief,
-                    "latency_ms": 0.0,
-                    "prompt_tokens": 0,
-                    "completion_tokens": 0,
-                    "cost_usd": 0.0,
-                },
-                model_used=synth.model,
-                failure_reason=f"guardrail: out_of_domain ({classification.reason})",
-                query_id=query_id,
-            )
-            qlogger.log(record)
-            _safe_db_write(record)
-            return {**brief.model_dump(), "query_id": query_id, "source": "fast"}
 
     # ── Agent routing ────────────────────────────────────────────────────────
     # Classify complexity AFTER guardrails — avoids spending router tokens on
     # queries that will be refused anyway. Fails-open (returns FAST/factual)
     # so any router error falls through to the fast path transparently.
     settings = get_settings()
-    agent_enabled = settings.agent.route_enabled
-
-    path, task_type = complexity_router(query)
-
-    use_agent = (
-        _should_use_agent(agent_enabled, settings.agent.canary_pct)
-        if (path == RoutePath.AGENT and task_type == "cross_doc")
-        else False
-    )
+    path, task_type, use_agent = _evaluate_route(query, settings)
 
     if use_agent:
         try:
-            return _run_agent_path(query, task_type, hybrid, synth, qlogger, query_id, log_path)
+            return _run_agent_path(query, task_type, hybrid, qlogger, query_id)
         except Exception:
             logger.exception(
                 "Agent path failed for query: %r — falling back to fast path", query
@@ -456,7 +460,7 @@ def run_query(
 
     # Shadow mode: run agent in background if the query is agent-eligible but
     # the flag is not fully enabled (or the canary coin flip said fast path).
-    if path == RoutePath.AGENT and agent_enabled in ("false", "canary"):
+    if path == RoutePath.AGENT and settings.agent.route_enabled in ("false", "canary"):
         _run_agent_shadow(query, task_type, hybrid, query_id)
 
     return _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
@@ -479,90 +483,29 @@ def run_query_with_progress(
 
     Guardrail refusals (length / daily cost / out-of-domain) yield "routing"="fast"
     then immediately "result" — no "node" events, matching the fast-path UX.
-
-    Note: guardrail logic mirrors run_query(). Keep both in sync when adding new gates.
     """
     query_id = str(uuid.uuid4())
 
-    def _fast_result(brief_obj) -> dict:
-        r = brief_obj.model_dump()
+    # Guardrails — length limit, daily cost, and domain gate
+    refusal = _check_guardrails(query, log_path)
+    if refusal is not None:
+        brief, failure_reason = refusal
+        _log_guardrail_refusal(query, query_id, brief, failure_reason, synth, qlogger)
+        r = brief.model_dump()
         r["query_id"] = query_id
         r["source"] = "fast"
-        return r
-
-    def _log_fast(brief_obj, failure_reason, cost_usd=0.0):
-        record = build_query_record(
-            query=query,
-            retrieved_chunks=[],
-            retrieval_latency_ms=0.0,
-            synthesis_result={"brief": brief_obj, "latency_ms": 0.0,
-                              "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": cost_usd},
-            model_used=synth.model,
-            failure_reason=failure_reason,
-            query_id=query_id,
-        )
-        qlogger.log(record)
-        _safe_db_write(record)
-
-    # Guardrail 1 — query length
-    if len(query) > MAX_QUERY_CHARS:
-        brief = _canonical_refusal(QUERY_TOO_LONG_MSG)
-        _log_fast(brief, f"guardrail: query_too_long ({len(query)} chars)")
         yield {"type": "routing", "path": "fast"}
-        yield {"type": "result", "brief": _fast_result(brief)}
+        yield {"type": "result", "brief": r}
         return
 
-    # Guardrail 2 — daily cost circuit breaker
-    daily_cost = _daily_cost_so_far(log_path)
-    if daily_cost >= DAILY_COST_LIMIT_USD:
-        brief = _canonical_refusal(COST_LIMIT_MSG)
-        _log_fast(brief, f"guardrail: daily_cost_limit (${daily_cost:.4f} spent)")
-        yield {"type": "routing", "path": "fast"}
-        yield {"type": "result", "brief": _fast_result(brief)}
-        return
-
-    # Guardrail 3 — domain gate
-    if QUERY_CLASSIFIER_ENABLED:
-        classification = classify_query(query)
-        if not classification.in_domain:
-            brief = _canonical_refusal(OUT_OF_CORPUS_ANSWER)
-            _log_fast(brief, f"guardrail: out_of_domain ({classification.reason})")
-            yield {"type": "routing", "path": "fast"}
-            yield {"type": "result", "brief": _fast_result(brief)}
-            return
-
-    # Routing decision
+    # ── Agent routing ────────────────────────────────────────────────────────
     settings = get_settings()
-    agent_enabled = settings.agent.route_enabled
-    path, task_type = complexity_router(query)
-
-    use_agent = (
-        _should_use_agent(agent_enabled, settings.agent.canary_pct)
-        if (path == RoutePath.AGENT and task_type == "cross_doc")
-        else False
-    )
+    path, task_type, use_agent = _evaluate_route(query, settings)
 
     if use_agent:
         yield {"type": "routing", "path": "agent"}
 
-        initial_state: dict = {
-            "request_id": query_id,
-            "query": query,
-            "task_type": task_type,
-            "sub_questions": [],
-            "retrievals": {},
-            "coverage": {},
-            "claims": [],
-            "verified_claims": [],
-            "steps_used": 0,
-            "cost_used_usd": 0.0,
-            "time_used_s": 0.0,
-            "retries_used": {},
-            "result": None,
-            "termination_reason": None,
-            "_retriever": hybrid,
-        }
-
+        initial_state = _make_agent_initial_state(query_id, query, task_type, hybrid)
         t_start = time.time()
         accumulated: dict = {}
 
@@ -588,30 +531,9 @@ def run_query_with_progress(
             yield {"type": "result", "brief": result}
             return
 
-        result_dict = accumulated.get("result") or {}
-        if result_dict:
-            brief_agent = AgentAnalystBrief(**result_dict)
-        else:
-            brief_agent = AgentAnalystBrief(
-                answer="The agent could not produce an answer for this query.",
-                citations=[],
-                truncated=True,
-                termination_reason=accumulated.get("termination_reason", "max_steps"),
-            )
-
+        brief_agent = _agent_state_to_brief(accumulated)
         agent_cost = accumulated.get("cost_used_usd", 0.0)
-        record = build_query_record(
-            query=query,
-            retrieved_chunks=[],
-            retrieval_latency_ms=0.0,
-            synthesis_result={"brief": brief_agent, "latency_ms": latency_s * 1000,
-                              "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": agent_cost},
-            model_used="agent",
-            failure_reason=None,
-            query_id=query_id,
-        )
-        qlogger.log(record)
-        _safe_db_write(record)
+        _log_agent_run(query, query_id, brief_agent, latency_s, agent_cost, qlogger)
 
         result = brief_agent.model_dump()
         result["query_id"] = query_id
@@ -620,7 +542,7 @@ def run_query_with_progress(
 
     else:
         yield {"type": "routing", "path": "fast"}
-        if path == RoutePath.AGENT and agent_enabled in ("false", "canary"):
+        if path == RoutePath.AGENT and settings.agent.route_enabled in ("false", "canary"):
             _run_agent_shadow(query, task_type, hybrid, query_id)
         result = _run_fast_path(query, hybrid, synth, qlogger, top_k, log_path, query_id)
         yield {"type": "result", "brief": result}

@@ -7,6 +7,8 @@ without making any real LLM calls.
 
 from __future__ import annotations
 
+import time
+
 from src.agent.policies import MAX_COST_USD, MAX_STEPS, MAX_TIME_S
 from src.agent.workflow import check_budget
 
@@ -24,7 +26,6 @@ def _state(**overrides) -> dict:
         "verified_claims": [],
         "steps_used": 0,
         "cost_used_usd": 0.0,
-        "time_used_s": 0.0,
         "retries_used": {},
         "result": None,
         "termination_reason": None,
@@ -58,14 +59,14 @@ def test_cost_above_max_triggers_terminate():
 
 
 def test_max_time_triggers_terminate():
-    """time_used_s at MAX_TIME_S → terminate."""
-    state = _state(time_used_s=MAX_TIME_S)
+    """_start_time set exactly MAX_TIME_S ago → terminate."""
+    state = _state(_start_time=time.monotonic() - MAX_TIME_S)
     assert check_budget(state) == "terminate"
 
 
 def test_time_above_max_triggers_terminate():
-    """time_used_s above MAX_TIME_S → terminate."""
-    state = _state(time_used_s=MAX_TIME_S + 1.0)
+    """_start_time set more than MAX_TIME_S ago → terminate."""
+    state = _state(_start_time=time.monotonic() - (MAX_TIME_S + 1.0))
     assert check_budget(state) == "terminate"
 
 
@@ -80,7 +81,7 @@ def test_normal_state_continues():
     state = _state(
         steps_used=2,
         cost_used_usd=0.01,
-        time_used_s=10.0,
+        _start_time=time.monotonic(),
     )
     assert check_budget(state) == "continue"
 

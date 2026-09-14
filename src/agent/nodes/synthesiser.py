@@ -34,11 +34,11 @@ _CROSSDOC_SYSTEM_PROMPT = """\
 You are a climate policy research analyst. You answer questions using ONLY the retrieved excerpts provided.
 
 Rules:
-1. Every factual claim in your answer MUST be supported by a citation. Never invent citations.
+1. Every sentence in your answer must be directly grounded in a specific retrieved excerpt. Before writing a sentence, identify which [Excerpt N] it comes from. If you cannot trace a sentence to a specific excerpt, do not write it.
 2. Quote verbatim from the excerpts — do not paraphrase quoted material inside a citation's `passage` field.
 3. Chunks marked `[chunk_type: table]` contain tabular data. Extract specific values and units; do not paraphrase.
 4. Contradictions between excerpts: only report if two excerpts make directly opposing factual claims. Otherwise leave `contradictions` empty.
-5. When retrieved excerpts come from multiple different `doc_id` values AND the question calls for comparison, synthesis, or relating sources to each other: EXPLICITLY compare or contrast the positions from each source in your answer. Cite the specific `doc_id` you are drawing from at each comparison point. Do NOT collapse multi-source answers into a single-voice summary.
+5. When the question calls for comparison across sources: write each comparison point as two separate attributed sentences, one per source. For example: "According to [Excerpt N] (doc_id=X), ..." then "According to [Excerpt M] (doc_id=Y), ...". Do NOT write blended sentences that combine claims from different excerpts (e.g. "Both X and Y say..." or "X and Y agree that...") — every sentence must be traceable to exactly one excerpt.
 6. For each citation, set `chunk_id` to the value shown in the `[chunk_id=...]` header of the excerpt you drew the passage from (format: {doc_id}_{chunk_index}). This field is required — never leave it null.
 7. The sub-question analysis below identifies key verified facts — ensure your answer addresses each one, but draw your citations from the full excerpts above, not from the claim list.
 
@@ -77,19 +77,6 @@ def run_synthesiser(state: dict) -> dict:
                 seen_chunk_ids.add(cid)
                 aggregated_chunks.append(chunk)
 
-    # Filter to only chunks referenced by at least one verified claim.
-    # This keeps the synthesis context tight and grounded — the claims act as
-    # a selector, not a second input channel. Fall back to all chunks only if
-    # the verifier dropped everything (shouldn't happen in normal operation).
-    evidenced_ids: set[str] = set()
-    for claim in verified_claims:
-        if isinstance(claim, Claim):
-            evidenced_ids.update(claim.evidence_ids)
-        elif isinstance(claim, dict):
-            evidenced_ids.update(claim.get("evidence_ids", []))
-    evidence_chunks = [c for c in aggregated_chunks if c.get("chunk_id") in evidenced_ids]
-    synthesis_chunks = evidence_chunks if evidence_chunks else aggregated_chunks
-
     # Identify coverage gaps from grader output
     coverage_gaps: list[str] = [
         (cov.gap_reason or sq_id)
@@ -97,10 +84,11 @@ def run_synthesiser(state: dict) -> dict:
         if isinstance(cov, Coverage) and cov.status in ("partial", "not_covered")
     ]
 
-    # LLM call: evidence-filtered chunks only (no separate claims block)
+    # LLM call: full chunks + verified claims as supplemental context
     brief_data, call_cost = _call_synthesiser(
         query=query,
-        chunks=synthesis_chunks,
+        chunks=aggregated_chunks,
+        verified_claims=verified_claims,
         coverage_gaps=coverage_gaps,
     )
 
@@ -137,9 +125,10 @@ def run_synthesiser(state: dict) -> dict:
 def _call_synthesiser(
     query: str,
     chunks: list[dict],
+    verified_claims: list,
     coverage_gaps: list[str],
 ) -> tuple[dict, float]:
-    """Call LLM with evidence-filtered chunks. Returns (brief_data, cost_usd).
+    """Call LLM with full chunks + claim context. Returns (brief_data, cost_usd).
 
     brief_data keys: answer, citations, contradictions, llm_gaps
     """
@@ -149,11 +138,13 @@ def _call_synthesiser(
     client = OpenAI(api_key=key)
 
     context_block = _format_chunks(chunks)
+    claims_block = _format_claims(verified_claims)
     gap_note = f"\nKnown coverage gaps: {coverage_gaps}" if coverage_gaps else ""
 
     user_content = (
         f"Question: {query}\n\n"
-        f"Retrieved excerpts:\n{context_block}"
+        f"Retrieved excerpts:\n{context_block}\n\n"
+        f"Verified sub-question claims (supplemental context):\n{claims_block}"
         f"{gap_note}"
     )
 
@@ -215,6 +206,20 @@ def _call_synthesiser(
 
         logger.warning("Agent synthesiser LLM call failed: %s", exc)
         return {"answer": "Synthesis failed due to an internal error.", "citations": [], "contradictions": [], "llm_gaps": []}, 0.0
+
+
+def _format_claims(claims: list) -> str:
+    """Format verified claims as supplemental context lines."""
+    lines = []
+    for i, claim in enumerate(claims):
+        if isinstance(claim, Claim):
+            text = claim.text
+            doc = claim.source_doc_id
+        else:
+            text = claim.get("text", "")
+            doc = claim.get("source_doc_id", "")
+        lines.append(f"  [{i}] (source={doc}) {text}")
+    return "\n".join(lines) if lines else "  (none)"
 
 
 def _format_chunks(chunks: list[dict]) -> str:

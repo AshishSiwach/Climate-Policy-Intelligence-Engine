@@ -156,16 +156,48 @@ def _run_agent_path(query: str, hybrid) -> dict:
         chunk.get("doc_id") for chunk in agent_chunks if chunk.get("doc_id")
     })
 
-    # Coverage status distribution from grader
+    # Per-sub-question detail: question text, required_source, chunks fetched, coverage
     raw_coverage: dict = final_state.get("coverage", {})
     coverage_statuses: dict[str, int] = {"covered": 0, "partial": 0, "not_covered": 0}
-    for cov in raw_coverage.values():
-        status = cov.status if hasattr(cov, "status") else cov.get("status", "")
-        if status in coverage_statuses:
-            coverage_statuses[status] += 1
+    sub_question_details: list[dict] = []
+
+    for sq in final_state.get("sub_questions", []):
+        if isinstance(sq, dict):
+            sq_id = sq.get("id", "")
+            sq_question = sq.get("question", "")
+            sq_required = sq.get("required_source")
+        else:
+            sq_id = sq.id
+            sq_question = sq.question
+            sq_required = sq.required_source
+
+        sq_chunks = agent_retrievals.get(sq_id, [])
+        sq_doc_ids = sorted({c.get("doc_id") for c in sq_chunks if c.get("doc_id")})
+
+        cov = raw_coverage.get(sq_id)
+        if cov is None:
+            cov_status, cov_gap = "unknown", None
+        elif hasattr(cov, "status"):
+            cov_status, cov_gap = cov.status, cov.gap_reason
+        else:
+            cov_status, cov_gap = cov.get("status", "unknown"), cov.get("gap_reason")
+
+        if cov_status in coverage_statuses:
+            coverage_statuses[cov_status] += 1
+
+        sub_question_details.append({
+            "id": sq_id,
+            "question": sq_question,
+            "required_source": sq_required,
+            "chunk_count": len(sq_chunks),
+            "retrieved_doc_ids": sq_doc_ids,
+            "found_required_source": (sq_required in sq_doc_ids) if sq_required else None,
+            "coverage_status": cov_status,
+            "gap_reason": cov_gap,
+        })
 
     # Sub-question count from planner
-    sub_question_count = len(final_state.get("sub_questions", []))
+    sub_question_count = len(sub_question_details)
 
     return {
         "agent_answer": brief.answer if brief else "",
@@ -179,6 +211,7 @@ def _run_agent_path(query: str, hybrid) -> dict:
         "agent_sub_question_count": sub_question_count,
         "agent_coverage_statuses": coverage_statuses,
         "_agent_retrieved_doc_ids": agent_retrieved_doc_ids,
+        "_agent_sub_question_details": sub_question_details,
         "_agent_chunks": agent_chunks,  # kept for judge; stripped from output record
     }
 
@@ -387,6 +420,7 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 "agent_coverage_statuses": agent.get("agent_coverage_statuses", {}),
                 "agent_retrieved_doc_ids": agent.get("_agent_retrieved_doc_ids", []),
                 "agent_retrieval_recall": agent_retrieval_recall,
+                "agent_sub_question_details": agent.get("_agent_sub_question_details", []),
             }
 
             records.append(record)
@@ -507,6 +541,69 @@ def _print_summary(records: list[dict]) -> None:
     print(f"  Coverage: covered {_fmt(_mean(cov_counts['covered']), 0)}%  "
           f"partial {_fmt(_mean(cov_counts['partial']), 0)}%  "
           f"not_covered {_fmt(_mean(cov_counts['not_covered']), 0)}%")
+
+    _print_subquestion_analysis(records)
+
+
+# ---------------------------------------------------------------------------
+# Sub-question analysis
+# ---------------------------------------------------------------------------
+
+
+def _print_subquestion_analysis(records: list[dict]) -> None:
+    """Aggregate per-sub-question data across all queries and print diagnostics."""
+    import collections
+
+    all_sqs: list[dict] = []
+    for r in records:
+        for sq in r.get("agent_sub_question_details", []):
+            all_sqs.append(sq)
+
+    if not all_sqs:
+        return
+
+    total = len(all_sqs)
+    covered   = sum(1 for s in all_sqs if s["coverage_status"] == "covered")
+    partial   = sum(1 for s in all_sqs if s["coverage_status"] == "partial")
+    not_cov   = sum(1 for s in all_sqs if s["coverage_status"] == "not_covered")
+
+    # Required-source hit rate
+    with_req   = [s for s in all_sqs if s["required_source"] is not None]
+    req_hit    = sum(1 for s in with_req if s["found_required_source"])
+    req_miss   = [s for s in with_req if not s["found_required_source"]]
+
+    # Chunk count distribution
+    chunk_counts = [s["chunk_count"] for s in all_sqs]
+    avg_chunks = sum(chunk_counts) / len(chunk_counts) if chunk_counts else 0
+    zero_chunk = sum(1 for c in chunk_counts if c == 0)
+
+    # Top gap reasons for partial sub-questions
+    gap_reasons: list[str] = [
+        s["gap_reason"] for s in all_sqs
+        if s["coverage_status"] in ("partial", "not_covered") and s["gap_reason"]
+    ]
+    top_gaps = collections.Counter(gap_reasons).most_common(5)
+
+    ruler = "-" * 52
+    print(f"\nSub-question analysis ({total} total across {len(records)} queries)")
+    print(ruler)
+    print(f"  Status: covered {covered} ({covered*100//total}%)  "
+          f"partial {partial} ({partial*100//total}%)  "
+          f"not_covered {not_cov} ({not_cov*100//total}%)")
+    print(f"  Avg chunks per sub-question: {avg_chunks:.1f}  "
+          f"(zero-chunk: {zero_chunk})")
+    if with_req:
+        print(f"  Required-source hit rate: {req_hit}/{len(with_req)} "
+              f"({req_hit*100//len(with_req)}%)")
+    if req_miss:
+        miss_sources = collections.Counter(s["required_source"] for s in req_miss)
+        print(f"  Required-source misses by institution:")
+        for src, cnt in miss_sources.most_common():
+            print(f"    {src}: {cnt} miss(es)")
+    if top_gaps:
+        print(f"  Top gap reasons (partial/not_covered):")
+        for reason, cnt in top_gaps:
+            print(f"    [{cnt}x] {reason[:90]}")
 
 
 # ---------------------------------------------------------------------------

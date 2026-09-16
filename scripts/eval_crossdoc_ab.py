@@ -151,6 +151,22 @@ def _run_agent_path(query: str, hybrid) -> dict:
                 seen_cids.add(cid)
                 agent_chunks.append(chunk)
 
+    # Retrieval-level doc_ids (before synthesis — what the retriever actually fetched)
+    agent_retrieved_doc_ids: list[str] = sorted({
+        chunk.get("doc_id") for chunk in agent_chunks if chunk.get("doc_id")
+    })
+
+    # Coverage status distribution from grader
+    raw_coverage: dict = final_state.get("coverage", {})
+    coverage_statuses: dict[str, int] = {"covered": 0, "partial": 0, "not_covered": 0}
+    for cov in raw_coverage.values():
+        status = cov.status if hasattr(cov, "status") else cov.get("status", "")
+        if status in coverage_statuses:
+            coverage_statuses[status] += 1
+
+    # Sub-question count from planner
+    sub_question_count = len(final_state.get("sub_questions", []))
+
     return {
         "agent_answer": brief.answer if brief else "",
         "agent_citation_count": len(brief.citations) if brief else 0,
@@ -160,6 +176,9 @@ def _run_agent_path(query: str, hybrid) -> dict:
         "agent_termination_reason": final_state.get("termination_reason"),
         "agent_coverage_gaps": (brief.coverage_gaps if brief else []),
         "agent_truncated": (brief.truncated if brief else False),
+        "agent_sub_question_count": sub_question_count,
+        "agent_coverage_statuses": coverage_statuses,
+        "_agent_retrieved_doc_ids": agent_retrieved_doc_ids,
         "_agent_chunks": agent_chunks,  # kept for judge; stripped from output record
     }
 
@@ -291,9 +310,17 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 }
 
             # Source recall (independent of judge)
-            expected_sources = set(q.get("expected_sources", []))
+            # expected_sources is a list of {doc_id, page_range} dicts — extract doc_ids
+            raw_sources = q.get("expected_sources", [])
+            expected_sources: set[str] = {
+                (s["doc_id"] if isinstance(s, dict) else s) for s in raw_sources
+            }
             fast_source_recall = _source_recall(set(fast.get("fast_doc_ids", [])), expected_sources)
             agent_source_recall = _source_recall(set(agent.get("agent_doc_ids", [])), expected_sources)
+            # Retrieval-level recall — what the retriever fetched before synthesis
+            agent_retrieval_recall = _source_recall(
+                set(agent.get("_agent_retrieved_doc_ids", [])), expected_sources
+            )
 
             # Judge scoring (optional)
             fast_scores = _null_scores()
@@ -322,7 +349,7 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 "id": query_id,
                 "question": question,
                 "expected_answer": expected_answer,
-                "expected_sources": list(expected_sources),
+                "expected_sources": sorted(expected_sources),
                 # fast path
                 "fast_answer": fast["fast_answer"],
                 "fast_citation_count": fast.get("fast_citation_count", 0),
@@ -356,6 +383,10 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 "agent_termination_reason": agent["agent_termination_reason"],
                 "agent_coverage_gaps": agent["agent_coverage_gaps"],
                 "agent_truncated": agent["agent_truncated"],
+                "agent_sub_question_count": agent.get("agent_sub_question_count", 0),
+                "agent_coverage_statuses": agent.get("agent_coverage_statuses", {}),
+                "agent_retrieved_doc_ids": agent.get("_agent_retrieved_doc_ids", []),
+                "agent_retrieval_recall": agent_retrieval_recall,
             }
 
             records.append(record)
@@ -369,9 +400,7 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
             )
 
     print(f"\nResults written to {OUTPUT_PATH}")
-
-    if use_judge:
-        _print_summary(records)
+    _print_summary(records)
 
 
 # ---------------------------------------------------------------------------
@@ -454,6 +483,30 @@ def _print_summary(records: list[dict]) -> None:
     print(f"Gate: Agent Correctness  >=3.50 -> {_gate(agent_correctness, CORRECTNESS_GATE)}")
     print(f"Gate: Agent Completeness >=3.25 -> {_gate(agent_completeness, COMPLETENESS_GATE)}")
     print(f"Gate: Agent Latency P95  <=15s  -> {_gate(agent_p95, LATENCY_P95_KILL, fail_above=True)}")
+
+    # Retrieval section (always shown — no judge required)
+    agent_retrieval_recall = _mean([r.get("agent_retrieval_recall") for r in records])
+    avg_sq = _mean([r.get("agent_sub_question_count") for r in records])
+
+    cov_counts: dict[str, list[int]] = {"covered": [], "partial": [], "not_covered": []}
+    for r in records:
+        cs = r.get("agent_coverage_statuses", {})
+        total_sq = sum(cs.values()) or 1
+        for k in cov_counts:
+            cov_counts[k].append(cs.get(k, 0) / total_sq * 100)
+
+    print(f"\nRetrieval (agent path, N={n})")
+    print(ruler)
+    print(f"  Retrieval recall (pre-synthesis) : {_fmt(agent_retrieval_recall)}")
+    print(f"  Citation recall  (post-synthesis): {_fmt(_mean([r.get('agent_source_recall') for r in records]))}")
+    recall_gap = (
+        (agent_retrieval_recall or 0) - (_mean([r.get("agent_source_recall") for r in records]) or 0)
+    )
+    print(f"  Retrieval -> citation gap        : {recall_gap:+.2f}  {'(synthesis drops docs)' if recall_gap > 0.05 else '(ok)'}")
+    print(f"  Avg sub-questions per query      : {_fmt(avg_sq, 1)}")
+    print(f"  Coverage: covered {_fmt(_mean(cov_counts['covered']), 0)}%  "
+          f"partial {_fmt(_mean(cov_counts['partial']), 0)}%  "
+          f"not_covered {_fmt(_mean(cov_counts['not_covered']), 0)}%")
 
 
 # ---------------------------------------------------------------------------

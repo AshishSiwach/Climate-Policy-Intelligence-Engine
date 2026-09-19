@@ -69,3 +69,11 @@ monitoring:
 ui:
   port: 8501
   title: "CPIE — Climate Policy Intelligence Engine"
+
+# --- Agent routing ---
+# route_enabled: "true"   → agent active for all cross_doc queries
+# route_enabled: "canary" → agent active for canary_pct fraction
+# route_enabled: "false"  → shadow mode (agent runs but fast path is returned)
+agent:
+  route_enabled: "true"
+  canary_pct: 0.10

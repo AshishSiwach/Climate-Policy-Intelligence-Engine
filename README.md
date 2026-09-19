@@ -635,6 +635,51 @@ against the 52-query ground truth. `v2_numeric` shipped as default: adds a
 Correctness without regressing any metric. `v2_crossdoc` preserved in the
 registry for per-query-type activation (future roadmap item).
 
+### LangGraph — agent orchestration
+
+The cross-document agent is implemented as a `StateGraph` (LangGraph). The
+choice determines how nodes communicate, how budget limits are enforced, and
+how the agent is observable.
+
+**Why a graph, not a chain or plain Python loop:**
+A multi-step agent with conditional retry logic, mid-graph termination, and
+per-node tracing has four natural representations:
+
+| Option | Problem |
+|---|---|
+| Plain Python loop | Budget checks, retry routing, and streaming must be hand-rolled; state is mutable and hard to inspect |
+| LangChain `AgentExecutor` | Opinionated tool-call loop; doesn't model the grader-decides-retry branching naturally |
+| Custom state machine | Equivalent to LangGraph but without built-in streaming, checkpointing, or graph visualisation |
+| **LangGraph `StateGraph`** | Conditional edges map directly onto the grader's three-way routing; budget checks are one-line conditional edge functions; streaming and tracing are built in |
+
+**Key architectural decisions:**
+
+- **`AgentState` as a `TypedDict`** — the entire agent's mutable state is a
+  single dict passed through every node. Nodes return partial dicts (only the
+  keys they change) and LangGraph merges them. This keeps nodes stateless and
+  individually testable without the full graph.
+
+- **Conditional edges as budget guards** — every node transition is a
+  conditional edge calling `check_budget(state)`. If steps, cost, or wall time
+  exceed their caps, the graph routes to `handle_termination` instead of the
+  next node. No try/except scaffolding needed; the graph topology enforces
+  limits structurally.
+
+- **Single LangGraph import file** — `from langgraph.graph import StateGraph`
+  appears only in `src/agent/workflow.py`. All other nodes are plain functions
+  that take and return dicts. This keeps the ML framework out of the test path:
+  unit tests for `run_planner`, `run_grader`, etc. run without importing
+  LangGraph at all.
+
+- **`agent_graph.stream()`** — the Streamlit UI uses LangGraph's streaming
+  mode to yield per-node progress events (`{"type": "node", "name": ...}`) so
+  the user sees a live status bar (Planner → Retriever → Grader → …) rather
+  than a blank spinner for 12s.
+
+- **`agent_graph.invoke()` for batch eval** — the eval harness uses synchronous
+  `invoke()` so each query is a single blocking call with a clean return dict,
+  matching the eval loop's sequential query-by-query structure.
+
 ### Reranker and query rewriting — measured and dropped
 
 Both were built and A/B-measured against the eval dataset:

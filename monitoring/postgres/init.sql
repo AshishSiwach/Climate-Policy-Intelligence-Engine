@@ -53,7 +53,10 @@ CREATE TABLE IF NOT EXISTS cpie.query_logs (
     contradiction_count   INT            NOT NULL DEFAULT 0,
 
     -- Failure tracking (nullable on the happy path)
-    failure_reason        TEXT
+    failure_reason        TEXT,
+
+    -- Config version (first 8 hex chars of SHA-256 of JSON-serialised settings)
+    config_fingerprint    TEXT
 );
 
 -- Indexes tuned to the dashboards we plan in 4c

@@ -1,0 +1,4002 @@
+[
+  {
+    "id": "xdoc_eval_001_ccc_iea_transport",
+    "query_type": "cross_document",
+    "question": "How does the CCC's assessment of UK surface-transport decarbonisation compare with the IEA's global outlook for electric vehicles and oil demand?",
+    "expected_answer": "The CCC reports that UK surface-transport emissions have fallen for two consecutive years, electric-car numbers are roughly doubling every two years, and surface transport is expected to provide almost 30% of the emissions reduction needed to 2030. The IEA's STEPS is global rather than UK-specific: electric cars exceed 50% of global sales by 2035, helping oil demand peak at about 102 mb/d around 2030 and then decline gradually. Both identify EV adoption as a major driver, but the CCC evaluates delivery against a UK target whereas the IEA describes a global scenario pathway.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          171,
+          182
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Two consecutive years of falling surface-transport emissions, rapid EV growth and the sector's near-30% contribution to required reductions."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          171,
+          182
+        ],
+        "supports": "STEPS global EV-sales trajectory, oil-demand peak around 2030 and displacement of oil demand by EVs."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_002_ofgem_eso_flexibility",
+    "query_type": "cross_document",
+    "question": "How do Ofgem's load-control licensing proposals and ESO's Beyond 2030 recommendations address different parts of electricity-system flexibility?",
+    "expected_answer": "Ofgem focuses on the consumer-facing control layer: it proposes licensing Load Controllers and Flexibility Service Providers that control domestic-scale assets such as EV charge points, heat pumps and batteries, with security and compliance obligations. ESO focuses on system planning: it recommends locating large flexible demand behind network bottlenecks, including in northern Britain, to absorb renewable output and potentially avoid reinforcement. The measures are complementary—Ofgem governs trusted operation of distributed flexibility, while ESO plans where large-scale flexibility can reduce network constraints.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          17
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          8,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          17
+        ],
+        "supports": "Purpose and scope of the licensing regime, licensable actors and in-scope smart appliances."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          8,
+          8
+        ],
+        "supports": "Up to 5 GW of flexible demand behind bottlenecks, potential £5 billion saving and avoided reinforcement."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_003_boe_iea_scenarios",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's Late Action climate scenario differ from the IEA's CPS, STEPS and NZE scenario framework?",
+    "expected_answer": "The Bank's Late Action scenario is a deliberately delayed and disorderly transition in which policy action begins late and creates sharper near-term economic and financial disruption than Early Action. The IEA uses CPS and STEPS to explore outcomes under current and stated policies, and NZE to describe a pathway to net zero emissions by 2050. The Bank scenario is designed for financial stress testing, while the IEA scenarios compare global energy-system trajectories; Late Action should therefore not be treated as a direct equivalent of any single IEA scenario.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          4,
+          5
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          27,
+          33
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          4,
+          5
+        ],
+        "supports": "Purpose and high-level design of Early Action, Late Action and No Additional Action stress scenarios."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          27,
+          33
+        ],
+        "supports": "Definitions and contrasting energy and warming outcomes of CPS, STEPS and NZE."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_004_ccc_boe_budget_macro",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget pathway relate to the Bank of England's analysis of climate change and monetary policy?",
+    "expected_answer": "The CCC's Balanced Pathway defines an emissions-reduction route from 2025 to UK Net Zero in 2050 and underpins the Seventh Carbon Budget and its sector actions. The Bank analyses a different layer of the problem: how physical climate impacts and the transition can affect output, inflation, monetary-policy trade-offs and transmission. The CCC therefore specifies the mitigation pathway and required real-economy change, while the Bank explains why both climate damage and the transition matter for macroeconomic stability and monetary policy.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          11,
+          11
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          3,
+          6
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          11,
+          11
+        ],
+        "supports": "Balanced Pathway, Net Zero 2050 alignment and relationship to the Seventh Carbon Budget."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          3,
+          6
+        ],
+        "supports": "Physical and transition channels affecting output, inflation and monetary-policy decisions."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_005_ccc_progress_change",
+    "query_type": "cross_document",
+    "question": "How did the CCC's headline assessment of UK progress towards the 2030 NDC change between its 2024 and 2025 reports?",
+    "expected_answer": "In 2024 the CCC said the UK was not on track for the 68%-by-2030 target and that only about one-third of the required emissions reductions were covered by credible plans. In 2025 it assessed 61% as covered by credible plans or plans with some risks, while 39% still had significant risks or insufficient or unquantified plans. The later report therefore shows an improved planning assessment and encouraging transport progress, but it does not say delivery risk has disappeared, particularly for heat pumps and industrial electrification.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          8,
+          8
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          8,
+          8
+        ],
+        "supports": "Not-on-track judgement and roughly one-third credible-plan coverage."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "61%/39% plan assessment and sectoral progress and risks."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_006_budget_vs_delivery",
+    "query_type": "cross_document",
+    "question": "What is the difference between the pathway set by the Seventh Carbon Budget and the near-term delivery position reported by the CCC in 2025?",
+    "expected_answer": "The Seventh Carbon Budget's Balanced Pathway is the CCC's recommended route from 2025 to Net Zero by 2050, linking the emissions limit to sector pathways and actions. The 2025 progress report assesses whether near-term plans are sufficient for the 2030 NDC: 61% of the required reduction is covered by credible plans or plans with some risk, while 39% faces significant, insufficient or unquantified plans. One document defines the destination and pathway; the other measures the current delivery gap against the nearer milestone.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          11,
+          11
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          11,
+          11
+        ],
+        "supports": "Definition and role of the Balanced Pathway."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Current 2030 delivery assessment and major sectoral risks."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_007_zev_ccc_transport",
+    "query_type": "cross_document",
+    "question": "How does the ZEV mandate's sales trajectory support the surface-transport transition described by the CCC in 2025?",
+    "expected_answer": "The ZEV mandate requires the share of new zero-emission cars to rise from 22% in 2024 to 80% in 2030, and vans from 10% to 70% over the same period. The CCC reports that electric-car numbers are already roughly doubling every two years and expects EV uptake, together with cleaner electricity, to help surface transport deliver almost 30% of the emissions reduction required to 2030. The mandate supplies a concrete new-vehicle sales mechanism for the broader transport decarbonisation trajectory assessed by the CCC.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "Annual car and van ZEV sales-percentage requirements through 2030."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Observed EV uptake and transport's expected contribution to the 2030 reduction."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_008_zev_ofgem_scope",
+    "query_type": "cross_document",
+    "question": "How do the ZEV mandate and Ofgem's proposed load-control licence regulate different parts of the electric-vehicle ecosystem?",
+    "expected_answer": "The ZEV mandate regulates whether vehicles count as zero-emission and sets manufacturer-facing requirements, including 0 g CO2/km, a 100-mile minimum range and battery-warranty conditions. Ofgem's proposal concerns the operation of connected demand: Load Controllers and Flexibility Service Providers that send or arrange control signals to domestic smart appliances, including private EVs and smart charge points. The ZEV mandate governs vehicle eligibility and sales compliance; the Ofgem regime governs secure and accountable control of charging-related electrical load.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          21,
+          22
+        ]
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          14,
+          17
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          21,
+          22
+        ],
+        "supports": "Vehicle qualification, range and battery-warranty requirements."
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          14,
+          17
+        ],
+        "supports": "Licensable load-control activities and inclusion of private EVs and smart charge points."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_009_zev_boe_assumptions",
+    "query_type": "cross_document",
+    "question": "How do the final ZEV sales targets compare with the vehicle-policy assumptions used in the Bank of England's CBES transition scenarios?",
+    "expected_answer": "The ZEV mandate sets annual compliance percentages, rising to 80% of new cars and 70% of new vans in 2030, with later targets intended to reach 100%. The CBES transition scenarios use broader policy assumptions: a ban on sales of new internal-combustion-engine vehicles from 2030 and hybrids from 2035. The mandate provides the phased manufacturer obligations, while CBES translates the policy direction into assumptions for testing financial exposure under the transition.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          46,
+          48
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "Phased car and van ZEV targets."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          46,
+          48
+        ],
+        "supports": "CBES assumptions for ending new ICE and hybrid vehicle sales."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_010_uk_global_ev_trajectory",
+    "query_type": "cross_document",
+    "question": "How ambitious is the UK's 2030 ZEV car-sales requirement compared with the IEA's global STEPS electric-car outlook?",
+    "expected_answer": "The UK mandate requires 80% of new cars to be zero-emission in 2030. In the IEA's global STEPS, electric cars rise from over 20% of sales today to more than 50% by 2035. The measures are not directly identical—UK ZEV compliance and the IEA's global electric-car category and geography differ—but the comparison shows the UK regulatory trajectory reaching a substantially higher share five years earlier than the global STEPS benchmark.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          171,
+          182
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "80% new-car ZEV requirement in 2030."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          171,
+          182
+        ],
+        "supports": "Global STEPS electric-car sales share above 50% by 2035."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_011_zev_modal_shift",
+    "query_type": "cross_document",
+    "question": "How do the ZEV mandate and the Seventh Carbon Budget's transport contingency reduce road-transport emissions through different mechanisms?",
+    "expected_answer": "The ZEV mandate changes the technology mix of vehicles sold, using rising manufacturer targets for zero-emission cars and vans through 2030. The Seventh Carbon Budget contingency considers reducing car use itself by shifting a further 3% of car demand to public transport or active travel by 2035, on top of baseline modal shift. One policy decarbonises remaining vehicle demand; the other reduces that demand through mode change, so they are complementary rather than substitutes.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          152,
+          153
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "Technology-focused ZEV sales trajectory."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          152,
+          153
+        ],
+        "supports": "Contingency for an additional 3% shift from car demand to public or active transport."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_012_ofgem_boe_electrification",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's proposed licensing regime interact with the heat-pump and vehicle assumptions in the Bank of England's transition scenarios?",
+    "expected_answer": "The Bank's scenarios assume rapid adoption policies, including 600,000 annual heat-pump installations by 2028, improved home energy performance and the end of new ICE and later hybrid vehicle sales. Ofgem's regime addresses how some resulting electrical assets—heat pumps, EVs, smart charge points and domestic batteries—may be controlled by third parties, licensing the relevant Load Controllers and Flexibility Service Providers. CBES supplies transition-adoption assumptions; Ofgem supplies operational governance for the flexible electrical demand those technologies create.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          14,
+          17
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          46,
+          48
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          14,
+          17
+        ],
+        "supports": "In-scope heat pumps, EV-related equipment and battery storage, plus licensed control activities."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          46,
+          48
+        ],
+        "supports": "Heat-pump, building-efficiency and vehicle-policy assumptions."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_013_ofgem_cyber_boe_maturity",
+    "query_type": "cross_document",
+    "question": "How do Ofgem's cyber-security requirements for Load Controllers differ from the climate-risk management gaps identified by the Bank of England's CBES results?",
+    "expected_answer": "Ofgem proposes concrete cyber controls differentiated at 300 MW: smaller Load Controllers self-assess against a Tier 2 Cyber Assessment Framework profile, while larger operators are expected to come under NIS requirements using Tier 1. CBES concerns financial climate risk rather than operational cyber risk; it found that banks and insurers had improved but still needed better data and understanding of counterparties' transition plans. Both use risk-based oversight, but they address different hazards, regulated entities and evidence requirements.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          47,
+          53
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          11,
+          11
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          47,
+          53
+        ],
+        "supports": "Tiered cyber requirements and the 300 MW distinction."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          11,
+          11
+        ],
+        "supports": "Progress and remaining climate-risk-management and counterparty-data gaps."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_014_ofgem_ccc_delivery",
+    "query_type": "cross_document",
+    "question": "How could Ofgem's load-control regime support the electrification priorities and delivery risks identified by the CCC in 2025?",
+    "expected_answer": "The CCC says the majority of the reduction required to 2030 must come from electrifying transport, buildings and industry, while identifying heat-pump scale-up and industrial electrification as major risks. Ofgem proposes a trusted licensing framework for controlling domestic smart electrical appliances such as heat pumps, EV charge points and batteries. The regime does not itself deliver the CCC's deployment volumes, but it can support secure, accountable flexibility as electrified demand grows.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          17
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          17
+        ],
+        "supports": "Objectives, actors and appliances covered by the proposed licence."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Electrification contribution and delivery risks for heat pumps and industry."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_015_eso_ccc_flexibility",
+    "query_type": "cross_document",
+    "question": "Why is ESO's strategic flexible-demand proposal relevant to the electrification pathway described by the CCC's 2025 progress report?",
+    "expected_answer": "The CCC expects electrification of surface transport, buildings and industry to provide much of the emissions reduction needed to 2030 and says expansion and decarbonisation of electricity supply are enabling conditions. ESO shows that the location of new demand also matters: placing up to 5 GW of flexible demand behind northern network bottlenecks could reduce reinforcement and save consumers about £5 billion. The CCC establishes the growing electrification requirement; ESO addresses how spatially flexible demand can make the supporting network more efficient.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          8,
+          8
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          8,
+          8
+        ],
+        "supports": "Flexible-demand quantity, bottleneck placement, saving and avoided reinforcement."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Electrification and electricity-system expansion needed for the 2030 pathway."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_016_eso_iea_electricity",
+    "query_type": "cross_document",
+    "question": "How do ESO's expectations for Great Britain's electricity system to 2035 compare with the IEA's global STEPS electricity outlook?",
+    "expected_answer": "ESO expects British electricity needs to rise by up to nearly 65% by 2035 as heat, transport and other uses electrify, requiring major network expansion; it recommends £58 billion of further direct network investment beyond its 2030 design. The IEA's 2025 STEPS projects more than 44,000 TWh of global electricity generation in 2035, around 4% above the previous year's STEPS, with data-centre demand among the drivers. Both foresee rapid electricity growth, but ESO specifies British transmission investment while the IEA provides a global generation outlook.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          10
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          35,
+          36
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          10
+        ],
+        "supports": "Projected British demand growth and recommended network investment."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          35,
+          36
+        ],
+        "supports": "Global 2035 electricity-generation projection and data-centre contribution."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_017_eso_boe_fossil_transition",
+    "query_type": "cross_document",
+    "question": "How does ESO's network plan enable the renewable-energy transition assumed in the Bank of England's Early and Late Action scenarios?",
+    "expected_answer": "The Bank's Early and Late Action scenarios assume fossil fuels are almost entirely replaced in the UK primary energy mix by 2050, with renewables supplying about 90% of UK energy needs. ESO identifies the physical network constraint behind such a transition: existing capacity cannot transport much more renewable electricity, and connecting large offshore-wind volumes requires coordinated transmission expansion. The Bank supplies a transition assumption for financial stress testing; ESO describes infrastructure needed to make a high-renewables system operable.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          10
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          23,
+          24
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          10
+        ],
+        "supports": "Grid-capacity constraints, offshore-wind integration and transmission-investment requirement."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          23,
+          24
+        ],
+        "supports": "Renewable and fossil-fuel shares under transition and no-additional-action scenarios."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_018_solar_cost_grid_constraint",
+    "query_type": "cross_document",
+    "question": "What do the IEA's projected solar-PV cost reductions and ESO's network findings imply about the constraints on renewable deployment?",
+    "expected_answer": "The IEA projects solar-PV costs in STEPS to fall by about 40% between 2024 and 2035, strengthening the economic case for deployment. ESO nevertheless reports that Britain's existing grid is reaching capacity and renewable power is already curtailed where the network cannot transport it, requiring coordinated transmission investment. Together the evidence shows that cheaper generation technology does not remove network-integration constraints: both generation economics and grid capacity must be addressed.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          201,
+          202
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          5
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          201,
+          202
+        ],
+        "supports": "Projected decline in solar-PV and other clean-technology costs."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          5
+        ],
+        "supports": "Network bottlenecks, curtailment of wind and need for reinforcement."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_019_policy_credibility_scenarios",
+    "query_type": "cross_document",
+    "question": "How do the CCC's 61%/39% assessment and the IEA's CPS/STEPS framework represent uncertainty about policy delivery?",
+    "expected_answer": "The CCC evaluates UK plans directly against the 2030 NDC: 61% of the required reduction is covered by credible plans or plans with some risks, while 39% has significant risks or insufficient or unquantified plans. The IEA separates global futures according to policy assumptions: CPS reflects policies in force, while STEPS also reflects policies that have been adopted or put forward. Both distinguish policy ambition from delivery, but the CCC scores adequacy against a fixed UK target whereas the IEA explores different global energy outcomes.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          11
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          27,
+          33
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          11
+        ],
+        "supports": "61% covered and 39% at significant or unquantified risk."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          27,
+          33
+        ],
+        "supports": "Different policy assumptions and resulting energy trajectories in CPS and STEPS."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_020_ccc_iea_fossil_progress",
+    "query_type": "cross_document",
+    "question": "How does recent UK transport progress reported by the CCC relate to the IEA's explanation of when global oil demand peaks?",
+    "expected_answer": "The CCC reports falling UK surface-transport emissions and electric-car numbers roughly doubling every two years. The IEA explains that road transport represents around 45% of global oil demand and that stronger EV uptake in STEPS puts road-transport oil use on a declining trajectory, leading total oil demand to peak around 2030; slower EV uptake in CPS keeps oil demand higher. The UK evidence is a national progress indicator, while the IEA explains the global scenario mechanism connecting EV adoption to oil demand.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          32,
+          33
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "UK surface-transport emissions and EV adoption trend."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          32,
+          33
+        ],
+        "supports": "Road transport's oil share and scenario link between EV uptake and the oil-demand peak."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_021_ccc24_iea_policy_gap",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 warning about UK policy delivery compare with the IEA's distinction between current and stated-policy energy futures?",
+    "expected_answer": "The CCC's 2024 report found the UK off track for its 2030 target, with only about one-third of required reductions covered by credible plans and recent policy reversals or delays weakening delivery. The IEA's CPS and STEPS similarly show why policy implementation matters: CPS keeps oil and gas demand growing longer, while STEPS brings earlier coal and oil peaks through stronger technology uptake and policy support. The CCC diagnoses a specific UK implementation gap; the IEA illustrates the broader energy consequences of different policy settings.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          8,
+          8
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          27,
+          33
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          8,
+          8
+        ],
+        "supports": "UK off-track assessment, one-third credible coverage and policy reversals or delays."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          27,
+          33
+        ],
+        "supports": "Contrasting fossil-demand outcomes under CPS and STEPS policy assumptions."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_022_ccc_iea_net_zero",
+    "query_type": "cross_document",
+    "question": "How do the CCC's Balanced Pathway and the IEA's NZE Scenario use net zero by 2050 differently?",
+    "expected_answer": "The CCC's Balanced Pathway is a UK-specific recommended emissions route from 2025 to Net Zero by 2050 and is used to set the Seventh Carbon Budget and sector actions. The IEA's NZE Scenario is a global energy-system pathway to net zero emissions by 2050, contrasted with CPS and STEPS and associated with lower warming. They share a 2050 net-zero endpoint, but the CCC pathway is a statutory UK budgeting recommendation whereas the IEA scenario is a global analytical benchmark.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          11,
+          11
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          27,
+          27
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          11,
+          11
+        ],
+        "supports": "UK Balanced Pathway and its role in setting the Seventh Carbon Budget."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          27,
+          27
+        ],
+        "supports": "NZE as a global net-zero-by-2050 scenario and its warming outcome."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_023_buildings_policy_gap",
+    "query_type": "cross_document",
+    "question": "How do the building-transition assumptions in CBES compare with the delivery risks identified in the CCC's 2024 progress report?",
+    "expected_answer": "CBES assumes announced transition policies including upgrading homes towards EPC band C, scaling heat-pump installations to 600,000 per year by 2028 and eventually making very inefficient properties unmarketable. The CCC's 2024 assessment found that policy rollback in buildings increased delivery risk and that credible plans covered only around 32% of the sector's required reduction for the 2030 NDC. CBES models a policy-driven transition; the CCC evidence shows that real-world delivery of comparable building changes was not yet sufficiently credible.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          46,
+          48
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          70,
+          71
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          46,
+          48
+        ],
+        "supports": "Home-efficiency, heat-pump and property-market assumptions."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          70,
+          71
+        ],
+        "supports": "Buildings-policy rollback, delivery risk and approximately 32% credible-plan coverage."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_024_transport_assumption_progress",
+    "query_type": "cross_document",
+    "question": "How does actual surface-transport progress reported by the CCC compare with the vehicle assumptions used in CBES?",
+    "expected_answer": "The CCC reports observed progress: surface-transport emissions fell for a second year and the number of electric cars was roughly doubling every two years, although substantial further reductions are required. CBES is scenario-based and assumes policy milestones including ending sales of new internal-combustion-engine vehicles from 2030 and hybrids from 2035. The CCC measures current delivery, while CBES uses future policy assumptions to test financial exposures; observed EV growth is directionally consistent but does not itself prove the scenario milestones will be met.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          46,
+          48
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Observed surface-transport emissions and EV uptake."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          46,
+          48
+        ],
+        "supports": "Future ICE and hybrid sales assumptions used in the scenarios."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_025_ccc_boe_physical_macro",
+    "query_type": "cross_document",
+    "question": "How do the physical climate impacts highlighted by the CCC in 2024 connect to the Bank of England's macroeconomic transmission channels?",
+    "expected_answer": "The CCC points to concrete UK impacts including exceptionally wet conditions, flooded farmland, lost crops and animals, disrupted livelihoods and the need to strengthen adaptation. The Bank explains how such physical effects can become macroeconomic shocks: extreme weather can disrupt supply and raise prices such as food prices, affecting output and inflation and therefore monetary-policy trade-offs. The CCC supplies observed policy and impact context; the Bank describes the economic transmission mechanism.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          8,
+          8
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          3,
+          6
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          8,
+          8
+        ],
+        "supports": "Flooding, agricultural damage, disrupted livelihoods and adaptation warning."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          3,
+          6
+        ],
+        "supports": "Physical-risk channels into supply, output, prices and monetary policy."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_026_cbes_design_results",
+    "query_type": "cross_document",
+    "question": "How do the CBES scenario assumptions relate to the losses subsequently reported in the CBES results?",
+    "expected_answer": "The Key Elements document defines contrasting transition paths: Early and Late Action replace most UK fossil-energy use with renewables by 2050, while No Additional Action leaves fossil fuels dominant and produces larger physical damage; it also quantifies different GDP effects. The Results document reports what participating firms estimated under those scenarios: without effective responses, climate risks could create a persistent drag equal to around 10–15% of annual profits, with very wide variation in counterparty loss estimates. The first document defines the stress; the second reports the financial vulnerability revealed by applying it.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          23,
+          35
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          12,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          23,
+          35
+        ],
+        "supports": "Energy-mix and GDP assumptions across the CBES scenarios."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          12,
+          12
+        ],
+        "supports": "Estimated profitability drag and dispersion in loss estimates."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_027_measurement_vs_maturity",
+    "query_type": "cross_document",
+    "question": "How do the Bank's general warnings about climate-risk measurement help explain the capability gaps found in the CBES results?",
+    "expected_answer": "The measurement article says climate risks are inherently difficult to quantify and that extending macro-climate scenarios to asset-level estimates remains constrained by data and modelling limitations. The CBES results found that banks and insurers had made progress but still needed better data on counterparties and customers and a stronger understanding of their transition plans. The general methodological limitations therefore appear operationally in CBES as incomplete data, uncertain exposure estimates and uneven firm capability.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          4,
+          4
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          4,
+          4
+        ],
+        "supports": "Data and modelling limits in scenario-based, asset-level climate-risk measurement."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Remaining counterparty-data and risk-management gaps plus dispersion of loss estimates."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_028_disclosure_measurement",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's 2024 climate disclosure put its own measurement guidance into practice, and what limitation still applies?",
+    "expected_answer": "The disclosure applies climate-risk reporting to the Bank's own physical operations and monetary-policy portfolios, covering governance, strategy, risk management, metrics and associated emissions. The measurement article cautions that scenario-based asset-level climate estimates remain constrained by data and modelling uncertainty. The disclosure therefore demonstrates practical measurement and transparency, but its reported exposures and metrics should still be interpreted in light of the methodological limitations the Bank identifies.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          2,
+          6
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          4,
+          4
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          2,
+          6
+        ],
+        "supports": "Scope of the Bank's own operational and financial climate disclosure."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          4,
+          4
+        ],
+        "supports": "Continuing data and modelling limitations."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_029_gdp_macro_channels",
+    "query_type": "cross_document",
+    "question": "How do the quantified GDP effects in the CBES scenarios relate to the macroeconomic channels identified by the Bank of England?",
+    "expected_answer": "CBES quantifies end-of-scenario UK GDP below its counterfactual by about 1.4% in Early Action, 4.6% in Late Action and 7.8% in No Additional Action. The macroeconomic article explains why those effects matter: physical damage and transition adjustments can affect supply, demand, output and inflation, creating monetary-policy trade-offs and potentially changing transmission. CBES supplies scenario magnitudes, while the macro article supplies the economic mechanisms and policy relevance behind them.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          34,
+          35
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          3,
+          6
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          34,
+          35
+        ],
+        "supports": "Quantified UK GDP effects under the three CBES scenarios."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          3,
+          6
+        ],
+        "supports": "Physical and transition channels into output, inflation and monetary policy."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_030_boe_iea_fossil",
+    "query_type": "cross_document",
+    "question": "How do the Bank of England's UK fossil-fuel assumptions compare with the IEA's global fossil-demand outlook under CPS and STEPS?",
+    "expected_answer": "The Bank's Early and Late Action scenarios assume fossil fuels are almost entirely replaced in the UK primary energy mix by 2050, with renewables supplying around 90% of UK energy needs; No Additional Action leaves fossil fuels at roughly 60% of the UK mix. The IEA's global CPS keeps oil and gas demand growing to mid-century, while STEPS brings coal and oil peaks by around 2030 but gas continues growing into the 2030s before plateauing. Both show strong dependence on policy action, but the Bank models UK energy shares for financial stress testing and the IEA models global fuel-demand trajectories.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          23,
+          24
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          27,
+          33
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          23,
+          24
+        ],
+        "supports": "UK renewable and fossil-energy shares under CBES scenarios."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          27,
+          33
+        ],
+        "supports": "Global coal, oil and gas trajectories under CPS and STEPS."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_031_seventh_budget_iea_renewables_capacity",
+    "query_type": "cross_document",
+    "question": "How do the CCC's Seventh Carbon Budget electricity system requirements compare with the IEA's global renewable capacity outlook in the STEPS?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires clean power for the UK by 2030 and an average annual investment of 26 billion pounds across the economy through to 2050. The IEA's STEPS projects global installed renewables capacity growing from around 4,900 GW in 2024 to around 13,700 GW in 2035, an increase of 2.8 times, on the back of record additions of over 680 GW in 2024 alone. The NZE Scenario requires 19,600 GW by 2035, roughly 40% more than STEPS. The CCC sets UK sectoral obligations tied to a specific legal target, while the IEA describes global scenario trajectories without binding national mandates.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          85,
+          86
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          40,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          85,
+          86
+        ],
+        "supports": "Average 26bn/year investment through 2050; role of private and public sector in financing."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          40,
+          41
+        ],
+        "supports": "680 GW global additions in 2024; STEPS 4,900 to 13,700 GW; NZE needs 19,600 GW by 2035."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_032_seventh_budget_iea_warming_nze_consistency",
+    "query_type": "cross_document",
+    "question": "How consistent is the CCC's Seventh Carbon Budget Net Zero 2050 pathway with the IEA's NZE Scenario temperature outcomes?",
+    "expected_answer": "The CCC's Seventh Carbon Budget targets UK net zero greenhouse gas emissions by 2050, which is aligned with the global objective of limiting long-run warming. The IEA's NZE Scenario projects global warming peaking at around 1.65 degrees Celsius around 2050 before declining as CO2 removal takes effect, but explicitly states that limiting warming to 1.5 degrees Celsius has now slipped out of reach. In the IEA's STEPS, warming exceeds 2 degrees Celsius by around 2060 and reaches around 2.5 degrees Celsius by 2100. Both documents agree that current policy trajectories are insufficient to avoid dangerous warming, and both identify faster near-term action as necessary.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          80,
+          82
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          38,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          80,
+          82
+        ],
+        "supports": "UK Net Zero 2050 target and contribution to global temperature stabilisation."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          38,
+          41
+        ],
+        "supports": "NZE peaks at ~1.65C; STEPS reaches ~2.5C by 2100; 1.5C slipped out of reach within a decade."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_033_seventh_budget_boe_cbes_ev_assumptions",
+    "query_type": "cross_document",
+    "question": "How do the EV transition assumptions in the CCC's Seventh Carbon Budget differ from those used in the Bank of England's CBES Early Action and Late Action scenarios?",
+    "expected_answer": "The CCC's Seventh Carbon Budget projects electric cars reaching price parity with ICE vehicles between 2026 and 2028, after which EVs deliver capital and operating cost savings. In the Bank of England's CBES Early Action scenario, the government acts promptly to encourage a smooth transition, with used ICE prices declining steadily and car finance losses manageable. In the Late Action scenario, the transition is rapid and disorderly from 2031, creating sharper residual value losses on car finance. The CCC describes a pathway aligned with an ordered Early Action-type trajectory; the CBES explores how financial losses differ if that order breaks down.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          155,
+          157
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          47,
+          48
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          155,
+          157
+        ],
+        "supports": "EV price parity 2026-2028; capital and operating cost savings post-parity."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          47,
+          48
+        ],
+        "supports": "Early Action: smooth government-encouraged EV transition; Late Action: rapid forced shift and residual value losses."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_034_seventh_budget_boe_macro_investment_r_star",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget investment requirement relate to the Bank of England's analysis of how the transition to net zero could affect the equilibrium real interest rate?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires average annual net-zero investment of 26 billion pounds, peaking at around 2% of annual GDP. The Bank of England's analysis identifies that such a large-scale shift towards green capital could affect the equilibrium real interest rate through multiple channels: if green investments carry a higher risk premium this would push R* down; if green technologies are more productive this would push R* up; and the scale of investment itself affects the demand for capital. The Bank notes considerable uncertainty about the net direction of these effects.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          85,
+          86
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          24,
+          25
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          85,
+          86
+        ],
+        "supports": "26bn/year average investment; peaking at ~2% of annual GDP."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          24,
+          25
+        ],
+        "supports": "Green capital transition could affect R* via risk premium, productivity, and investment demand channels; direction uncertain."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_035_seventh_budget_ofgem_heat_pumps_load_control",
+    "query_type": "cross_document",
+    "question": "How do the CCC's Seventh Carbon Budget requirements for heat pump deployment relate to Ofgem's proposed load-control licensing regime?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires 83% of commercial and public sector buildings to have low-carbon heating by 2040, and identifies heat pump roll-out reaching the natural replacement rate by 2036 as a key milestone, alongside electricity and gas price rebalancing to make the economics viable. Ofgem's Smart Secure Electricity Systems licensing regime explicitly lists heat pumps as in-scope smart appliances for load control, meaning they would need to be operated by licensed Load Controllers or Flexibility Service Providers. The CCC pathway creates the volume of heat pump installations that Ofgem's licensing regime governs; the two frameworks are complementary.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          107,
+          108
+        ]
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          107,
+          108
+        ],
+        "supports": "83%/95% low-carbon heat targets for commercial/public buildings; heat pumps at natural replacement rate by 2036; need for gas/electricity price rebalancing."
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Heat pumps listed as in-scope smart appliances under the SSES load-control licensing regime."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_036_seventh_budget_eso_offshore_network",
+    "query_type": "cross_document",
+    "question": "How do the CCC's Seventh Carbon Budget electricity supply pathway and ESO's Beyond 2030 network infrastructure recommendations relate to each other?",
+    "expected_answer": "The CCC's Seventh Carbon Budget calls for a clean power system by 2030, requiring a large expansion of offshore wind and other renewables. ESO's Beyond 2030 report identifies that investment in renewable generation has outpaced investment in transmission capacity over the past decade, creating network bottlenecks. ESO recommends the Holistic Network Design connecting 23 GW of offshore wind and the subsequent ScotWind build-out, and identifies new circuits such as CLN2 and CMN3 as necessary to bring Scottish generation south. The CCC sets the demand for clean electricity; ESO identifies the physical grid upgrade required to deliver it.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          85,
+          88
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          85,
+          88
+        ],
+        "supports": "Clean power by 2030; large electricity investment requirement in Balanced Pathway."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Generation investment outpacing transmission; HND for 23 GW offshore wind; ScotWind; new circuits CMN3, CLN2."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_037_seventh_budget_boe_disclosure_epc_buildings",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget buildings decarbonisation pathway relate to the Bank of England's use of EPC ratings in managing climate risk to its mortgage collateral?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires heat pump installation rates to reach the natural replacement rate across all homes by 2036, and identifies substantial capital costs in the early years of the transition. The Bank of England's 2024 climate disclosure shows it has already begun excluding buy-to-let mortgages with EPC ratings below E from the Sterling Monetary Framework and integrating flood risk discounts into haircut models. The CCC pathway drives the need for home retrofit that the Bank uses EPC ratings to price; better-insulated homes with higher EPC ratings become a lower-risk asset class as the transition advances.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          170,
+          171
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          22,
+          23
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          170,
+          171
+        ],
+        "supports": "Heat pumps at natural replacement rate by 2036; capital cost structure; energy efficiency co-benefits."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          22,
+          23
+        ],
+        "supports": "BtL mortgages with EPC < E excluded from SMF; flood risk discounts in haircut models."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_038_seventh_budget_ccc2024_heat_policy_gap",
+    "query_type": "cross_document",
+    "question": "What was the state of UK buildings decarbonisation policy according to the CCC's 2024 progress report, and how does this compare with the requirements set out in the Seventh Carbon Budget?",
+    "expected_answer": "The CCC's 2024 progress report found that the buildings sector assessment had worsened, following the government's decision not to implement a heat market mechanism and its decision not to regulate improved energy efficiency in rented homes. Only around one-third of required emissions reductions across all sectors were covered by credible plans. The Seventh Carbon Budget requires heat pump installation to reach the natural replacement rate by 2036 and commercial/public buildings to achieve 83% low-carbon heat by 2040. The 2024 report documented a growing gap between the policy baseline and what the Seventh Carbon Budget requires.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          66,
+          67
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          107,
+          108
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          66,
+          67
+        ],
+        "supports": "Worsened buildings assessment; heat market mechanism abandoned; rented homes efficiency regulation not pursued."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          107,
+          108
+        ],
+        "supports": "83% commercial/public low-carbon heat by 2040; heat pumps at natural replacement rate by 2036."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_039_seventh_budget_cbes_results_industry_credit",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget pathway for industry compare with the Bank of England's CBES finding on financial risk concentrations in carbon-intensive industrial sectors?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires industry emissions to fall 78% to 11.2 MtCO2e by 2040, noting that much of the historic reduction has come from steep declines in UK steel and cement production. The Bank of England's CBES found that insurer transition losses were particularly concentrated in carbon-intensive industries including the mining and manufacture of petroleum and electricity supply. Banks participating in the CBES also planned large reductions in exposure to petroleum and gas extraction. The CCC documents the physical emissions reductions required; the CBES quantifies the financial risks if those transitions occur rapidly or disruptively.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          175,
+          176
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          55,
+          56
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          175,
+          176
+        ],
+        "supports": "Industry -78% to 11.2 MtCO2e by 2040; steel 17.8 to 5.6 Mt, cement 14.7 to 7.7 Mt since 1990."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          55,
+          56
+        ],
+        "supports": "Insurer losses concentrated in mining, petroleum manufacture, electricity supply; banks plan to reduce exposure to these sectors."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_040_seventh_budget_zev_modal_shift_vs_composition",
+    "query_type": "cross_document",
+    "question": "How does the ZEV Mandate's focus on vehicle-sales composition compare with the CCC's Seventh Carbon Budget approach to surface-transport decarbonisation through both EV uptake and modal shift?",
+    "expected_answer": "The ZEV Mandate requires 22% of new car sales to be zero-emission in 2024, rising to 80% by 2030. The CCC's Seventh Carbon Budget notes that lower running costs for electric cars are expected to increase car-kilometres driven, which more than offsets emissions reductions from modal shift in the near term, creating tension between EV uptake and overall demand reduction. The mandate addresses the fleet composition but not the volume of car travel, whereas the Seventh Carbon Budget requires both a ZEV-dominated fleet and modal shift to limit the rebound effect.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          157,
+          158
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "22% car ZEV 2024 to 80% by 2030; phased van trajectory."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          157,
+          158
+        ],
+        "supports": "Lower EV running costs increase car-kilometres, more than offsetting modal shift; both composition and demand management needed."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_041_progress2025_boe_disclosure_flood_mortgage",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK land-use and flooding risks relate to the Bank of England's management of flood risk to its mortgage collateral?",
+    "expected_answer": "The CCC's 2025 progress report notes that peatland restoration rates increased to 12,700 ha in 2023 but remain behind the government's pathway, and that the UK met its first three carbon budgets. The Bank of England's 2024 climate disclosure describes applying flood-risk haircut discounts to UK residential mortgage collateral and notes that until 2039 most homeowners are effectively insulated by the FloodRe reinsurance scheme, but properties in flood-prone areas already face additional price discounts. After 2039 when FloodRe rolls off, mortgage borrowers in high-risk areas may face difficulty accessing finance from banks.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          58,
+          59
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          22,
+          24
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          58,
+          59
+        ],
+        "supports": "Peatland restoration 12,700 ha in 2023; behind pathway; land use progress modest."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          22,
+          24
+        ],
+        "supports": "Flood risk haircut discounts; FloodRe runs until 2039; post-2039 exposure for flood-prone properties."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_042_progress2025_boe_macro_agriculture_food_prices",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK agriculture and land use emissions relate to the Bank of England's analysis of how physical climate change can affect food prices and inflation?",
+    "expected_answer": "The CCC's 2025 progress report notes that the Sustainable Farming Incentive scheme was paused in March 2025 due to being fully allocated, marking a positive change, and that agriculture and land use saw a small improvement in its policy assessment. The Bank of England's paper on macroeconomic implications identifies that physical climate impacts, particularly extreme weather events, temporarily raise inflation through food price channels, though such effects have tended to dissipate in the medium term in historical data. Both documents agree that agriculture is a sector requiring management: the CCC from an emissions perspective, the Bank from a price-stability perspective.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          91,
+          92
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          7,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          91,
+          92
+        ],
+        "supports": "SFI paused but positive; small improvement in agriculture/land use assessment."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Physical climate impacts temporarily raise food price inflation; effects may grow with increasing frequency of extreme weather."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_043_progress2025_cbes_results_clean_power_financial_risk",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK clean power delivery compare with the financial risk picture for electricity supply firms from the Bank of England's CBES?",
+    "expected_answer": "The CCC's 2025 progress report records a record 9.6 GW of new renewables capacity from the AR6 Contracts for Difference auction, with offshore wind and onshore wind pipelines broadly on track, though solar deployment needs to quadruple. The Bank of England's CBES found that insurer losses in transition scenarios were particularly concentrated in carbon-intensive electricity supply firms, reflecting the stranded-asset risk of unabated fossil generation. Banks planned to increase lending substantially to renewable energy firms and reduce it to fossil-fuel-dependent electricity suppliers. The CCC measures the real-economy progress; the CBES reveals how the financial sector is repositioning in anticipation of it.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          104,
+          106
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          55,
+          56
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          104,
+          106
+        ],
+        "supports": "AR6 record 9.6 GW; offshore and onshore wind on track; solar off track needing to quadruple."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          55,
+          56
+        ],
+        "supports": "Insurer losses concentrated in carbon-intensive electricity supply; banks plan to increase renewable lending and reduce fossil-fuel exposure."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_044_progress2025_eso_ar6_scotland_offshore",
+    "query_type": "cross_document",
+    "question": "How do the CCC's 2025 assessment of the AR6 renewables auction results and ESO's Beyond 2030 analysis of Scottish offshore wind infrastructure requirements compare?",
+    "expected_answer": "The CCC's 2025 progress report highlights that AR6 secured a record 9.6 GW of new renewables capacity and that the offshore wind pipeline remains broadly on track, though the cancellation of Hornsea 4 by Orsted will need to be compensated over future auctions. ESO's Beyond 2030 report notes that the ScotWind leasing round enabled nearly 28 GW of offshore wind capacity in Scotland and that new transmission circuits such as CLN2 and CMN3 are needed to bring this power southward through England. The CCC assesses procurement success; ESO addresses the grid infrastructure needed to dispatch the contracted generation.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          104,
+          106
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          51,
+          52
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          104,
+          106
+        ],
+        "supports": "AR6 record 9.6 GW; offshore wind pipeline on track; Hornsea 4 cancellation manageable."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          51,
+          52
+        ],
+        "supports": "ScotWind ~28 GW offshore wind capacity in Scotland; new circuits CLN2, CMN3 needed."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_045_progress2025_zev_ev_uptake_mandate",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK electric vehicle uptake relate to the phased sales requirements under the ZEV Mandate?",
+    "expected_answer": "The CCC's 2025 progress report notes that the number of electric cars on UK roads is doubling roughly every two years, and that the reinstatement of the 2030 phase-out date for new petrol and diesel cars improved the surface transport policy assessment. Manufacturers are increasingly offering new lower-cost electric vehicles. The ZEV Mandate requires 22% of new car sales to be zero-emission in 2024, rising to 80% by 2030 and 100% by 2035. The observed doubling rate reported by the CCC is consistent with the mandate's phased escalation, though delivery of the 80% target by 2030 remains demanding.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "EV numbers doubling every two years; 2030 phase-out reinstated; lower-cost models arriving."
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "22% ZEV share for new cars in 2024, rising to 80% by 2030 and 100% by 2035."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_046_progress2025_cbes_key_policy_credibility",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK policy credibility compare with the policy assumptions underlying the Bank of England's CBES Early Action scenario?",
+    "expected_answer": "The CCC's 2025 progress report finds that 61% of required emissions reductions are covered by credible plans or plans with some risks, while 39% face significant risks or have insufficient or unquantified plans, with heat pumps and industrial electrification being the biggest remaining risks. The Bank of England's CBES Early Action scenario assumes ambitious policies are enacted from 2021 with a gradual intensification of carbon taxes and other policies over time, producing a smooth transition. The CCC's assessment places the UK policy environment closer to an ordered transition but with material gaps, suggesting the Early Action scenario's assumptions are not yet fully met in practice.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          23,
+          24
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "61%/39% plan coverage split; heat pumps and industrial electrification as biggest delivery risks."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          23,
+          24
+        ],
+        "supports": "Early Action: ambitious policies from 2021, gradual carbon tax intensification, smooth transition."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_047_progress2025_seventh_budget_aviation",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK aviation emissions compare with the aviation requirements set out in the Seventh Carbon Budget?",
+    "expected_answer": "The CCC's 2025 progress report records that aviation emissions increased 9% in 2024 to 38.4 MtCO2e, returning to pre-pandemic levels, and notes this is above the level the Seventh Carbon Budget Balanced Pathway expects for 2025. The Seventh Carbon Budget requires aviation emissions to remain roughly flat and begin declining slowly over the rest of the decade, consistent with the Jet Zero Strategy. The 2025 report flags concern that if passenger growth continues at its recent rate, it will be difficult to hold aviation emissions flat, meaning this sector is at risk of diverging from the Seventh Carbon Budget pathway.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          35,
+          36
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          41,
+          42
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          35,
+          36
+        ],
+        "supports": "Aviation +9% in 2024 to 38.4 MtCO2e; now above Seventh Carbon Budget baseline start."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          41,
+          42
+        ],
+        "supports": "Aviation baseline assumes flat emissions and slow decline through the decade; consistent with Jet Zero Strategy."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_048_iea_boe_cbes_key_late_action_consistency",
+    "query_type": "cross_document",
+    "question": "How consistent is the Bank of England's CBES Late Action scenario with the IEA's STEPS and NZE scenario outcomes for global emissions and temperature?",
+    "expected_answer": "The Bank of England's CBES Late Action scenario describes a transition that begins after delayed policy action, with a sharp, unanticipated increase in shadow carbon prices from 2031 and a GDP fall comparable to the global financial crisis. The scenario nonetheless assumes net zero is reached globally by 2050. The IEA's STEPS, which reflects current stated policies, projects warming exceeding 2 degrees Celsius by around 2060 and reaching 2.5 degrees Celsius by 2100. The Bank's Late Action sits conceptually between the IEA's STEPS and NZE, representing a disorderly path to net zero, but not a direct equivalent of any IEA scenario.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          36,
+          38
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          38,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          36,
+          38
+        ],
+        "supports": "Late Action: sharp carbon price rise from 2031; GDP fall similar to GFC; net zero achieved globally by 2050."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          38,
+          41
+        ],
+        "supports": "STEPS: warming >2C by 2060, ~2.5C by 2100; NZE: peaks ~1.65C then declines."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_049_iea_boe_disclosure_itr_warming",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's Implied Temperature Rise metric for its sovereign portfolio compare with the warming outcomes projected in the IEA's different scenarios?",
+    "expected_answer": "The Bank of England's 2024 climate disclosure reports an Implied Temperature Rise of 1.69-1.70 degrees Celsius for its sovereign asset holdings under a current policies scenario, similar to a G7 reference portfolio. The IEA's WEO 2025 projects that under STEPS, global warming exceeds 2 degrees Celsius by around 2060 and reaches roughly 2.5 degrees Celsius by 2100; the NZE Scenario limits warming to a peak of around 1.65 degrees Celsius. The Bank's ITR indicates the portfolio is exposed to less transition risk than the STEPS warming trajectory implies, but the metric measures alignment rather than the physical warming outcome the portfolio will actually experience.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          29,
+          31
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          38,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          29,
+          31
+        ],
+        "supports": "ITR 1.69-1.70C under current policies; similar to G7 reference portfolio."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          38,
+          41
+        ],
+        "supports": "STEPS >2C by 2060, ~2.5C by 2100; NZE peaks ~1.65C; 1.5C no longer achievable within a decade."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_050_iea_boe_measuring_scenario_extension",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's framework for extending macro scenarios to asset-level analysis address challenges in using the IEA's WEO scenario outputs for financial risk assessment?",
+    "expected_answer": "The Bank of England's article on measuring climate-related financial risks identifies that macro climate scenarios from sources such as the IEA provide a starting point but generally do not contain the level of detail needed for asset-level financial risk analysis. End users must undertake substantial scenario expansion to incorporate sector-specific and firm-specific exposures, and there is significant intra-sector variability in climate risk outcomes. The IEA's WEO scenarios provide global energy-system trajectories and temperature outcomes but do not prescribe corporate-level cash-flow impacts or asset values. The Bank article explicitly treats bridging this gap as the primary challenge the framework addresses.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          8,
+          9
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          38,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          8,
+          9
+        ],
+        "supports": "Macro scenarios insufficient for asset-level analysis; scenario extension needed; primary challenge of the framework."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          38,
+          41
+        ],
+        "supports": "WEO provides macro-level scenario trajectories at global energy-system level without firm-specific financial outputs."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_051_iea_boe_macro_fossil_transition_r_star",
+    "query_type": "cross_document",
+    "question": "How do the IEA's WEO 2025 investment scenario projections relate to the Bank of England's analysis of how the net-zero transition could affect global equilibrium real interest rates?",
+    "expected_answer": "The IEA's WEO 2025 projects STEPS investment of around USD 3.6 trillion in 2035, with spending shifting from fossil fuel supply towards low-emissions power, grids, and end-use electrification. Solar PV investment declines in dollar terms despite continued capacity additions as unit costs fall. The Bank of England's paper on macroeconomic implications identifies that the shift towards green capital could affect the equilibrium real interest rate through productivity effects, risk premia on green investments, and changes in the demand for capital. The IEA quantifies the investment scale; the Bank analyses how that scale and composition of investment propagates into macroeconomic equilibria.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          270,
+          272
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          24,
+          25
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          270,
+          272
+        ],
+        "supports": "STEPS investment ~$3.6T in 2035; shift from fossil fuels to low-emissions power; solar investment declines in dollar terms; grids ~$730bn."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          24,
+          25
+        ],
+        "supports": "Green capital transition affects R* via risk premia, productivity, and capital demand; direction uncertain."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_052_iea_ofgem_heat_pump_global_uk",
+    "query_type": "cross_document",
+    "question": "How does the IEA's WEO 2025 global outlook for heat pump deployment in STEPS compare with Ofgem's load-control licensing framework for smart heat pumps in the UK?",
+    "expected_answer": "The IEA's WEO 2025 notes that in the STEPS, increased deployment of heat pumps alongside EVs and other electrical technologies pushes electricity's share of global final energy consumption from around one-fifth to around one-quarter by 2035. Ofgem's Smart Secure Electricity Systems licensing regime explicitly lists heat pumps as in-scope smart appliances, requiring Load Controllers and Flexibility Service Providers operating them to hold a licence with security and compliance obligations. The IEA documents the global demand trend that underpins UK deployment; Ofgem governs the compliance framework that ensures UK deployments are operated safely and in a grid-compatible way.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          41,
+          42
+        ]
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          41,
+          42
+        ],
+        "supports": "Heat pumps and EVs push electricity share from 1/5 to 1/4 of global energy by 2035 in STEPS."
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Heat pumps listed as in-scope smart appliances; licensing for Load Controllers and FSPs required."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_053_iea_ccc2024_uk_vs_global_clean_power",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of UK clean power delivery risks compare with the IEA's global renewable capacity outlook in the STEPS?",
+    "expected_answer": "The CCC's 2024 progress report identified delivery risks for UK clean power around grid connections, planning, consenting, and CfD auction design, noting that in 2023 the pace of reduction was roughly in line with the annual NDC requirement but the seven-year average was insufficient. The IEA's WEO 2025 records that global renewable additions reached a record 680 GW in 2024, and the STEPS projects the global installed renewables base growing from 4,900 GW to 13,700 GW by 2035. Global momentum in renewables is strong; the CCC's concern is that UK-specific institutional barriers could cause the UK to miss its clean power target even as the global transition accelerates.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          71,
+          72
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          40,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          71,
+          72
+        ],
+        "supports": "Grid connections, planning, consenting, and CfD risks for UK clean power; delivery strategy absent."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          40,
+          41
+        ],
+        "supports": "Record 680 GW global renewable additions in 2024; STEPS: 4,900 to 13,700 GW globally by 2035."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_054_iea_zev_non_road_scope",
+    "query_type": "cross_document",
+    "question": "How does the IEA's WEO 2025 outlook for shipping and aviation fuels compare with the scope of the UK ZEV Mandate?",
+    "expected_answer": "The IEA's WEO 2025 notes that oil accounted for more than 99% of total aviation fuel consumption in 2024 and that sustainable aviation fuels have expanded but remain minimal. In shipping, more LNG-powered vessels are entering the fleet but oil still dominates. The UK ZEV Mandate covers only new cars and vans, with phased annual targets from 22% in 2024 to 80% by 2030 for cars; it explicitly does not apply to aviation or shipping. The IEA describes the large decarbonisation gap remaining in these hard-to-abate transport modes, precisely those the UK mandate leaves outside its scope.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          130,
+          132
+        ]
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          130,
+          132
+        ],
+        "supports": "Oil >99% of aviation fuel in 2024; shipping transitioning to some LNG but still oil-dominated."
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "Mandate covers cars and vans only; annual ZEV percentage requirements for new vehicles."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_055_iea_cbes_results_coal_insurer",
+    "query_type": "cross_document",
+    "question": "How does the IEA's WEO 2025 STEPS outlook for coal demand compare with the Bank of England's CBES finding on concentrated insurer losses in carbon-intensive sectors?",
+    "expected_answer": "The IEA's WEO 2025 STEPS projects coal production declining in all major producing countries except India to 2035, with China's production falling by about 25%. Global coal trade of around 1,200 Mtce in 2024 is expected to shrink. The Bank of England's CBES found that insurer transition losses were particularly concentrated in carbon-intensive industries including the mining and manufacture of petroleum and electricity supply. Although coal is less prominent in the UK financial sector, the IEA's declining coal trajectory corresponds directly to the stranded-asset risk that the CBES sought to quantify for insurers' corporate investment portfolios.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          220,
+          221
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          55,
+          56
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          220,
+          221
+        ],
+        "supports": "Coal production declines in all major countries except India in STEPS; China -25% to 2035; global coal trade ~1,200 Mtce in 2024."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          55,
+          56
+        ],
+        "supports": "Insurer losses concentrated in mining, petroleum manufacture and electricity supply in transition scenarios."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_056_iea_eso_storage_grid_investment",
+    "query_type": "cross_document",
+    "question": "How does the IEA's WEO 2025 global outlook for grid and storage investment compare with ESO's Beyond 2030 recommendations for UK transmission infrastructure?",
+    "expected_answer": "The IEA's WEO 2025 projects global investment in grids at around USD 730 billion in 2035 under STEPS, with slightly more needed in STEPS than CPS owing to higher renewable penetration. By 2035, electricity sector emissions are almost 20% lower than in 2024 in STEPS. ESO's Beyond 2030 identifies that UK investment in renewable generation has outpaced transmission investment, causing network bottlenecks, and recommends a new network design building on the Holistic Network Design for 23 GW of offshore wind and ScotWind. Both documents identify transmission infrastructure as a constraint on deploying more renewables.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          270,
+          271
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          270,
+          271
+        ],
+        "supports": "Global grid investment ~$730bn in 2035; electricity sector emissions -20% by 2035."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Generation investment outpaced transmission; HND for 23 GW offshore wind; bottlenecks wasting wind energy."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_057_iea_progress2025_solar_gap",
+    "query_type": "cross_document",
+    "question": "How does the IEA's WEO 2025 global outlook for solar PV deployment compare with the CCC's 2025 assessment of UK solar capacity progress?",
+    "expected_answer": "The IEA's WEO 2025 records that China alone added more than 300 GW of new solar PV capacity in 2024, and globally over 680 GW of new renewables were added. In dollar terms, global solar PV investment is projected to decline to 2035 in STEPS as unit costs fall, even as capacity continues to grow. The CCC's 2025 progress report notes that UK solar capacity stands at around 18 GW, with a further 5 GW contracted; to meet the lower end of the Clean Power 2030 target of 45 GW, the UK needs to install 4.5 GW per year, quadruple the recent average. The global solar boom documented by the IEA has not yet delivered the domestic installation rate the CCC requires.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          40,
+          41
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          60,
+          62
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          40,
+          41
+        ],
+        "supports": "680+ GW global renewables in 2024; China added >300 GW solar; global solar investment declining in dollar terms."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          60,
+          62
+        ],
+        "supports": "UK solar at 18 GW; 5 GW contracted; needs 45 GW by 2030; requires 4.5 GW/year."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_058_progress2024_cbes_results_data_quality",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of monitoring data gaps compare with the Bank of England's finding on data limitations in the CBES exercise?",
+    "expected_answer": "The CCC's 2024 progress report identifies data gaps in its monitoring framework for certain industrial and land-use emissions. The Bank of England's CBES results report found that UK banks and insurers lacked standardised information about location of corporate assets needed for physical risk assessment and had no standardised scope 3 emissions data for corporate counterparties. Both documents point to data availability as a key constraint: the CCC tracks real-economy progress while the CBES participants track financial exposures, and both communities face similar challenges in translating high-level climate commitments into measurable, asset-level information.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          63,
+          65
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          63,
+          65
+        ],
+        "supports": "Monitoring framework data gaps for certain sectors."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Banks/insurers lack corporate asset location data for physical risk; no standardised scope 3 data; firms need interim proxies."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_059_progress2024_boe_disclosure_buildings_epc",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of UK buildings decarbonisation policy compare with the Bank of England's use of EPC ratings to manage climate risk on its mortgage book?",
+    "expected_answer": "The CCC's 2024 progress report notes a worsened assessment of buildings decarbonisation policy after the government abandoned the heat market mechanism and did not regulate energy efficiency in rented homes, leaving only around one-third of required reductions covered by credible plans. The Bank of England's 2024 climate disclosure reports that it has begun excluding buy-to-let mortgages located in England and Wales with EPC ratings below E from its SMF collateral. The CCC reveals the policy failure that leaves poor-EPC properties stranded; the Bank is already pricing that risk through collateral eligibility.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          66,
+          67
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          22,
+          23
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          66,
+          67
+        ],
+        "supports": "Worsened buildings assessment; heat market mechanism dropped; rented home energy efficiency regulation not pursued."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          22,
+          23
+        ],
+        "supports": "BtL mortgages with EPC < E excluded from SMF collateral."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_060_progress2024_boe_macro_investment_flows",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of UK low-carbon investment flows compare with the Bank of England's analysis of how green capital formation affects the macroeconomy?",
+    "expected_answer": "The CCC's 2024 progress report notes that UK low-carbon investment placed the UK fourth globally in 2023, second by share of GDP, and that this investment was concentrated in renewables and EVs. The Bank of England's paper on macroeconomic implications identifies that the shift to green capital could affect the equilibrium real interest rate through multiple channels including risk premia, productivity growth and investment demand, and that central banks will need to monitor these effects as net-zero investment scales up. The CCC documents the UK's investment position; the Bank frames why that investment scale matters for monetary policy transmission.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          81,
+          82
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          24,
+          25
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          81,
+          82
+        ],
+        "supports": "UK 4th globally for green investment in 2023; 2nd by GDP share; concentrated in renewables and EVs."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          24,
+          25
+        ],
+        "supports": "Green capital transition could affect R* via risk premia, productivity, and capital demand; requires monitoring by central banks."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_061_progress2024_boe_measuring_data_extension",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 monitoring framework for industry decarbonisation relate to the Bank of England's challenge in extending climate scenario analysis to industrial corporate-bond level?",
+    "expected_answer": "The CCC's 2024 progress report notes data gaps in monitoring industrial decarbonisation including CCUS deployment and fuel switching. The Bank of England's article on measuring climate risks identifies significant intra-sector variability in how climate risks affect corporate bonds, and that extending macro scenarios to the firm level requires incorporating sector-specific exposure, technology, and jurisdiction factors. The CCC's monitoring gaps for industry correspond directly to the missing data that the Bank identifies as limiting the quality of scenario extension for industrial-sector financial risk analysis.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          63,
+          65
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          12,
+          13
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          63,
+          65
+        ],
+        "supports": "Monitoring framework indicators for industry; data gaps for CCUS and fuel switching."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          12,
+          13
+        ],
+        "supports": "Significant intra-sector variability; sector and sub-sector exposures differ; firm-level data needed for asset-level analysis."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_062_progress2024_cbes_key_carbon_price_credibility",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of UK policy credibility compare with the carbon tax trajectory assumptions in the Bank of England's CBES Early and Late Action scenarios?",
+    "expected_answer": "The CCC's 2024 progress report found that credible plans covered only around one-third of required emissions reductions, with significant gaps especially in buildings, agriculture and transport demand, pointing to weak policy credibility. The Bank of England's CBES Early Action scenario assumes carbon taxes and other policies are enacted from 2021 and intensify gradually. The Late Action scenario features a delayed and then abrupt policy tightening from 2031. The CCC's 2024 assessment places the UK policy baseline closer to the conditions that set up Late Action risks than Early Action smoothness.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          66,
+          67
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          23,
+          24
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          66,
+          67
+        ],
+        "supports": "Only ~1/3 of reductions covered by credible plans; gaps in buildings, agriculture, transport demand."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          23,
+          24
+        ],
+        "supports": "Early Action: gradual carbon tax from 2021; Late Action: delayed then sharp unanticipated increase from 2031."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_063_progress2024_ofgem_smart_charging_delivery",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of UK electricity delivery risks relate to Ofgem's proposed governance framework for smart electricity systems?",
+    "expected_answer": "The CCC's 2024 progress report identified delivery risks around grid connections, planning, consenting and CfD auctions, noting the continued lack of an overall delivery strategy. Ofgem's Smart Secure Electricity Systems consultation proposes a licensing regime for Load Controllers and Flexibility Service Providers, with an industry-led Smart Grid Governance body facilitated by Elexon providing ongoing security standard-setting. Ofgem's framework addresses governance of the distributed flexibility that must integrate with the large-scale network expansion the CCC says lacks a delivery strategy, suggesting the two governance mechanisms need to be coordinated.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          71,
+          72
+        ]
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          50,
+          52
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          71,
+          72
+        ],
+        "supports": "Grid connections, planning, consenting and CfD risks; lack of overall delivery strategy."
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          50,
+          52
+        ],
+        "supports": "SGG body facilitated by Elexon; licensing for LCs and FSPs; compliance and audit powers for Ofgem."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_064_progress2024_eso_grid_bottlenecks",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 identification of grid connection delays as a delivery risk compare with ESO's Beyond 2030 analysis of transmission bottlenecks?",
+    "expected_answer": "The CCC's 2024 progress report identified grid connections, planning and consenting as key delivery risks for UK clean power, noting the lack of an overall delivery strategy. ESO's Beyond 2030 report confirms the same structural issue: investment in renewable generation has exceeded investment in transmission capacity over the past decade, causing bottlenecks that force curtailment of wind energy. ESO recommends a country-wide new network design including the HND and subsequent ScotWind connections, and estimates that large flexible demand positioned behind bottlenecks could save around 5 billion pounds. Both documents identify the same constraint; ESO provides the technical investment programme to address it.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          71,
+          72
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          71,
+          72
+        ],
+        "supports": "Grid connections, planning, consenting as key risks; absence of overall delivery strategy."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          8
+        ],
+        "supports": "Generation investment outpaced transmission; bottlenecks; HND + ScotWind connections; ~5bn saving from flexible demand behind bottlenecks."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_065_progress2024_zev_transport_policy_gap",
+    "query_type": "cross_document",
+    "question": "What did the CCC's 2024 progress report say about the UK transport policy gap, and how did the ZEV Mandate address it?",
+    "expected_answer": "The CCC's 2024 progress report noted that the surface transport sector had significant delivery risks, partly because the 2030 phase-out date for petrol and diesel cars had at that time been moved to 2035, weakening the policy signal. The ZEV Mandate published in 2023 sets annual phased ZEV sales requirements for new cars from 22% in 2024 to 80% by 2030, and provides flexibility provisions for manufacturers who miss annual targets. The CCC's concern about a weakened phase-out date was addressed when the 2030 deadline was reinstated, but the 2024 report reflects the risk environment before that reinstatement.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          16,
+          17
+        ]
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          16,
+          17
+        ],
+        "supports": "Surface transport risks; need for faster progress outside electricity supply."
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "Annual ZEV car targets 22% (2024) to 80% (2030); flexibility provisions for manufacturers."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_066_eso_boe_macro_stranded_assets",
+    "query_type": "cross_document",
+    "question": "How does ESO's Beyond 2030 analysis of network transition investment relate to the Bank of England's analysis of stranded assets and macroeconomic implications of the transition?",
+    "expected_answer": "ESO's Beyond 2030 report recommends large upfront network investment to connect offshore wind and avoid bottlenecks that waste renewable output, describing it as a once-in-a-generation upgrade comparable to the 1950s supergrid. The Bank of England's paper on macroeconomic implications analyses how the transition involves reallocation of capital away from carbon-intensive assets, which can create stranded assets in fossil sectors while requiring new investment in green infrastructure. The Bank identifies that expectations effects and regulatory policy credibility affect how smoothly this capital reallocation proceeds, a dynamic that is directly relevant to investors deciding whether to fund the network build ESO recommends.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          9,
+          11
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Once-in-a-generation network upgrade; HND connects 23 GW; ScotWind enables GB to have largest European offshore wind fleet."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          9,
+          11
+        ],
+        "supports": "Transition reallocates capital; stranded assets in fossil sectors; regulatory credibility and expectations affect smooth capital transition."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_067_eso_boe_disclosure_network_sovereign",
+    "query_type": "cross_document",
+    "question": "How does ESO's Beyond 2030 recommendation for network infrastructure investment relate to the Bank of England's approach to managing transition risk in its sovereign portfolio?",
+    "expected_answer": "ESO's Beyond 2030 report identifies that large upfront investment in new electricity transmission infrastructure is required to deliver the UK's clean power target, including new circuits connecting Scotland to England and offshore wind. The Bank of England's 2024 climate disclosure describes using NGFS scenario analysis on its sovereign portfolio and computing Implied Temperature Rise metrics showing sovereign bond holdings at 1.69-1.70 degrees Celsius under current policies. As the UK government issues green gilts and incurs capital expenditure for network upgrades, the composition and risk profile of UK sovereign assets changes, which is relevant to the Bank's sovereign portfolio analysis.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          29,
+          32
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Large upfront network investment; new circuits; once-in-a-generation upgrade; connection of 23 GW HND and ScotWind."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          29,
+          32
+        ],
+        "supports": "NGFS scenario analysis on sovereign portfolio; ITR 1.69-1.70C under current policies."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_068_eso_boe_measuring_sector_risks",
+    "query_type": "cross_document",
+    "question": "How does ESO's Beyond 2030 analysis of electricity sector investment requirements relate to the Bank of England's framework for measuring sector-specific climate financial risks?",
+    "expected_answer": "ESO's Beyond 2030 describes the electricity sector as facing a major structural investment requirement, with generation investment outpacing transmission and creating bottlenecks. The Bank of England's article on measuring climate financial risks identifies significant intra-sector variability in climate risks within the electricity sector, noting that firms face different exposures depending on their specific generation mix, geography and technology. ESO describes the system-level investment challenge; the Bank's framework emphasises that financial institutions cannot use a single sector-level risk measure because individual firms within the same sector can face very different transition risk trajectories.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          12,
+          13
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Electricity sector investment requirement; generation outpaced transmission; ScotWind and new circuit needs."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          12,
+          13
+        ],
+        "supports": "Significant intra-sector variability in climate risk; sub-sector and firm-specific exposures differ materially."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_069_eso_zev_ev_flexible_load",
+    "query_type": "cross_document",
+    "question": "How does ESO's Beyond 2030 analysis of flexible demand relate to the EV adoption trajectory required under the ZEV Mandate?",
+    "expected_answer": "ESO's Beyond 2030 report identifies that placing up to 5 GW of flexible demand, including EVs, behind network bottlenecks in northern Britain could save around 5 billion pounds by deferring or avoiding reinforcement. The ZEV Mandate requires 80% of new cars sold in the UK to be zero-emission by 2030, creating a large and growing fleet of EVs that need to be charged. Smart charging of that fleet is a central element of the flexibility that ESO aims to locate behind bottlenecks. The ZEV Mandate creates the EV asset base; ESO's recommendations describe how the grid can benefit from it.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          8,
+          9
+        ]
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          8,
+          9
+        ],
+        "supports": "Up to 5 GW flexible demand behind bottlenecks; 5bn potential saving; EVs as key flexible demand asset."
+      },
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "80% new car ZEV by 2030; growing EV fleet requiring grid-compatible smart charging."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_070_eso_cbes_results_bank_lending_renewables",
+    "query_type": "cross_document",
+    "question": "How does ESO's Beyond 2030 analysis of electricity sector investment needs relate to the Bank of England's CBES finding on banks' plans to increase lending to renewable energy firms?",
+    "expected_answer": "ESO's Beyond 2030 identifies a major investment gap in electricity transmission infrastructure and confirms that investment in renewable generation has already been strong while transmission lagged. The Bank of England's CBES results report found that in transition scenarios, banks planned to increase lending substantially to renewable energy firms and those developing technology for electric vehicle batteries, while planning to reduce lending to fossil-fuel-dependent sectors. This planned capital reallocation by the banking sector is essential to fund the renewable generation and network investment that ESO says is required.",
+    "expected_sources": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          68,
+          70
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Generation investment outpaced transmission; large renewable investment already underway; new transmission needed."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          68,
+          70
+        ],
+        "supports": "Banks plan to increase lending substantially to renewable energy firms and EV battery manufacturers; reduce lending to fossil-fuel sectors."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_071_ofgem_seventh_budget_load_control_heat",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's load-control licensing framework complement the heat pump rollout requirements set out in the CCC's Seventh Carbon Budget?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires heat pump installation rates to reach the natural replacement rate across all UK homes by 2036, with commercial and public buildings at 83% low-carbon heat by 2040. Alongside this volume requirement, the CCC identifies that electricity and gas price rebalancing is essential to make heat pump operation economically viable for households. Ofgem's Smart Secure Electricity Systems licensing regime makes heat pumps in-scope smart appliances and requires Load Controllers and Flexibility Service Providers to meet security, compliance and monitoring obligations. The Seventh Carbon Budget creates the deployment imperative; Ofgem's licensing ensures the operating and grid-management framework is in place to support it.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          107,
+          108
+        ]
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          107,
+          108
+        ],
+        "supports": "Heat pumps at natural replacement rate by 2036; 83%/95% commercial/public buildings 2040/2050; gas/electricity price rebalancing needed."
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Heat pumps in-scope smart appliances; licensing obligations for load controllers and FSPs."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_072_ofgem_boe_macro_smart_grid_investment",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's proposed load-control licensing for distributed flexibility relate to the Bank of England's analysis of how the energy transition affects macroeconomic investment dynamics?",
+    "expected_answer": "Ofgem's Smart Secure Electricity Systems programme establishes a licensing regime for Load Controllers and Flexibility Service Providers managing EV chargers, heat pumps and batteries, with an industry-led governance body and compliance obligations under Ofgem oversight. The Bank of England's macroeconomic analysis identifies that the transition to net zero requires substantial investment in new green capital, and that regulatory policy credibility affects the risk premium on green investments and the pace of capital formation. Regulatory clarity from Ofgem about who can operate distributed flexibility assets reduces investment uncertainty and thereby supports the capital allocation the Bank's paper identifies as necessary.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          8
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          15,
+          16
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "SSES licensing regime; SGG governance body; Elexon oversight; licensing for LCs and FSPs."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          15,
+          16
+        ],
+        "supports": "Regulatory credibility and forward-looking expectations affect investment; uncertainty raises risk premium on green investments."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_073_ofgem_boe_disclosure_cyber_governance",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's cyber security framework for load-control licensees relate to the Bank of England's approach to managing operational and climate-related governance risks in its own operations?",
+    "expected_answer": "Ofgem's Smart Secure Electricity Systems consultation establishes a cyber security evidence assessment process for licence applicants, with the Smart Grid Governance body maintaining security documents and Ofgem having powers to appoint third-party auditors for compliance monitoring. The Bank of England's 2024 climate disclosure describes its Climate Transition Plan published in July 2023, the appointment of its first Chief Sustainability Officer, and its Centre for Central Banking Studies providing training on climate-related financial regulation to other central banks. Both institutions are building governance frameworks to manage the operational and regulatory risks created by the energy transition, but at different levels.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          50,
+          52
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          10,
+          17
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          50,
+          52
+        ],
+        "supports": "Cyber security evidence assessment; SGG maintains security documents; Ofgem can appoint auditors or require self-audit."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          10,
+          17
+        ],
+        "supports": "Bank appointed first Chief Sustainability Officer; CTP published 2023; Centre for Central Banking Studies climate training."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_074_ofgem_cbes_results_compliance_litigation",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's compliance and enforcement framework for load-control licensees relate to the Bank of England's CBES finding on climate litigation risks for directors and officers?",
+    "expected_answer": "Ofgem's Smart Secure Electricity Systems licensing framework includes monitoring and compliance obligations, with Ofgem able to carry out inspections, appoint third-party auditors, or ask licensees to appoint their own auditors. The Bank of England's CBES results explored scenarios in which directors and officers of companies with inadequate climate transition plans face professional indemnity and D&O insurance claims. Ofgem's licensing regime creates clear compliance obligations for energy-system actors, thereby helping to reduce the regulatory uncertainty that the CBES identifies as a driver of potential climate litigation risk.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          51,
+          52
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          65,
+          67
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          51,
+          52
+        ],
+        "supports": "Monitoring and compliance; Ofgem inspection and audit powers; enforcement for NIS incidents."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          65,
+          67
+        ],
+        "supports": "D&O and professional indemnity insurance at risk from climate litigation; annual repricing mitigates some risk."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_075_ofgem_progress2024_ev_charging_delivery",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's proposed smart charging governance relate to the CCC's 2024 assessment of EV smart charging and buildings delivery gaps?",
+    "expected_answer": "The CCC's 2024 progress report identified significant gaps in the UK's buildings decarbonisation plans, including a lack of planning for smart charging infrastructure in rented properties and new builds. Ofgem's Smart Secure Electricity Systems consultation proposes a licensing regime that explicitly covers EV charge points as in-scope smart appliances, with Load Controllers and Flexibility Service Providers subject to security and compliance obligations. Ofgem's framework provides the operational governance layer that smart EV charging infrastructure will require; the CCC's concern is that the physical deployment of that infrastructure in homes and buildings is proceeding too slowly.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          8
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          66,
+          67
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "EV charge points as in-scope smart appliances; licensing for load controllers and FSPs."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          66,
+          67
+        ],
+        "supports": "Buildings assessment worsened; lack of planning for smart charging in rented homes; energy efficiency regulation not pursued."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_076_ofgem_boe_measuring_data_compliance",
+    "query_type": "cross_document",
+    "question": "How does Ofgem's data and monitoring requirements for load-control licensees relate to the Bank of England's framework for addressing climate data gaps in financial risk measurement?",
+    "expected_answer": "Ofgem's Smart Secure Electricity Systems consultation sets out monitoring and data requirements for load-control licensees, with Ofgem able to request information and conduct audits of how licensed entities operate smart appliances. The Bank of England's article on measuring climate financial risks identifies that a key challenge in climate risk analysis is the absence of granular, asset-level data, and that extended scenario analysis requires incorporating energy-performance data, physical location and other operational details. Ofgem's licensing data requirements for the energy-system assets underlying low-carbon infrastructure could, over time, contribute to the richer asset-level datasets that the Bank identifies as necessary.",
+    "expected_sources": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          50,
+          52
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          8,
+          9
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          50,
+          52
+        ],
+        "supports": "Monitoring and data requirements for licensees; Ofgem audit and information-gathering powers."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          8,
+          9
+        ],
+        "supports": "Key challenge: macro scenarios insufficient for asset-level analysis; granular data on energy performance, location, and technology needed."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_077_zev_boe_macro_ev_adoption_gdp",
+    "query_type": "cross_document",
+    "question": "How does the ZEV Mandate's phased EV sales trajectory relate to the Bank of England's analysis of how the energy transition could affect consumer spending and GDP?",
+    "expected_answer": "The ZEV Mandate requires 22% of new car sales to be zero-emission in 2024, rising to 80% by 2030 and 100% by 2035 for new cars. The Bank of England's paper on macroeconomic implications identifies that the transition creates temporary headwinds to growth through higher upfront costs for new technologies, changes in consumer spending patterns, and capital reallocation away from existing industries. Lower EV running costs may, over time, raise consumer purchasing power, but the upfront cost premium during the transition phase can reduce spending elsewhere. The mandate accelerates fleet turnover; the Bank's analysis flags the GDP dynamics accompanying it.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          9,
+          11
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "22% ZEV share 2024 to 80% by 2030 for new cars; flexibility provisions; phased van targets."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          9,
+          11
+        ],
+        "supports": "Transition creates temporary GDP headwinds; higher upfront technology costs; lower operating costs over time."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_078_zev_cbes_key_car_finance_residual_values",
+    "query_type": "cross_document",
+    "question": "How do the ZEV Mandate's ICE vehicle phase-out requirements compare with the Bank of England's CBES assumptions about EV adoption and car finance residual value losses?",
+    "expected_answer": "The ZEV Mandate requires the proportion of new zero-emission cars to reach 80% by 2030. The Bank of England's CBES Early Action scenario assumes the government acts promptly to encourage a smooth EV transition, with used ICE vehicle prices declining steadily, creating manageable residual value losses on car finance lending. The Late Action scenario features a rapid, forced transition from 2031, generating larger and more concentrated residual value losses. The ZEV Mandate's gradual annual escalation is broadly consistent with the Early Action EV pathway, but the financial exposure of car finance lenders depends critically on how orderly the broader transition remains.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          47,
+          48
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "22% ZEV share 2024 to 80% by 2030 to 100% by 2035 for new cars."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          47,
+          48
+        ],
+        "supports": "Early Action: smooth government-encouraged transition, steady ICE price decline; Late Action: rapid forced transition from 2031 with concentrated residual value losses."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_079_zev_boe_measuring_auto_stranded_assets",
+    "query_type": "cross_document",
+    "question": "How does the ZEV Mandate's ICE vehicle phase-out timeline relate to the Bank of England's framework for measuring transition risk to auto-sector corporate bonds?",
+    "expected_answer": "The ZEV Mandate requires all new cars to be zero-emission by 2035, creating a defined horizon within which ICE vehicle manufacturing becomes stranded. The Bank of England's article on measuring climate financial risks identifies significant intra-sector variability, noting that even within the same sector different firms face very different transition risk profiles based on their technology, cost position and geography. For the auto sector, manufacturers with high ICE exposure and low EV investment face materially worse transition risk. The mandate provides a clear policy signal that the Bank's scenario extension framework can use to differentiate between auto-sector bond issuers.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          12,
+          13
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "All new cars ZEV by 2035; clear phase-out horizon for ICE vehicles."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          12,
+          13
+        ],
+        "supports": "Significant intra-sector variability; sub-sector and firm-level exposures differ materially even within the same sector."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_080_zev_cbes_results_lending_ev_batteries",
+    "query_type": "cross_document",
+    "question": "How does the ZEV Mandate's requirement for a rapid EV fleet transition relate to the Bank of England's CBES finding on banks' lending plans to EV battery manufacturers?",
+    "expected_answer": "The ZEV Mandate requires 80% of new car sales to be zero-emission by 2030, implying rapid scaling of EV manufacturing and battery supply chains. The Bank of England's CBES results report found that in transition scenarios, banks planned to increase lending substantially to firms developing technology for electric vehicle batteries, alongside lending to renewable energy firms, while reducing exposure to fossil-fuel sectors. The mandate creates the regulatory demand signal that underpins the banks' projected lending increase to the EV battery supply chain; its annual escalation provides the commercial visibility that banks and manufacturers need to commit capital.",
+    "expected_sources": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "page_range": [
+          12,
+          15
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          68,
+          70
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "DESNZ_ZEV_MANDATE_2023",
+        "pages": [
+          12,
+          15
+        ],
+        "supports": "80% ZEV new cars by 2030; requires rapid scaling of EV manufacturing and battery supply."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          68,
+          70
+        ],
+        "supports": "Banks plan to increase lending substantially to EV battery manufacturers in transition scenarios."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_081_boe_disclosure_boe_measuring_scenario_methods",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's 2024 climate disclosure use of scenario analysis on its sovereign portfolio compare with the Bank's own methodological framework described in its article on measuring climate financial risks?",
+    "expected_answer": "The Bank of England's 2024 climate disclosure describes using NGFS climate scenarios to estimate potential financial losses from repricing of risk-free rates in sovereign asset holdings, computing Implied Temperature Rise metrics of 1.69-1.70 degrees Celsius under current policies. The Bank's article on measuring climate financial risks explains that macro scenarios such as those from the NGFS provide a starting point but require substantial extension to reach asset-level analysis, including incorporating sovereign debt dynamics through green financing costs and debt servicing effects. The 2024 disclosure represents the Bank applying its own methodological framework to its own balance sheet.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          29,
+          32
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          16,
+          17
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          29,
+          32
+        ],
+        "supports": "NGFS scenario analysis on sovereign portfolio; ITR 1.69-1.70C; repricing risk for sovereign bonds."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          16,
+          17
+        ],
+        "supports": "Sovereign debt analysis requires extending macro scenarios; green transition costs, debt issuance, and debt servicing channels."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_082_boe_disclosure_cbes_results_risk_management_evolution",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's 2024 climate disclosure describe the evolution of its internal climate governance compared with the CBES finding on the state of firms' climate risk management in 2021?",
+    "expected_answer": "The Bank of England's 2021 CBES results report found that participating banks and insurers were making good progress in some aspects of climate risk management, but capabilities were still in an early stage, with the exercise itself helping to spur firms to develop their capabilities further. By 2024, the Bank's own climate disclosure shows significant institutional progress: appointment of the first Chief Sustainability Officer, publication of its Climate Transition Plan in 2023, the Centre for Central Banking Studies providing climate training to other central banks, and integration of climate scenario analysis across its own balance sheet management. Three years separates the two documents, reflecting a material maturation of climate risk governance.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          10,
+          17
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Firms making good progress; CBES spurred capability development; capabilities in infancy; four dimensions assessed."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          10,
+          17
+        ],
+        "supports": "First Chief Sustainability Officer appointed; CTP published 2023; CCBS climate training; scenario analysis integrated into balance sheet management."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_083_boe_disclosure_boe_macro_flood_property",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's 2024 management of flood risk to its mortgage collateral relate to the Bank's earlier analysis of flooding and UK house prices as a macroeconomic channel?",
+    "expected_answer": "The Bank of England's paper on macroeconomic implications includes a case study of flooding and UK house prices, identifying that flooding reduces property values and can have broader macroeconomic effects through wealth, collateral and confidence channels. The Bank's 2024 climate disclosure translates this analytical insight into operational action: applying flood risk haircut discounts to SMF mortgage collateral, noting that FloodRe caps insurance premia until 2039, and flagging that after 2039 properties in the most flood-prone areas face difficulty accessing bank finance. The earlier paper identifies the macroeconomic risk; the 2024 disclosure shows how the Bank has operationalised that understanding in its own risk management.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          7,
+          8
+        ]
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          22,
+          24
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Flooding and UK house prices case study; negative economic effects; macroeconomic channels from physical climate impacts."
+      },
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          22,
+          24
+        ],
+        "supports": "Flood risk haircut discounts for SMF mortgage collateral; FloodRe until 2039; post-2039 access-to-finance risk for flood-prone properties."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_084_boe_macro_cbes_key_gdp_pathways",
+    "query_type": "cross_document",
+    "question": "How do the GDP trajectories described in the Bank of England's CBES scenarios compare with the macroeconomic transmission channels analysed in the Bank's paper on climate and monetary policy?",
+    "expected_answer": "The Bank of England's paper on macroeconomic implications identifies multiple transmission channels through which climate change affects GDP: physical impacts reduce output and raise food price inflation, while the transition to net zero creates temporary headwinds from higher energy and technology costs, capital reallocation and regulatory change. The CBES Key Elements document translates these channels into scenario pathways: in Early Action, UK GDP is about 1.4% below the counterfactual by 2050; in Late Action, a sharp unanticipated carbon price increase from 2031 produces a GDP fall comparable in scale to the global financial crisis. The macro paper provides the theoretical framework; the CBES provides the quantified scenario outcomes.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          6,
+          8
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          35,
+          37
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          6,
+          8
+        ],
+        "supports": "Physical impacts reduce output and raise inflation; transition creates temporary headwinds; capital reallocation."
+      },
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          35,
+          37
+        ],
+        "supports": "Early Action: UK GDP ~1.4% below counterfactual by 2050; Late Action: sharp fall from 2031 comparable to GFC."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_085_boe_macro_boe_measuring_flood_mortgage",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's macroeconomic analysis of flooding and house prices compare with the Bank's framework for measuring physical climate risks to mortgage portfolios?",
+    "expected_answer": "The Bank of England's macroeconomic paper uses flooding as a case study for how physical climate impacts affect UK property values and broader economic activity, noting that negative wealth effects from house price falls can create macroeconomic headwinds. The Bank's article on measuring climate financial risks explores how flood risk is translated into mortgage portfolio risk, identifying that rising insurance premia and reduced coverage in flood-prone areas, particularly after the FloodRe scheme rolls off in 2039, can impair mortgage borrowers' access to finance and increase bank credit losses. The macro paper establishes the GDP-level channel; the measuring article bridges from that to the balance-sheet impact on individual mortgage lenders.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          7,
+          8
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          29,
+          35
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Flooding case study; negative economic effects on house prices; physical impacts as macroeconomic channel."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          29,
+          35
+        ],
+        "supports": "Rising flood insurance premia; FloodRe rolls off 2039; reduced coverage in flood-prone areas; banks' access-to-finance risk for uninsured homeowners."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_086_boe_macro_eso_investment_network",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's analysis of how large net-zero investment could affect macroeconomic equilibria relate to ESO's Beyond 2030 recommendation for upfront network infrastructure investment?",
+    "expected_answer": "The Bank of England's paper on macroeconomic implications identifies that the net-zero transition requires a large-scale shift in investment toward green capital, with uncertain effects on the equilibrium real interest rate depending on productivity, risk premia and capital demand. ESO's Beyond 2030 describes the UK electricity network as requiring a once-in-a-generation upgrade comparable to the 1950s supergrid, with large upfront capital expenditure needed to connect offshore wind and avoid costly bottlenecks. The Bank's analysis frames why this investment scale is macroeconomically significant; ESO specifies the technical programme through which the investment must be deployed.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          24,
+          26
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          7
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          24,
+          26
+        ],
+        "supports": "Large green capital formation; uncertain R* effects; productivity, risk premium and capital demand channels."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          7
+        ],
+        "supports": "Once-in-a-generation network upgrade; large upfront investment needed; HND and ScotWind connections."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_087_cbes_results_boe_measuring_data_gaps",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's CBES finding on data quality limitations compare with the methodological challenges described in the Bank's article on measuring climate financial risks?",
+    "expected_answer": "The Bank of England's CBES results report found that participating banks and insurers lacked the asset-level data needed for rigorous climate risk analysis, specifically the absence of corporate asset location data for physical risk assessment and no standardised scope 3 emissions data. Firms needed interim proxies and acknowledged they would need to develop better data capabilities. The Bank's article on measuring climate financial risks identifies these same limitations as the central methodological challenge: macro-level climate scenarios cannot be directly used for portfolio risk quantification without substantial scenario extension incorporating firm-specific, sector-specific and geographic data. The CBES documents the empirical data gaps; the measuring article provides the conceptual framework for addressing them.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          8,
+          9
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "Lack of corporate asset location data; no standardised scope 3 data; firms need interim proxies."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          8,
+          9
+        ],
+        "supports": "Macro scenarios insufficient for asset-level analysis; scenario extension needed; primary challenge of climate risk measurement."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_088_cbes_key_ofgem_energy_governance",
+    "query_type": "cross_document",
+    "question": "How do the energy system assumptions in the Bank of England's CBES scenarios relate to the governance framework Ofgem is establishing for smart electricity assets?",
+    "expected_answer": "The Bank of England's CBES Early Action scenario assumes heat pump roll-out consistent with the CCC's recommendations, and an orderly transition to EVs with government support. The Late Action scenario requires a rapid and disorderly transition from 2031. Ofgem's Smart Secure Electricity Systems programme establishes a licensing and governance framework for exactly the smart assets, heat pumps and EV charge points, whose deployment rates are embedded in the CBES scenarios. The CBES implicitly relies on the orderly governance that Ofgem is now building; without it, the Late Action-type disorderly scenario becomes more likely.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          47,
+          48
+        ]
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "page_range": [
+          7,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          47,
+          48
+        ],
+        "supports": "Heat pump roll-out and EV transition consistent with CCC recommendations embedded in CBES scenarios."
+      },
+      {
+        "doc_id": "OFGEM_SMART_SECURE_2025",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Licensing and governance framework for heat pumps and EV charge points as in-scope smart appliances."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_089_cbes_key_eso_physical_grid_resilience",
+    "query_type": "cross_document",
+    "question": "How do the physical risk assumptions in the Bank of England's CBES No Additional Action scenario relate to ESO's Beyond 2030 analysis of electricity network resilience needs?",
+    "expected_answer": "The Bank of England's CBES No Additional Action scenario projects global warming of 3.3 degrees Celsius above pre-industrial levels by end-century, leading to chronic changes in precipitation, ecosystems and sea levels, with extreme weather events becoming more frequent. Annualised insurer losses from physical risks increased by 50-70% in the NAA scenario. ESO's Beyond 2030 identifies that the electricity network is already reaching capacity and that the supergrid design must accommodate increasing generation variability from renewables. Higher temperatures and more frequent extreme weather events in a NAA-type world would place additional stress on the network infrastructure that ESO is planning to upgrade.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          9,
+          11
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          6
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          9,
+          11
+        ],
+        "supports": "NAA: 3.3C warming; chronic precipitation and sea-level changes; extreme weather; insurer losses +50-70%."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          6
+        ],
+        "supports": "Grid reaching capacity; needs upgrading to accommodate renewable variability; once-in-a-generation network investment needed."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_090_seventh_budget_boe_measuring_retrofit_mortgage",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget residential buildings pathway relate to the Bank of England's framework for measuring physical climate risk to UK mortgage portfolios?",
+    "expected_answer": "The CCC's Seventh Carbon Budget requires large-scale residential retrofit including heat pump installation reaching the natural replacement rate by 2036, alongside energy efficiency improvements that deliver operating cost savings and lower household energy bills. These measures improve EPC ratings over time, which the Bank of England directly links to mortgage collateral risk. The Bank's article on measuring climate financial risks describes how flood insurance coverage and EPC performance affect the risk of mortgage default, and how FloodRe's sunset in 2039 creates a step-change in physical risk exposure for flood-prone properties. The Seventh Carbon Budget pathway drives the EPC improvements that the Bank uses to price mortgage risk.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          170,
+          172
+        ]
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "page_range": [
+          29,
+          35
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          170,
+          172
+        ],
+        "supports": "Heat pump installation at natural replacement rate by 2036; energy efficiency improvements; lower household energy bills as co-benefit."
+      },
+      {
+        "doc_id": "BOE_MEASURING_CLIMATE_RISKS",
+        "pages": [
+          29,
+          35
+        ],
+        "supports": "Flood risk to mortgages; FloodRe sunset 2039; reduced insurance coverage and access to bank finance in high-risk areas."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_091_progress2025_boe_macro_transition_inflation",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2025 assessment of UK emissions reduction progress relate to the Bank of England's analysis of how the energy transition could affect UK inflation?",
+    "expected_answer": "The CCC's 2025 progress report records that UK greenhouse gas emissions were 423.3 MtCO2e in 2023, that the UK has met its first three carbon budgets, and that 61% of reductions required by 2030 are now covered by credible or some-risk plans. The Bank of England's macroeconomic paper identifies multiple inflation transmission channels from both physical climate change, especially food price spikes from extreme weather, and the transition, including regulatory costs, energy price changes, and demand-supply dynamics during technology roll-out. Electricity price rebalancing relative to gas, which the CCC identifies as necessary to drive heat pump adoption, is precisely the type of relative price change the Bank flags as relevant to CPI inflation dynamics.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          7,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "UK 2023 emissions 423.3 MtCO2e; three carbon budgets met; 61%/39% plan assessment; electricity/gas price rebalancing needed."
+      },
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          7,
+          8
+        ],
+        "supports": "Transition affects relative prices and CPI; physical impacts raise food price inflation; extreme weather effects may grow."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_092_cbes_key_progress2025_late_action_delivery_risk",
+    "query_type": "cross_document",
+    "question": "How do the characteristics of the Bank of England's CBES Late Action scenario compare with the CCC's 2025 assessment of the risks in the UK's climate delivery programme?",
+    "expected_answer": "The Bank of England's CBES Late Action scenario is defined by delayed and insufficient policy action leading to a sharp, unanticipated increase in shadow carbon prices from 2031, producing a GDP fall comparable to the global financial crisis. The CCC's 2025 progress report finds that 39% of required emissions reductions by 2030 face significant risks, insufficient plans, or unquantified measures, with the biggest gaps in heat pumps and industrial electrification. This 39% delivery risk does not yet constitute Late Action, but it is precisely the kind of accumulated policy gap that the CBES Late Action scenario was designed to stress-test: if these gaps persist and are addressed only through belated and sudden policy tightening, the financial sector disruption in Late Action could materialise.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "page_range": [
+          36,
+          38
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          11,
+          12
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_KEY_ELEMENTS_2021",
+        "pages": [
+          36,
+          38
+        ],
+        "supports": "Late Action: delayed policy, sharp carbon price increase from 2031, GDP fall similar to GFC."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          11,
+          12
+        ],
+        "supports": "39% of reductions face significant risks, insufficient plans, or unquantified measures; heat pumps and industrial electrification biggest gaps."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_093_eso_progress2024_grid_bottlenecks_delivery",
+    "query_type": "cross_document",
+    "question": "How does ESO's Beyond 2030 analysis of transmission network bottlenecks compare with the CCC's 2024 identification of grid connections as a key clean power delivery risk?",
+    "expected_answer": "The CCC's 2024 progress report identifies grid connections, planning, consenting and CfD implementation as key delivery risks for UK clean power, and notes the absence of an overall delivery strategy. ESO's Beyond 2030 report confirms the same structural problem: investment in renewable generation has outpaced investment in transmission capacity over the past decade, creating bottlenecks that force ESO to curtail wind output. ESO recommends a coordinated programme of new circuits and upgrades, and finds that up to 5 GW of flexible demand placed behind bottlenecks could save around 5 billion pounds. Both documents identify the same infrastructure constraint; the CCC flags it as a governance failure and ESO proposes the technical solution.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          71,
+          72
+        ]
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "page_range": [
+          5,
+          8
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          71,
+          72
+        ],
+        "supports": "Grid connections, planning, consenting, CfD delivery risks; absence of overall delivery strategy."
+      },
+      {
+        "doc_id": "ESO_BEYOND2030_2024",
+        "pages": [
+          5,
+          8
+        ],
+        "supports": "Generation investment outpaced transmission; bottlenecks; wind curtailment; ~5bn saving from flexible demand; new circuit programme."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_094_iea_seventh_budget_methane",
+    "query_type": "cross_document",
+    "question": "How does the IEA's WEO 2025 analysis of methane abatement requirements in the NZE Scenario compare with the CCC's Seventh Carbon Budget approach to non-CO2 greenhouse gases?",
+    "expected_answer": "The IEA's WEO 2025 NZE Scenario requires methane emissions to be reduced by 80% from their 2024 level by 2035, compared with only around 20% reduction in the STEPS and about 5% in the CPS. Methane abatement is identified as among the most cost-effective near-term interventions. The CCC's Seventh Carbon Budget addresses non-CO2 greenhouse gases including methane from agriculture and waste, and requires the UK to reach net zero across all greenhouse gases by 2050. The IEA's methane scenario analysis covers global energy-sector methane; the CCC's pathway covers all UK sectors including agriculture, which is the dominant source of UK methane emissions.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          41,
+          42
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          200,
+          202
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          41,
+          42
+        ],
+        "supports": "NZE: methane -80% by 2035; STEPS: -20%; CPS: -5%; methane reduction among most cost-effective near-term actions."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          200,
+          202
+        ],
+        "supports": "Non-CO2 GHGs including methane from agriculture and waste in the Balanced Pathway; UK net zero all GHGs by 2050."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_095_boe_macro_progress2024_investment_assessment",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's analysis of uncertainty around green capital investment returns compare with the CCC's 2024 assessment of UK low-carbon investment performance?",
+    "expected_answer": "The Bank of England's paper on macroeconomic implications notes that if investors perceive green investments as riskier because new technologies may not pay off, the risk premium may rise and push down the equilibrium interest rate, and that the direction of the net effect is uncertain, requiring central banks to monitor evolving risk pricing. The CCC's 2024 progress report records that UK low-carbon investment placed the UK fourth globally in 2023 and second by share of GDP, concentrated in renewables and EVs, suggesting strong investor appetite. The CCC provides evidence that green investment uncertainty has not deterred UK capital in practice; the Bank's framework explains why monitoring how risk pricing evolves remains important for monetary policy.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "page_range": [
+          25,
+          26
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          81,
+          82
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_MACRO_IMPLICATIONS",
+        "pages": [
+          25,
+          26
+        ],
+        "supports": "Uncertainty about risk premium on green investments; may push R* down if perceived riskier; monitoring needed."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          81,
+          82
+        ],
+        "supports": "UK 4th globally for green investment 2023; 2nd by GDP share; concentrated in renewables and EVs."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_096_cbes_results_progress2025_bank_lending_clean_power",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's CBES finding on banks' lending plans for renewable energy compare with the CCC's 2025 assessment of UK clean power financing and delivery?",
+    "expected_answer": "The Bank of England's CBES results report found that in transition scenarios, UK banks planned to increase lending substantially to renewable energy firms, alongside lending to construction firms for retrofitting and flood defence. The CCC's 2025 progress report records that AR6 secured a record 9.6 GW of new renewables capacity and that the pipeline for offshore and onshore wind looks broadly on track for the Clean Power 2030 goal, though solar deployment needs to accelerate sharply. The banking sector's stated intention to increase renewable lending in the CBES is consistent with, and necessary to finance, the sustained pipeline growth the CCC says is required.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          68,
+          70
+        ]
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "page_range": [
+          104,
+          106
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          68,
+          70
+        ],
+        "supports": "Banks plan to increase lending substantially to renewable energy firms in transition scenarios."
+      },
+      {
+        "doc_id": "CCC_PROGRESS_2025",
+        "pages": [
+          104,
+          106
+        ],
+        "supports": "AR6 record 9.6 GW; offshore/onshore wind pipeline on track; solar needs to quadruple; continued pipeline growth required."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_097_boe_disclosure_seventh_budget_epc_pathway",
+    "query_type": "cross_document",
+    "question": "How does the Bank of England's EPC-based management of mortgage collateral risk relate to the CCC's Seventh Carbon Budget residential buildings pathway?",
+    "expected_answer": "The Bank of England's 2024 climate disclosure reports that it now excludes buy-to-let mortgages with EPC ratings below E from its SMF collateral, and is integrating flood risk discounts into haircut models for residential mortgage pools. The CCC's Seventh Carbon Budget requires heat pump installation to reach the natural replacement rate across all UK homes by 2036, and notes that energy efficiency improvements and low-carbon heating systems deliver substantial co-benefits including reduced household energy bills. As the Seventh Carbon Budget pathway drives EPC rating improvements in the housing stock, the Bank's collateral eligibility thresholds become less binding; conversely, homes that fall behind the retrofit pathway will be increasingly repriced in the Bank's collateral framework.",
+    "expected_sources": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "page_range": [
+          22,
+          23
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          170,
+          172
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "BOE_DISCLOSURE_2024",
+        "pages": [
+          22,
+          23
+        ],
+        "supports": "BtL mortgages with EPC < E excluded from SMF; tiered treatment of pools with missing EPC data; flood risk haircut discounts."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          170,
+          172
+        ],
+        "supports": "Heat pumps at natural replacement rate by 2036; energy efficiency improvements; lower household energy bills as co-benefit."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_098_cbes_results_seventh_budget_insurer_transition",
+    "query_type": "cross_document",
+    "question": "How does the CCC's Seventh Carbon Budget pathway for industry and energy compare with the Bank of England's CBES finding on insurer financial losses from transition risks?",
+    "expected_answer": "The CCC's Seventh Carbon Budget projects industry emissions falling 78% to 11.2 MtCO2e by 2040, requiring large-scale electrification, CCUS deployment, and in some sectors hydrogen. The Bank of England's CBES found that in transition scenarios, insurer losses were particularly concentrated in carbon-intensive industries including mining, petroleum manufacture, and electricity supply, reflecting the stranded-asset and transition cost exposure of these sectors. The magnitude of transition losses in CBES is directly related to the scale of structural change the Seventh Carbon Budget describes; industries that must transform most rapidly face the largest financial risk.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          175,
+          177
+        ]
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "page_range": [
+          53,
+          57
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          175,
+          177
+        ],
+        "supports": "Industry -78% to 11.2 MtCO2e by 2040; electrification, CCUS, hydrogen required; steel and cement already contracted."
+      },
+      {
+        "doc_id": "BOE_CBES_RESULTS_2021",
+        "pages": [
+          53,
+          57
+        ],
+        "supports": "Insurer losses concentrated in mining, petroleum manufacture, electricity supply; asset values fall in EA, LA, NAA scenarios."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_099_iea_seventh_budget_global_uk_net_zero_pathway",
+    "query_type": "cross_document",
+    "question": "How does the IEA's NZE Scenario pathway to net zero emissions by 2050 compare with the CCC's Seventh Carbon Budget pathway for the UK?",
+    "expected_answer": "The IEA's NZE Scenario translates the global 1.5 degrees Celsius objective into a pathway for the energy sector, with warming peaking at approximately 1.65 degrees Celsius around 2050 and declining thereafter; it requires global renewables capacity to reach 19,600 GW by 2035 and methane to fall by 80% from 2024 levels by 2035. The CCC's Seventh Carbon Budget provides a sector-by-sector pathway for the UK to reach net zero by 2050, requiring average annual investment of 26 billion pounds and decarbonisation of buildings, transport, industry, and land use. Both are 2050 net zero pathways, but the IEA describes a global energy-sector view while the CCC provides a legally binding UK-wide programme across all sectors and greenhouse gases.",
+    "expected_sources": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          38,
+          42
+        ]
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "page_range": [
+          41,
+          43
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          38,
+          42
+        ],
+        "supports": "NZE: peaks ~1.65C 2050; 19,600 GW renewables by 2035; methane -80% by 2035; global energy sector focus."
+      },
+      {
+        "doc_id": "CCC_SEVENTH_CARBON_BUDGET_2025",
+        "pages": [
+          41,
+          43
+        ],
+        "supports": "UK net zero 2050; 26bn/year investment; all sectors all GHGs; legally binding framework."
+      }
+    ]
+  },
+  {
+    "id": "xdoc_eval_100_iea_progress2024_uk_ndcs_vs_global_ndc_ambition",
+    "query_type": "cross_document",
+    "question": "How does the CCC's 2024 assessment of the UK's 2030 NDC delivery gap compare with the IEA's WEO 2025 analysis of global NDC ambition and the gap between NDCs and net zero?",
+    "expected_answer": "The CCC's 2024 progress report found that only around one-third of UK emissions reductions required to meet the 2030 NDC were covered by credible plans, and that the seven-year average pace of reduction at 13.8 MtCO2e per year was insufficient compared with the 18.8 MtCO2e per year needed to 2030. The IEA's WEO 2025 notes that other countries have NDCs implying faster emissions reductions than captured in the STEPS, indicating they will need new policies to deliver on their pledges. At the global level, NDC ambition is insufficient to reach NZE, and in the STEPS warming exceeds 2 degrees Celsius. Both documents illustrate the same dynamic at different scales: stated targets outrun current policies and plans, creating a credibility gap that only concrete action can close.",
+    "expected_sources": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "page_range": [
+          16,
+          17
+        ]
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "page_range": [
+          40,
+          41
+        ]
+      }
+    ],
+    "evidence_notes": [
+      {
+        "doc_id": "CCC_PROGRESS_2024",
+        "pages": [
+          16,
+          17
+        ],
+        "supports": "~1/3 of reductions covered by credible plans; 7-year average 13.8 MtCO2e/year vs 18.8 needed; UK NDC delivery gap."
+      },
+      {
+        "doc_id": "IEA_WEO_2025",
+        "pages": [
+          40,
+          41
+        ],
+        "supports": "Many NDCs imply faster reductions than STEPS; new policies needed globally; gap between NDC ambition and actual policy trajectories."
+      }
+    ]
+  }
+]

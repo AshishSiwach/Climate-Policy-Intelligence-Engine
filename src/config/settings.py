@@ -26,7 +26,7 @@ from functools import lru_cache
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 logger = logging.getLogger(__name__)
 
@@ -107,14 +107,19 @@ class UISettings(BaseModel):
 class AgentSettings(BaseModel):
     """Feature-flag settings for the agent route.
 
-    ``route_enabled`` is read from the ``AGENT_ROUTE_ENABLED`` environment
-    variable at settings-construction time so docker/systemd env overrides
-    work without touching config.yaml.  The lru_cache on get_settings() means
-    this is sampled once per process; call ``get_settings.cache_clear()`` in
-    tests to reset between runs.
+    ``route_enabled`` precedence (highest to lowest):
+      1. ``AGENT_ROUTE_ENABLED`` environment variable — always wins, including
+         over config.yaml. This is the production kill switch: set
+         ``AGENT_ROUTE_ENABLED=false`` in docker/systemd to disable the agent
+         path without touching any file.
+      2. ``agent.route_enabled`` in config.yaml — the repo default.
+      3. Pydantic field default ("false") — fallback when neither is set.
+
+    The lru_cache on get_settings() means this is sampled once per process;
+    call ``get_settings.cache_clear()`` in tests to reset between runs.
     """
 
-    route_enabled: str = Field(default_factory=lambda: os.environ.get("AGENT_ROUTE_ENABLED", "false"))
+    route_enabled: str = "false"
     """
     Controls the agent route for cross_doc queries:
       "false"  — shadow mode (agent runs but fast-path answer is returned)
@@ -123,6 +128,18 @@ class AgentSettings(BaseModel):
     """
     canary_pct: float = 0.10
     """Fraction of cross_doc queries routed to the agent in canary mode (0–1)."""
+
+    @model_validator(mode="before")
+    @classmethod
+    def env_overrides_yaml(cls, data: object) -> object:
+        """Environment variable takes precedence over config.yaml for the kill switch."""
+        env_val = os.environ.get("AGENT_ROUTE_ENABLED")
+        if env_val is not None:
+            if isinstance(data, dict):
+                data = {**data, "route_enabled": env_val}
+            else:
+                data = {"route_enabled": env_val}
+        return data
 
 
 # ---------------------------------------------------------------------------

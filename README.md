@@ -338,6 +338,26 @@ latency by ~2.3s in the agent path (which makes longer API calls than the
 fast path and is therefore more sensitive to API-side queuing). The 14.4s
 clean-run measurement is the true agent P95 under production conditions.
 
+*Synthesiser token reduction (prompt rules 8–10):* Since the synthesiser
+dominates latency (~10–12s of the ~12.6s mean), reducing completion tokens
+directly reduces wall time. Three prompt rules were added to eliminate
+redundant output without losing coverage:
+
+- **Rule 8:** *"Do not repeat the same fact from the same source in multiple
+  sentences. State each distinct point once."* — eliminates restatement loops
+  where the model echoes the same BoE figure across opening and closing
+  sentences.
+- **Rule 9:** *"Use the single strongest [Excerpt N] per source per comparison
+  point. Do not stack multiple citations for the same claim."* — stops the
+  model from appending three identical-signal excerpts to a single sentence.
+- **Rule 10:** *"Begin your answer directly with the evidence. Do not open by
+  restating or paraphrasing the question."* — cuts the standard 15–25 token
+  preamble (*"This question asks me to compare…"*) that added latency with
+  zero information content.
+
+Mean completion tokens after rules 8–10: 924 (P95: 1387). Zero
+`finish_reason=length` truncations across 100 queries.
+
 *Resolution:* 14.4s is the production latency. The synthesiser is the
 bottleneck and the only real knob remaining is adaptive sub-question count
 (generating 2–4 sub-questions for simple comparisons vs up to 6 for complex

@@ -106,7 +106,7 @@ def _run_fast_path(query: str, hybrid, synth) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _run_agent_path(query: str, hybrid) -> dict:
+def _run_agent_path(query: str, hybrid, no_claim_builder: bool = False) -> dict:
     """Run the Phase 2 agent graph and return timing + result."""
     import uuid
 
@@ -131,6 +131,7 @@ def _run_agent_path(query: str, hybrid) -> dict:
         "termination_reason": None,
         "_retriever": hybrid,
         "_start_time": t0_mono,  # enables wall-clock budget enforcement
+        "_ablate_no_claim_builder": no_claim_builder,
     }
 
     t0 = time.time()
@@ -191,7 +192,10 @@ def _run_agent_path(query: str, hybrid) -> dict:
             "required_source": sq_required,
             "chunk_count": len(sq_chunks),
             "retrieved_doc_ids": sq_doc_ids,
-            "found_required_source": (sq_required in sq_doc_ids) if sq_required else None,
+            "found_required_source": (
+                any(sq_required.upper() in did.upper() or did.upper().startswith(sq_required.upper())
+                    for did in sq_doc_ids)
+            ) if sq_required else None,
             "coverage_status": cov_status,
             "gap_reason": cov_gap,
         })
@@ -210,6 +214,8 @@ def _run_agent_path(query: str, hybrid) -> dict:
         "agent_truncated": (brief.truncated if brief else False),
         "agent_sub_question_count": sub_question_count,
         "agent_coverage_statuses": coverage_statuses,
+        "agent_synthesis_finish_reason": final_state.get("synthesis_finish_reason", "unknown"),
+        "agent_synthesis_completion_tokens": final_state.get("synthesis_completion_tokens", 0),
         "_agent_retrieved_doc_ids": agent_retrieved_doc_ids,
         "_agent_sub_question_details": sub_question_details,
         "_agent_chunks": agent_chunks,  # kept for judge; stripped from output record
@@ -297,12 +303,14 @@ def _source_recall(cited_doc_ids: set[str], expected_sources: set[str]) -> float
 # ---------------------------------------------------------------------------
 
 
-def _run_ab(queries: list[dict], use_judge: bool) -> None:
+def _run_ab(queries: list[dict], use_judge: bool, no_claim_builder: bool = False) -> None:
     """Run the A/B evaluation and write results to JSONL."""
     from main import build_pipeline  # type: ignore[import]
 
     print("Building pipeline (loading indices + embedding model)...")
     hybrid, synth = build_pipeline()
+    if no_claim_builder:
+        print("ABLATION MODE: claim-builder bypassed (empty claims passed to synthesiser)\n")
     print("Pipeline ready.\n")
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -330,7 +338,7 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 }
 
             try:
-                agent = _run_agent_path(question, hybrid)
+                agent = _run_agent_path(question, hybrid, no_claim_builder=no_claim_builder)
             except Exception as exc:
                 agent = {
                     "agent_answer": f"ERROR: {exc}",
@@ -421,6 +429,8 @@ def _run_ab(queries: list[dict], use_judge: bool) -> None:
                 "agent_retrieved_doc_ids": agent.get("_agent_retrieved_doc_ids", []),
                 "agent_retrieval_recall": agent_retrieval_recall,
                 "agent_sub_question_details": agent.get("_agent_sub_question_details", []),
+                "agent_synthesis_finish_reason": agent.get("agent_synthesis_finish_reason", "unknown"),
+                "agent_synthesis_completion_tokens": agent.get("agent_synthesis_completion_tokens", 0),
             }
 
             records.append(record)
@@ -542,6 +552,18 @@ def _print_summary(records: list[dict]) -> None:
           f"partial {_fmt(_mean(cov_counts['partial']), 0)}%  "
           f"not_covered {_fmt(_mean(cov_counts['not_covered']), 0)}%")
 
+    # Synthesis token diagnostics
+    synth_tokens = [r.get("agent_synthesis_completion_tokens", 0) for r in records]
+    finish_reasons = [r.get("agent_synthesis_finish_reason", "unknown") for r in records]
+    length_count = sum(1 for f in finish_reasons if f == "length")
+    avg_tokens = _mean([float(t) for t in synth_tokens])
+    p95_tokens = _p95([float(t) for t in synth_tokens])
+    print(f"\nSynthesis output (agent path, N={n})")
+    print(ruler)
+    print(f"  Avg completion tokens : {_fmt(avg_tokens, 0)}")
+    print(f"  P95 completion tokens : {_fmt(p95_tokens, 0)}")
+    print(f"  finish_reason=length  : {length_count}/{n} ({length_count*100//n if n else 0}%)  {'<-- TOKEN CAP TRUNCATING' if length_count > 0 else '(none)'}")
+
     _print_subquestion_analysis(records)
 
 
@@ -623,6 +645,11 @@ def main() -> None:
             "and completeness for each answer. Adds ~$0.002 per query."
         ),
     )
+    parser.add_argument(
+        "--no-claim-builder",
+        action="store_true",
+        help="Ablation: skip the claim-builder LLM call (returns empty claims). Tests whether claim-builder earns its place on the critical path.",
+    )
     args = parser.parse_args()
 
     queries = _load_cross_doc_queries(limit=args.limit)
@@ -634,7 +661,7 @@ def main() -> None:
     if args.dry_run:
         _run_dry(queries)
     else:
-        _run_ab(queries, use_judge=args.judge)
+        _run_ab(queries, use_judge=args.judge, no_claim_builder=args.no_claim_builder)
 
 
 if __name__ == "__main__":

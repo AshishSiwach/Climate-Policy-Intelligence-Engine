@@ -33,7 +33,9 @@ automatically once factual evidence is retrieved.
 Return a JSON array where each element has these exact keys:
   - "id": string like "sq_0", "sq_1", ... (sequential)
   - "question": string — the factual sub-question text
-  - "required_source": string or null — institution name if a specific source is needed (e.g. "BoE", "Ofgem", "IPCC")
+  - "required_source": string or null — institution name if a specific source is needed.
+    Use ONLY one of these exact values: "BoE", "CCC", "DESNZ", "ESO", "IEA", "Ofgem".
+    Use null if the question can draw from any source.
   - "task_type": "factual"
 
 Return ONLY the JSON array, no other text.
@@ -43,7 +45,8 @@ _CROSSDOC_STRICT_SYSTEM_PROMPT = """\
 You are a research planner. Return a valid JSON array and NOTHING ELSE.
 
 Decompose the query into at most {max_sq} factual sub-questions (no comparison/synthesis questions). Each must have:
-  "id" (sq_0, sq_1...), "question" (string), "required_source" (string or null),
+  "id" (sq_0, sq_1...), "question" (string),
+  "required_source" (one of "BoE"/"CCC"/"DESNZ"/"ESO"/"IEA"/"Ofgem" or null),
   "task_type": "factual".
 
 Example: [{"id":"sq_0","question":"What is X?","required_source":null,"task_type":"factual"}]

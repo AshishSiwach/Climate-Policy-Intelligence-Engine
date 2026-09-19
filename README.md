@@ -170,9 +170,24 @@ sub-questions. Each claim must cite ≥1 chunk_id visible in the retrieved passa
 `state["retrievals"]`. No semantic matching — a set-membership check against chunk_ids
 that were actually retrieved. Prevents chunk_id hallucination without an LLM call.
 
-**Synthesiser** (GPT-4o-mini): produces an `AnalystBrief` from verified claims +
+**Synthesiser** (GPT-5.4-mini): produces an `AnalystBrief` from verified claims +
 full retrieved excerpts. Tracks `finish_reason` and `completion_tokens` for
 diagnostics; retries once at 3000 tokens on `LengthFinishReasonError`.
+
+**Model tiering — cost vs quality at each stage:**
+
+The agent uses two models chosen deliberately for the work each node does:
+
+| Node | Model | Reason |
+|---|---|---|
+| Planner | GPT-4o-mini | Structural JSON task (decompose query into sub-questions). Output is a schema — correctness is verifiable by the parser, not the user. Cheapest capable model. |
+| Claim Builder | GPT-4o-mini | Structured extraction from retrieved text. Claims are post-filtered by the deterministic Verifier anyway, so model quality is less critical here than synthesis quality. |
+| Synthesiser | GPT-5.4-mini | The only node whose output the user reads. Upgraded from GPT-4o-mini after A/B: +0.09 Correctness, +0.25 Faithfulness, −26% latency. The latency improvement comes from GPT-5.4-mini's faster token generation, which more than offsets the cost increase on a per-query basis. |
+
+Upstream tasks (planner, claim builder) together cost ~$0.002 per query.
+Synthesis costs ~$0.011. Total agent mean: **$0.013 per cross-doc query**.
+The tiering concentrates spend where quality is user-visible and saves it
+where the output is intermediate and machine-consumed.
 
 **Budget caps** (hard stops before each node):
 

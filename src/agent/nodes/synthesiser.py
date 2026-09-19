@@ -41,6 +41,9 @@ Rules:
 5. When the question calls for comparison across sources: be thorough — cover every relevant point from every source. When a sentence draws from multiple excerpts, cite all of them inline (e.g. "Both BoE [Excerpt 3] and IEA [Excerpt 7] project X"). Never write a sentence with no excerpt reference. Do NOT collapse multi-source answers into a single-voice summary.
 6. For each citation, set `chunk_id` to the value shown in the `[chunk_id=...]` header of the excerpt you drew the passage from (format: {doc_id}_{chunk_index}). This field is required — never leave it null.
 7. The sub-question analysis below identifies key verified facts — ensure your answer addresses each one, but draw your citations from the full excerpts above, not from the claim list.
+8. Do not repeat the same fact from the same source in multiple sentences. State each distinct point once.
+9. Use the single strongest [Excerpt N] per source per comparison point. Do not stack multiple citations for the same claim.
+10. Begin your answer directly with the evidence. Do not open by restating or paraphrasing the question.
 
 If the excerpts genuinely do not contain enough information to answer the question, refuse the request rather than fabricating an answer.
 
@@ -85,7 +88,7 @@ def run_synthesiser(state: dict) -> dict:
     ]
 
     # LLM call: full chunks + verified claims as supplemental context
-    brief_data, call_cost = _call_synthesiser(
+    brief_data, call_cost, finish_reason, completion_tokens = _call_synthesiser(
         query=query,
         chunks=aggregated_chunks,
         verified_claims=verified_claims,
@@ -114,6 +117,8 @@ def run_synthesiser(state: dict) -> dict:
         "steps_used": steps_used + 1,
         "cost_used_usd": cost_used_usd + call_cost,
         "termination_reason": "complete",
+        "synthesis_finish_reason": finish_reason,
+        "synthesis_completion_tokens": completion_tokens,
     }
 
 
@@ -127,8 +132,8 @@ def _call_synthesiser(
     chunks: list[dict],
     verified_claims: list,
     coverage_gaps: list[str],
-) -> tuple[dict, float]:
-    """Call LLM with full chunks + claim context. Returns (brief_data, cost_usd).
+) -> tuple[dict, float, str, int]:
+    """Call LLM with full chunks + claim context. Returns (brief_data, cost_usd, finish_reason, completion_tokens).
 
     brief_data keys: answer, citations, contradictions, llm_gaps
     """
@@ -167,17 +172,19 @@ def _call_synthesiser(
 
         message = response.choices[0].message
         usage = response.usage
-        cost = _estimate_cost(usage.prompt_tokens if usage else 0, usage.completion_tokens if usage else 0)
+        completion_tokens = usage.completion_tokens if usage else 0
+        cost = _estimate_cost(usage.prompt_tokens if usage else 0, completion_tokens)
+        finish_reason = response.choices[0].finish_reason or "unknown"
 
         if message.refusal:
             logger.info("Agent synthesiser: LLM refusal — %s", message.refusal)
-            return {"answer": "Insufficient evidence to compose an answer.", "citations": [], "contradictions": [], "llm_gaps": []}, cost
+            return {"answer": "Insufficient evidence to compose an answer.", "citations": [], "contradictions": [], "llm_gaps": []}, cost, "refusal", completion_tokens
 
         llm_response: LLMResponse = message.parsed
         if llm_response is None:
             # Structured output parse failed — mid-JSON truncation despite token budget.
             logger.warning("Agent synthesiser: parsed=None (truncated output)")
-            return {"answer": "Synthesis was truncated before completing — reduce prompt or increase token budget.", "citations": [], "contradictions": [], "llm_gaps": ["synthesis truncated"]}, cost
+            return {"answer": "Synthesis was truncated before completing — reduce prompt or increase token budget.", "citations": [], "contradictions": [], "llm_gaps": ["synthesis truncated"]}, cost, "length", completion_tokens
 
         # Verify citations against the aggregated chunks (hardened verifier)
         verified_citations = _verify_citations(llm_response.citations, chunks)
@@ -187,25 +194,53 @@ def _call_synthesiser(
             "citations": verified_citations,
             "contradictions": llm_response.contradictions,
             "llm_gaps": [],
-        }, cost
+        }, cost, finish_reason, completion_tokens
 
     except Exception as exc:
         # LengthFinishReasonError: SDK raises this when finish_reason=="length" in structured-output mode.
         # The model hit its output cap mid-JSON so the response cannot be parsed.
         if LengthFinishReasonError and isinstance(exc, LengthFinishReasonError):
             raw_usage = getattr(getattr(exc, "response", None), "usage", None)
+            trunc_tokens = raw_usage.completion_tokens if raw_usage else 0
             cost = _estimate_cost(
                 raw_usage.prompt_tokens if raw_usage else 0,
-                raw_usage.completion_tokens if raw_usage else 0,
+                trunc_tokens,
             )
             logger.warning(
-                "Agent synthesiser: output truncated at %d tokens — add rule 10 to prompt or raise model limit",
-                raw_usage.completion_tokens if raw_usage else 0,
+                "Agent synthesiser: output truncated at %d tokens — retrying with cap=3000",
+                trunc_tokens,
             )
-            return {"answer": "Synthesis was truncated — the model hit its output token limit before completing the JSON.", "citations": [], "contradictions": [], "llm_gaps": ["synthesis truncated"]}, cost
+            # Single retry with a higher token cap — only triggered for this rare case
+            try:
+                retry_resp = client.beta.chat.completions.parse(
+                    model=_MODEL,
+                    messages=[
+                        {"role": "system", "content": _CROSSDOC_SYSTEM_PROMPT},
+                        {"role": "user", "content": user_content},
+                    ],
+                    response_format=LLMResponse,
+                    max_completion_tokens=3000,
+                    temperature=0.0,
+                )
+                r_msg = retry_resp.choices[0].message
+                r_usage = retry_resp.usage
+                r_tokens = r_usage.completion_tokens if r_usage else 0
+                r_finish = retry_resp.choices[0].finish_reason or "unknown"
+                r_cost = cost + _estimate_cost(r_usage.prompt_tokens if r_usage else 0, r_tokens)
+                if r_msg.parsed is not None and not r_msg.refusal:
+                    logger.info("Agent synthesiser: length-retry succeeded at %d tokens", r_tokens)
+                    return {
+                        "answer": r_msg.parsed.answer,
+                        "citations": _verify_citations(r_msg.parsed.citations, chunks),
+                        "contradictions": r_msg.parsed.contradictions,
+                        "llm_gaps": [],
+                    }, r_cost, r_finish, r_tokens
+            except Exception as retry_exc:
+                logger.warning("Agent synthesiser: length-retry also failed: %s", retry_exc)
+            return {"answer": "Synthesis was truncated — the model hit its output token limit before completing the JSON.", "citations": [], "contradictions": [], "llm_gaps": ["synthesis truncated"]}, cost, "length", trunc_tokens
 
         logger.warning("Agent synthesiser LLM call failed: %s", exc)
-        return {"answer": "Synthesis failed due to an internal error.", "citations": [], "contradictions": [], "llm_gaps": []}, 0.0
+        return {"answer": "Synthesis failed due to an internal error.", "citations": [], "contradictions": [], "llm_gaps": []}, 0.0, "error", 0
 
 
 def _format_claims(claims: list) -> str:

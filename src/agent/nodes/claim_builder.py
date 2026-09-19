@@ -64,6 +64,11 @@ def run_claim_builder(state: dict) -> dict:
     steps_used = state.get("steps_used", 0)
     cost_used_usd = state.get("cost_used_usd", 0.0)
 
+    # Ablation bypass: skip LLM call and return empty claims (eval flag only)
+    if state.get("_ablate_no_claim_builder"):
+        logger.info("ClaimBuilder: ablation bypass — returning empty claims")
+        return {"claims": [], "steps_used": steps_used + 1, "cost_used_usd": cost_used_usd}
+
     # Filter to covered/partial only — skip not_covered
     eligible_sqs = [
         sq for sq in sub_questions if _get_sq_id(sq) in coverage and coverage[_get_sq_id(sq)].status != "not_covered"

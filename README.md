@@ -63,8 +63,8 @@ search indices used at query time: a **BM25 index** (keyword matching) and a
 
 ### Stage 2 — Retrieval
 
-Each query is first scanned for named institutions (Ofgem, FCA, IEA, BoE, CCC,
-DESNZ, ESO). Matching institutions pre-filter both retrievers before RRF fusion.
+Each query is first scanned for named institutions (BoE, CCC, DESNZ, ESO, IEA,
+Ofgem). Matching institutions pre-filter both retrievers before RRF fusion.
 
 <p align="center">
   <img src="docs/diagrams/arch_02_retrieval.svg" alt="Stage 2 — Retrieval" width="580">

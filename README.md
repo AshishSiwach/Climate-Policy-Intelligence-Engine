@@ -36,7 +36,7 @@ The entire RAG pipeline for the project is organised into five stages. Stage 1 (
 build the search indices; Stages 2–5 execute on every query.
 
 <p align="center">
-  <img src="docs/diagrams/arch_00_overview.svg" alt="Complete Architecture Overview" width="680">
+  <img src="docs/diagrams/arch_00_overview.svg" alt="Complete Architecture Overview — fast path and LangGraph agent path" width="730">
 </p>
 
 ### Stage 1 — Ingestion (offline)

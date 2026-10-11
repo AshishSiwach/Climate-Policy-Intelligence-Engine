@@ -1,92 +1,176 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 730 858" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 950 752" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="#161b22" rx="12"/>
   <defs>
-    <marker id="a0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0,1 L10,5 L0,9 z" fill="#6e7681"/>
     </marker>
-    <marker id="a0r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+    <marker id="arrr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0,1 L10,5 L0,9 z" fill="#f85149"/>
     </marker>
   </defs>
-  <text x="300" y="24" text-anchor="middle" fill="#6e7681" font-size="9.5" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">query-time pipeline — BM25 + Chroma indices pre-built by ingestion stage</text>
+
+  <!-- SUBTITLE -->
+  <text x="475" y="20" text-anchor="middle" fill="#6e7681" font-size="9.5" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">complete query-time pipeline — BM25 + Chroma indices pre-built offline by ingestion stage</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- SHARED HEADER                                  -->
+  <!-- ══════════════════════════════════════════════ -->
+
   <!-- User Query -->
-  <rect x="210" y="32" width="180" height="40" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
-  <text x="300" y="47" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">User Query</text>
-  <text x="300" y="63" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">natural language question</text>
-  <line x1="300" y1="72" x2="300" y2="106" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- Institution Detector -->
-  <rect x="168" y="108" width="264" height="48" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-  <text x="300" y="127" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Institution Detector</text>
-  <text x="300" y="145" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Ofgem · FCA · IEA · BoE · CCC · DESNZ · ESO</text>
-  <!-- Branch to BM25 / Dense -->
-  <line x1="300" y1="156" x2="300" y2="178" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="148" y1="178" x2="452" y2="178" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="148" y1="178" x2="148" y2="188" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <line x1="452" y1="178" x2="452" y2="188" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- BM25 -->
-  <rect x="58" y="190" width="180" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-  <text x="148" y="208" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">BM25 Retriever</text>
-  <text x="148" y="224" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">rank-bm25 · keyword match</text>
-  <!-- Dense -->
-  <rect x="352" y="190" width="200" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-  <text x="452" y="208" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Dense Retriever</text>
-  <text x="452" y="224" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">BAAI/bge-base-en-v1.5 · Chroma</text>
-  <!-- Merge to RRF -->
-  <line x1="148" y1="234" x2="148" y2="268" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="452" y1="234" x2="452" y2="268" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="148" y1="268" x2="452" y2="268" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="300" y1="268" x2="300" y2="274" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- RRF Fusion -->
-  <rect x="200" y="276" width="200" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-  <text x="300" y="294" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">RRF Fusion  k=60</text>
-  <text x="300" y="310" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">reciprocal rank fusion · Cormack 2009</text>
-  <line x1="300" y1="320" x2="300" y2="334" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- Top-5 Chunks -->
-  <rect x="200" y="336" width="200" height="44" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
-  <text x="300" y="354" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Top-5 Chunks</text>
-  <text x="300" y="370" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">text · doc_id · page · rrf_score</text>
-  <line x1="300" y1="380" x2="300" y2="414" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- CRAG Gate -->
-  <rect x="190" y="416" width="220" height="52" rx="8" fill="#21262d" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="5,3"/>
-  <text x="300" y="435" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">CRAG Correction</text>
-  <text x="300" y="452" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">empty retrieval? · LLM refuses?</text>
-  <!-- CRAG → Canonical Refusal -->
-  <line x1="410" y1="442" x2="466" y2="442" stroke="#f85149" stroke-width="1.5" marker-end="url(#a0r)"/>
-  <text x="438" y="435" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">yes</text>
-  <rect x="468" y="416" width="162" height="52" rx="8" fill="#3a1f1f" stroke="#f85149" stroke-width="1.5"/>
-  <text x="549" y="435" text-anchor="middle" fill="#ff7b72" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Canonical Refusal</text>
-  <text x="549" y="452" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">"corpus does not contain…"</text>
-  <!-- CRAG no → GPT -->
-  <text x="277" y="490" text-anchor="middle" fill="#8b949e" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">no</text>
-  <line x1="300" y1="468" x2="300" y2="508" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- GPT-5.4-mini -->
-  <rect x="180" y="510" width="240" height="52" rx="8" fill="#3d2d0a" stroke="#d29922" stroke-width="1.5"/>
-  <text x="300" y="530" text-anchor="middle" fill="#e3b341" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">GPT-5.4-mini</text>
-  <text x="300" y="547" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Structured Outputs · Pydantic · prompt v2_numeric</text>
-  <line x1="300" y1="562" x2="300" y2="600" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <!-- Citation Verifier -->
-  <rect x="180" y="602" width="240" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-  <text x="300" y="622" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Citation Verifier</text>
-  <text x="300" y="639" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">passage in chunks? keep · drop fabricated</text>
-  <path d="M 420,628 C 458,628 458,672 420,672" stroke="#6e7681" stroke-width="1" fill="none" stroke-dasharray="3,2"/>
-  <text x="463" y="654" text-anchor="middle" fill="#6e7681" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">loop</text>
-  <line x1="300" y1="654" x2="300" y2="692" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <rect x="375" y="28" width="200" height="40" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
+  <text x="475" y="43" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">User Query</text>
+  <text x="475" y="59" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">natural language question</text>
+  <line x1="475" y1="68" x2="475" y2="84" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Input Guardrails -->
+  <rect x="240" y="86" width="470" height="44" rx="8" fill="#21262d" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="475" y="104" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Input Guardrails</text>
+  <text x="475" y="120" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">query length ≤500 chars  ·  daily cost ≤$5  ·  domain gate (GPT-4o-mini classifier)</text>
+  <line x1="475" y1="130" x2="475" y2="146" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Complexity Router -->
+  <rect x="295" y="148" width="360" height="44" rx="8" fill="#21262d" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="475" y="166" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Complexity Router  (GPT-4o-mini)</text>
+  <text x="475" y="182" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">factual · numeric · cross_doc · summary · unsupported</text>
+
+  <!-- Branch from router to two paths -->
+  <line x1="475" y1="192" x2="475" y2="210" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="210" y1="210" x2="750" y2="210" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="210" y1="210" x2="210" y2="222" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="750" y1="210" x2="750" y2="222" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="210" y="221" text-anchor="middle" fill="#8b949e" font-size="8.5" font-family="ui-sans-serif,system-ui,sans-serif">factual / numeric / summary</text>
+  <text x="750" y="221" text-anchor="middle" fill="#3fb950" font-size="8.5" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">cross_doc</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- FAST PATH  (left, center x=210)               -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <text x="210" y="242" text-anchor="middle" fill="#58a6ff" font-size="9.5" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">FAST PATH</text>
+
+  <!-- 1. Institution Detector -->
+  <rect x="100" y="248" width="220" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="210" y="264" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Institution Detector</text>
+  <text x="210" y="280" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">BoE · CCC · DESNZ · ESO · IEA · Ofgem</text>
+  <line x1="210" y1="290" x2="210" y2="304" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 2. Hybrid Retrieval -->
+  <rect x="100" y="306" width="220" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="210" y="322" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Hybrid Retrieval</text>
+  <text x="210" y="338" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">BM25 + Dense (bge-base-en) + RRF k=60</text>
+  <line x1="210" y1="348" x2="210" y2="362" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 3. Top-5 Chunks -->
+  <rect x="100" y="364" width="220" height="42" rx="7" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
+  <text x="210" y="380" text-anchor="middle" fill="#d2a8ff" font-size="11" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Top-5 Chunks</text>
+  <text x="210" y="396" text-anchor="middle" fill="#8957e5" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">text · doc_id · page · rrf_score</text>
+  <line x1="210" y1="406" x2="210" y2="420" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 4. CRAG Gate -->
+  <rect x="100" y="422" width="220" height="42" rx="7" fill="#21262d" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="210" y="438" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">CRAG Gate</text>
+  <text x="210" y="454" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">empty retrieval · LLM refuses?</text>
+  <!-- Refusal branch (yes) -->
+  <line x1="320" y1="443" x2="344" y2="443" stroke="#f85149" stroke-width="1.5" marker-end="url(#arrr)"/>
+  <text x="332" y="438" text-anchor="middle" fill="#f85149" font-size="8.5" font-family="ui-sans-serif,system-ui,sans-serif">yes</text>
+  <rect x="346" y="422" width="158" height="42" rx="7" fill="#3a1f1f" stroke="#f85149" stroke-width="1.5"/>
+  <text x="425" y="438" text-anchor="middle" fill="#ff7b72" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Canonical Refusal</text>
+  <text x="425" y="454" text-anchor="middle" fill="#f85149" font-size="9" font-family="ui-sans-serif,system-ui,sans-serif">"corpus does not contain…"</text>
+  <!-- CRAG no -->
+  <text x="192" y="476" fill="#8b949e" font-size="8.5" font-family="ui-sans-serif,system-ui,sans-serif">no</text>
+  <line x1="210" y1="464" x2="210" y2="478" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 5. GPT-5.4-mini Synthesis -->
+  <rect x="100" y="480" width="220" height="42" rx="7" fill="#3d2d0a" stroke="#d29922" stroke-width="1.5"/>
+  <text x="210" y="496" text-anchor="middle" fill="#e3b341" font-size="11" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">GPT-5.4-mini  Synthesis</text>
+  <text x="210" y="512" text-anchor="middle" fill="#d29922" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">Structured Outputs · prompt v2_numeric</text>
+  <line x1="210" y1="522" x2="210" y2="536" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 6. Citation Verifier -->
+  <rect x="100" y="538" width="220" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="210" y="554" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Citation Verifier</text>
+  <text x="210" y="570" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">passage provenance check · drop fabricated</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- AGENT PATH  (right, center x=750)             -->
+  <!-- LangGraph StateGraph                          -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <text x="750" y="242" text-anchor="middle" fill="#3fb950" font-size="9.5" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">AGENT PATH  (LangGraph StateGraph)</text>
+
+  <!-- 1. Planner -->
+  <rect x="630" y="248" width="240" height="42" rx="7" fill="#162a1b" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="750" y="264" text-anchor="middle" fill="#56d364" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Planner  (GPT-4o-mini)</text>
+  <text x="750" y="280" text-anchor="middle" fill="#3fb950" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">≤6 factual sub-questions · required_source</text>
+  <line x1="750" y1="290" x2="750" y2="304" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 2. Retriever (per sub-question) -->
+  <rect x="630" y="306" width="240" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="750" y="322" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Retriever  (per sub-question)</text>
+  <text x="750" y="338" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">BM25 + Dense + RRF · institution filter</text>
+  <line x1="750" y1="348" x2="750" y2="362" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 3. Grader -->
+  <rect x="630" y="364" width="240" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="750" y="380" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Grader  (cross-encoder)</text>
+  <text x="750" y="396" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">covered · partial · not_covered</text>
+  <!-- Retry loop arc back to Retriever -->
+  <path d="M 870,385 C 908,385 908,327 870,327" stroke="#8b949e" stroke-width="1.2" fill="none" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+  <text x="916" y="360" text-anchor="middle" fill="#8b949e" font-size="8.5" font-family="ui-sans-serif,system-ui,sans-serif">retry</text>
+  <text x="916" y="371" text-anchor="middle" fill="#8b949e" font-size="8.5" font-family="ui-sans-serif,system-ui,sans-serif">×1</text>
+  <line x1="750" y1="406" x2="750" y2="420" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 4. Claim Builder -->
+  <rect x="630" y="422" width="240" height="42" rx="7" fill="#162a1b" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="750" y="438" text-anchor="middle" fill="#56d364" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Claim Builder  (GPT-4o-mini)</text>
+  <text x="750" y="454" text-anchor="middle" fill="#3fb950" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">structured claims · chunk_id citations</text>
+  <line x1="750" y1="464" x2="750" y2="478" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 5. Verifier -->
+  <rect x="630" y="480" width="240" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="750" y="496" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Verifier  (deterministic)</text>
+  <text x="750" y="512" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">drop claims with hallucinated chunk_ids</text>
+  <line x1="750" y1="522" x2="750" y2="536" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 6. Synthesiser -->
+  <rect x="630" y="538" width="240" height="42" rx="7" fill="#3d2d0a" stroke="#d29922" stroke-width="1.5"/>
+  <text x="750" y="554" text-anchor="middle" fill="#e3b341" font-size="11" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Synthesiser  (GPT-5.4-mini)</text>
+  <text x="750" y="570" text-anchor="middle" fill="#d29922" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">verified claims + full excerpts · rules 1–10</text>
+
+  <!-- Budget caps annotation (agent path) -->
+  <text x="916" y="442" text-anchor="middle" fill="#6e7681" font-size="8" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">budget</text>
+  <text x="916" y="453" text-anchor="middle" fill="#6e7681" font-size="8" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">14 steps</text>
+  <text x="916" y="464" text-anchor="middle" fill="#6e7681" font-size="8" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">$0.05</text>
+  <text x="916" y="475" text-anchor="middle" fill="#6e7681" font-size="8" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">60 s</text>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- MERGE — both paths converge to AnalystBrief   -->
+  <!-- ══════════════════════════════════════════════ -->
+
+  <!-- Fast path down, then horizontal bar, then agent path down -->
+  <line x1="210" y1="580" x2="210" y2="616" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="750" y1="580" x2="750" y2="616" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="210" y1="616" x2="750" y2="616" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="475" y1="616" x2="475" y2="623" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
   <!-- AnalystBrief -->
-  <rect x="175" y="694" width="250" height="52" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
-  <text x="300" y="713" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">AnalystBrief JSON</text>
-  <text x="300" y="730" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">answer · citations[] · contradictions[]</text>
+  <rect x="355" y="625" width="240" height="44" rx="8" fill="#2d1b69" stroke="#8957e5" stroke-width="1.5"/>
+  <text x="475" y="642" text-anchor="middle" fill="#d2a8ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">AnalystBrief JSON</text>
+  <text x="475" y="658" text-anchor="middle" fill="#8957e5" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">answer · citations[] · contradictions[]</text>
+
   <!-- Branch to monitoring -->
-  <line x1="300" y1="746" x2="300" y2="776" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="148" y1="776" x2="452" y2="776" stroke="#6e7681" stroke-width="1.5"/>
-  <line x1="148" y1="776" x2="148" y2="788" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
-  <line x1="452" y1="776" x2="452" y2="788" stroke="#6e7681" stroke-width="1.5" marker-end="url(#a0)"/>
+  <line x1="475" y1="669" x2="475" y2="684" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="296" y1="684" x2="654" y2="684" stroke="#6e7681" stroke-width="1.5"/>
+  <line x1="296" y1="684" x2="296" y2="692" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="654" y1="684" x2="654" y2="692" stroke="#6e7681" stroke-width="1.5" marker-end="url(#arr)"/>
+
   <!-- JSONL Logger -->
-  <rect x="63" y="790" width="170" height="44" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
-  <text x="148" y="808" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">JSONL Logger</text>
-  <text x="148" y="825" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">fallback · offline analytics</text>
+  <rect x="176" y="694" width="240" height="42" rx="7" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
+  <text x="296" y="710" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">JSONL Logger</text>
+  <text x="296" y="726" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">primary sink · offline analytics</text>
+
   <!-- Postgres + Grafana -->
-  <rect x="367" y="790" width="170" height="44" rx="8" fill="#1a2f1a" stroke="#3fb950" stroke-width="1.5"/>
-  <text x="452" y="808" text-anchor="middle" fill="#56d364" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Postgres + Grafana</text>
-  <text x="452" y="825" text-anchor="middle" fill="#3fb950" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">dashboards · Streamlit feedback</text>
+  <rect x="534" y="694" width="240" height="42" rx="7" fill="#1a2f1a" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="654" y="710" text-anchor="middle" fill="#56d364" font-size="11" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Postgres + Grafana</text>
+  <text x="654" y="726" text-anchor="middle" fill="#3fb950" font-size="9.5" font-family="ui-sans-serif,system-ui,sans-serif">dashboards · user feedback</text>
 </svg>

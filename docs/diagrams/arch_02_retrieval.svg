@@ -14,7 +14,7 @@
   <!-- Institution Detector -->
   <rect x="168" y="96" width="264" height="52" rx="8" fill="#21262d" stroke="#30363d" stroke-width="1.5"/>
   <text x="300" y="116" text-anchor="middle" fill="#e6edf3" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">Institution Detector</text>
-  <text x="300" y="134" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Ofgem · FCA · IEA · BoE · CCC · DESNZ · ESO</text>
+  <text x="300" y="134" text-anchor="middle" fill="#8b949e" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">BoE · CCC · DESNZ · ESO · IEA · Ofgem</text>
   <!-- Branch -->
   <line x1="300" y1="148" x2="300" y2="178" stroke="#6e7681" stroke-width="1.5"/>
   <line x1="162" y1="178" x2="438" y2="178" stroke="#6e7681" stroke-width="1.5"/>

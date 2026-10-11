@@ -9,6 +9,8 @@
       <path d="M0,1 L10,5 L0,9 z" fill="#f85149"/>
     </marker>
   </defs>
+  <!-- subtitle -->
+  <text x="330" y="14" text-anchor="middle" fill="#6e7681" font-size="9.5" font-style="italic" font-family="ui-sans-serif,system-ui,sans-serif">fast path — cross_doc queries use the LangGraph agent path (arch_00_overview)</text>
   <!-- Input -->
   <rect x="175" y="22" width="250" height="44" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
   <text x="300" y="40" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">Top-5 Chunks + Query</text>

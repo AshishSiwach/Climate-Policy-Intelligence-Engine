@@ -8,8 +8,8 @@
   </defs>
   <!-- GT QA Pairs -->
   <rect x="190" y="22" width="220" height="44" rx="8" fill="#1f3a5f" stroke="#58a6ff" stroke-width="1.5"/>
-  <text x="300" y="40" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">52 Ground-Truth QA Pairs</text>
-  <text x="300" y="57" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">factual · numeric · cross-doc · negative</text>
+  <text x="300" y="40" text-anchor="middle" fill="#79c0ff" font-size="12" font-weight="700" font-family="ui-sans-serif,system-ui,sans-serif">100 Cross-Doc GT Pairs</text>
+  <text x="300" y="57" text-anchor="middle" fill="#58a6ff" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">agent path A/B eval · N=100 · LLM-as-judge</text>
   <!-- Branch -->
   <line x1="300" y1="66" x2="300" y2="92" stroke="#6e7681" stroke-width="1.5"/>
   <line x1="148" y1="92" x2="452" y2="92" stroke="#6e7681" stroke-width="1.5"/>
@@ -26,9 +26,9 @@
   <rect x="362" y="120" width="180" height="96" rx="8" fill="#3d2d0a" stroke="#d29922" stroke-width="1.5"/>
   <text x="452" y="140" text-anchor="middle" fill="#e3b341" font-size="12" font-weight="600" font-family="ui-sans-serif,system-ui,sans-serif">LLM-as-Judge</text>
   <text x="452" y="158" text-anchor="middle" fill="#e3b341" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">GPT-5.4-mini · 4 dimensions</text>
-  <text x="452" y="173" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Correctness    4.13</text>
-  <text x="452" y="188" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Faithfulness   4.37</text>
-  <text x="452" y="203" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Completeness   3.33</text>
+  <text x="452" y="173" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Correctness    4.06  ✓ ≥3.50</text>
+  <text x="452" y="188" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Completeness   3.31  ✓ ≥3.25</text>
+  <text x="452" y="203" text-anchor="middle" fill="#d29922" font-size="10" font-family="ui-sans-serif,system-ui,sans-serif">Latency P95   14.4 s  ✓ ≤15 s</text>
   <!-- Merge -->
   <line x1="148" y1="216" x2="148" y2="272" stroke="#6e7681" stroke-width="1.5"/>
   <line x1="452" y1="216" x2="452" y2="272" stroke="#6e7681" stroke-width="1.5"/>
